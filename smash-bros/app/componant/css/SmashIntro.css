@@ -1,0 +1,125 @@
+.smash-intro {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: #050302;
+  color: #fff4e6;
+}
+
+/* vidéo zoomée sur le logo au départ */
+.smash-intro__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  cursor: pointer;
+  transform-origin: 50% 34%;
+  transform: translateY(15%) scale(1.15);
+  transition: transform 1.8s cubic-bezier(0.65, 0, 0.2, 1);
+  filter: brightness(1.05) saturate(1.1);
+}
+.smash-intro__vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, #000 0%, #000 9%, rgba(0, 0, 0, 0) 22%),
+    radial-gradient(ellipse at 50% 45%, transparent 45%, rgba(0, 0, 0, 0.75) 100%);
+  transition: opacity 1.8s ease;
+}
+.smash-intro__embers {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+}
+.smash-intro.is-open .smash-intro__video { transform: translateY(0) scale(1); cursor: default; }
+.smash-intro.is-open .smash-intro__vignette { opacity: 0; }
+
+/* bouton "Cliquer" sobre */
+.smash-intro__cta {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(28px, 7vh, 72px);
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 18px;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font: 800 clamp(14px, 1.4vw, 17px) / 1 system-ui, sans-serif;
+  letter-spacing: 0.45em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 0 12px rgba(0, 0, 0, 0.9), 0 1px 2px #000;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.smash-intro__cta-text { animation: si-pulse 2s ease-in-out infinite; }
+.smash-intro__dot {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+.smash-intro__dot::before,
+.smash-intro__dot::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 1.5px solid #fff;
+  animation: si-ring 2s ease-out infinite;
+}
+.smash-intro__dot::after { animation-delay: 1s; }
+.smash-intro__cta:hover .smash-intro__cta-text,
+.smash-intro__cta:focus-visible .smash-intro__cta-text { animation: none; opacity: 1; }
+.smash-intro__cta:focus-visible { outline: 1px solid rgba(255, 255, 255, 0.6); outline-offset: 4px; }
+@keyframes si-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@keyframes si-ring { 0% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(3.2); opacity: 0; } }
+.smash-intro.is-open .smash-intro__cta { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(20px); }
+
+/* boutons en haut à droite : n'apparaissent qu'après le dézoom */
+.smash-intro__actions {
+  position: absolute;
+  top: clamp(12px, 3vh, 24px);
+  right: clamp(12px, 3vw, 24px);
+  z-index: 6;
+  display: flex;
+  gap: 12px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+  transition: opacity 0.5s ease 1.4s, transform 0.5s ease 1.4s;
+}
+.smash-intro.is-open .smash-intro__actions { opacity: 1; pointer-events: auto; transform: none; }
+
+.smash-intro__error {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+  z-index: 7;
+  max-width: min(90vw, 520px);
+  margin: 0;
+  padding: 16px 20px;
+  font: 600 13px/1.5 system-ui, sans-serif;
+  background: rgba(20, 6, 2, 0.9);
+  border: 2px solid #ff7a1a;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .smash-intro__cta-text, .smash-intro__dot::before, .smash-intro__dot::after { animation: none !important; }
+  .smash-intro__video { transition-duration: 0.01s !important; }
+}

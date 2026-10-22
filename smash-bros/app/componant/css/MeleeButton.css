@@ -1,0 +1,69 @@
+@font-face {
+  font-family: "Melee Cond";
+  font-weight: 700;
+  font-display: swap;
+  src: url("../../fonts/roboto-condensed-700.woff2") format("woff2");
+}
+
+.mbtn {
+  --h: 56px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: var(--h);
+  padding: 0 calc(var(--h) * 1.35) 0 calc(var(--h) * 1.05);
+  isolation: isolate;
+  font: 700 calc(var(--h) * 0.6) / 1 "Melee Cond", "Roboto Condensed", "Arial Narrow", system-ui, sans-serif;
+  letter-spacing: 0.01em;
+  color: #e8b648;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  margin: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.mbtn__label {
+  position: relative;
+  white-space: nowrap;
+  transition: color 0.12s;
+  text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 0 2px 2px rgba(0, 0, 0, 0.8);
+}
+.mbtn svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.mbtn .mb-hot { opacity: 0; transition: opacity 0.12s; }
+.mbtn .mb-idle { transition: opacity 0.12s; }
+
+/* état sélectionné : survol, focus clavier ou prop selected */
+.mbtn:is(:hover, :focus-visible, .mbtn--hot) .mb-hot { opacity: 1; }
+.mbtn:is(:hover, :focus-visible, .mbtn--hot) .mb-target { opacity: 0.9; }
+.mbtn:is(:hover, :focus-visible, .mbtn--hot) .mb-idle { opacity: 0; }
+.mbtn:is(:hover, :focus-visible, .mbtn--hot) .mbtn__label { color: #111; text-shadow: none; }
+.mbtn:focus-visible { outline: none; }
+.mbtn:active { filter: brightness(0.92); }
+
+.mbtn .mb-flash { opacity: 0; }
+.mbtn:is(:hover, :focus-visible) .mb-flash { animation: mbflash 0.45s ease-out; }
+@keyframes mbflash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
+
+.mbtn .mb-ripple {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mbripple 1.6s ease-out infinite;
+}
+.mbtn .mb-ripple.r2 { animation-delay: 0.8s; }
+@keyframes mbripple { 0% { transform: scale(0.8); opacity: 0.9; } 100% { transform: scale(1.6); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .mbtn .mb-ripple, .mbtn .mb-flash { animation: none !important; }
+}
