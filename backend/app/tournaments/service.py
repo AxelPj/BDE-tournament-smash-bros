@@ -4,10 +4,13 @@ import random
 from datetime import UTC, datetime
 
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from app.bets.service import settle_tournament as settle_bets
+from app.gages.models import GageUse
 from app.gages.service import sync_tournament as sync_gages
+from app.shop.models import InventoryItem
 from app.tournaments.bracket import DoubleEliminationBracket, MatchStatus
 from app.tournaments.models import (
     Participant,
@@ -28,27 +31,57 @@ class TournamentStateError(Exception):
     """Action impossible dans l'état actuel du tournoi (ex. inscription après génération)."""
 
 
-def list_tournaments(db: Session) -> list[Tournament]:
+def list_tournaments(db: Session, full: bool = False) -> list[Tournament]:
+    options = [
+        selectinload(Tournament.participants).selectinload(Participant.user)
+        if full
+        else selectinload(Tournament.participants)
+    ]
+    if full:
+        options.extend(
+            [
+                selectinload(Tournament.matches),
+                selectinload(Tournament.gage_uses)
+                .selectinload(GageUse.item)
+                .selectinload(InventoryItem.gage),
+            ]
+        )
     query = (
         select(Tournament)
-        .options(selectinload(Tournament.participants))
+        .options(*options)
         .order_by(Tournament.created_at.desc(), Tournament.id.desc())
     )
     return list(db.scalars(query))
 
 
 def get_tournament(db: Session, tournament_id: int) -> Tournament:
-    tournament = db.get(Tournament, tournament_id)
+    tournament = db.scalar(
+        select(Tournament)
+        .options(
+            selectinload(Tournament.participants).selectinload(Participant.user),
+            selectinload(Tournament.matches),
+            selectinload(Tournament.gage_uses)
+            .selectinload(GageUse.item)
+            .selectinload(InventoryItem.gage),
+        )
+        .where(Tournament.id == tournament_id)
+    )
     if tournament is None:
         raise NotFoundError("Tournoi introuvable")
     return tournament
 
 
 def create_tournament(
-    db: Session, name: str, rewards: RewardSettings | None = None
+    db: Session,
+    name: str,
+    rewards: RewardSettings | None = None,
+    meta: dict | None = None,
 ) -> Tournament:
+    settings_dict = (rewards or RewardSettings()).model_dump()
+    if meta:
+        settings_dict["_meta"] = meta
     tournament = Tournament(
-        name=name.strip(), reward_settings=(rewards or RewardSettings()).model_dump()
+        name=name.strip(), reward_settings=settings_dict
     )
     db.add(tournament)
     db.commit()
@@ -68,7 +101,11 @@ def update_tournament(
         _require_registration_phase(tournament)
         tournament.registration_open = registration_open
     if rewards is not None:
-        tournament.reward_settings = rewards.model_dump()
+        meta = (tournament.reward_settings or {}).get("_meta")
+        settings_dict = rewards.model_dump()
+        if meta:
+            settings_dict["_meta"] = meta
+        tournament.reward_settings = settings_dict
         # Les récompenses déjà versées sont ajustées aux nouveaux montants.
         reconcile_rewards(db, tournament)
     db.commit()
@@ -88,12 +125,20 @@ def add_participant(db: Session, tournament: Tournament, user_id: int, by_admin:
     _require_registration_phase(tournament)
     if not by_admin and not tournament.registration_open:
         raise TournamentStateError("Les inscriptions sont fermées")
+    meta = (tournament.reward_settings or {}).get("_meta") or {}
+    max_players = meta.get("max_players")
+    if max_players is not None and len(tournament.participants) >= int(max_players):
+        raise TournamentStateError("Le tournoi est complet")
     if db.get(User, user_id) is None:
         raise NotFoundError("Utilisateur introuvable")
     if _find_participant(tournament, user_id):
         raise TournamentStateError("Déjà inscrit")
     tournament.participants.append(Participant(user_id=user_id))
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise TournamentStateError("Déjà inscrit") from exc
 
 
 def remove_participant(db: Session, tournament: Tournament, user_id: int, by_admin: bool) -> None:
@@ -132,6 +177,11 @@ def set_seeds(db: Session, tournament: Tournament, user_ids: list[int]) -> None:
     db.commit()
 
 
+def _has_losers_bracket(tournament: Tournament) -> bool:
+    meta = (tournament.reward_settings or {}).get("_meta") or {}
+    return bool(meta.get("has_losers_bracket", True))
+
+
 def generate_bracket(db: Session, tournament: Tournament, rng: random.Random | None = None) -> None:
     """Place les joueurs (têtes de série puis tirage au sort), construit le bracket
     et enregistre tous ses matchs. Les inscriptions sont alors figées."""
@@ -147,7 +197,9 @@ def generate_bracket(db: Session, tournament: Tournament, rng: random.Random | N
     for rank, user_id in enumerate(order, start=1):
         by_user[user_id].bracket_seed = rank
 
-    bracket = DoubleEliminationBracket(order)
+    bracket = DoubleEliminationBracket(
+        order, double_elimination=_has_losers_bracket(tournament)
+    )
     tournament.matches = [
         TournamentMatch(
             code=match.id, side=match.side, round=match.round, position=match.position,
@@ -247,7 +299,9 @@ def _replay(db: Session, tournament: Tournament) -> list[str]:
     saisis, dans leur ordre de saisie. Un résultat n'est conservé que si le match
     oppose toujours les mêmes joueurs aux mêmes places ; sinon il est annulé."""
     order = [p.user_id for p in sorted(tournament.participants, key=lambda p: p.bracket_seed)]
-    bracket = DoubleEliminationBracket(order)
+    bracket = DoubleEliminationBracket(
+        order, double_elimination=_has_losers_bracket(tournament)
+    )
     previous_players = {m.code: (m.player1_id, m.player2_id) for m in tournament.matches}
 
     results = sorted(

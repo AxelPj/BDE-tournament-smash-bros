@@ -9,15 +9,37 @@ import "../css/MeleeButton.css";
  *  - href      (string)  si fourni, le bouton est un lien <a>
  *  - onClick   (func)    action au clic
  *  - selected  (bool)    reste en jaune (état sélectionné) en permanence
+ *  - flip      (bool)    inverse la forme horizontalement (pointe à droite, cible à gauche)
  *  - height    (number)  hauteur en px (56 par défaut) — tout le dessin suit
  *  - className, style, ...rest : passés à l'élément
  */
+let __actx;
+function blip(f1, f2, d, vol = 0.05) {
+  if (typeof window === "undefined") return;
+  try {
+    __actx = __actx || new (window.AudioContext || window.webkitAudioContext)();
+    const t = __actx.currentTime, o = __actx.createOscillator(), g = __actx.createGain();
+    o.type = "square";
+    o.frequency.setValueAtTime(f1, t);
+    o.frequency.exponentialRampToValueAtTime(f2, t + d);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g).connect(__actx.destination);
+    o.start(t); o.stop(t + d);
+  } catch (e) {}
+}
+
 export default function MeleeButton({
   text,
   href,
   onClick,
+  onMouseEnter,
   selected = false,
-  height = 56,
+  disabled = false,
+  flip = false,
+  mirror = false,
+  sound = true,
+  height,
   className = "",
   style,
   ...rest
@@ -25,6 +47,7 @@ export default function MeleeButton({
   const ref = useRef(null);
   const [size, setSize] = useState({ w: 0, h: 0 });
   const id = "mb" + useId().replace(/[^a-zA-Z0-9]/g, "");
+  const isFlipped = flip || mirror;
 
   // le dessin se recalcule à la taille réelle du bouton (texte plus long = bouton plus long)
   useLayoutEffect(() => {
@@ -38,14 +61,32 @@ export default function MeleeButton({
   }, []);
 
   const Tag = href ? "a" : "button";
-  const tagProps = href ? { href } : { type: "button" };
+  const tagProps = href ? { href } : { type: "button", disabled };
 
   return (
     <Tag
       ref={ref}
-      className={`mbtn${selected ? " mbtn--hot" : ""} ${className}`}
-      style={{ "--h": `${height}px`, ...style }}
-      onClick={onClick}
+      className={`mbtn${selected && !disabled ? " mbtn--hot" : ""}${disabled ? " mbtn--disabled" : ""}${isFlipped ? " mbtn--flip" : ""} ${className}`}
+      style={{
+        ...(height
+          ? {
+              "--h-base": `${height}px`,
+              "--h-cqw": `${(height * 0.1).toFixed(2)}cqw`,
+              "--h": `${height}px`,
+            }
+          : {}),
+        ...style,
+      }}
+      onClick={(e) => {
+        if (disabled) return;
+        if (sound) blip(520, 1500, 0.14, 0.06);
+        onClick?.(e);
+      }}
+      onMouseEnter={(e) => {
+        if (disabled) return;
+        if (sound && __actx) blip(1100, 1300, 0.04, 0.03);
+        onMouseEnter?.(e);
+      }}
       {...tagProps}
       {...rest}
     >

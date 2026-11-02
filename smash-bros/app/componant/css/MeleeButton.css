@@ -40,20 +40,31 @@
   z-index: -1;
   pointer-events: none;
 }
+.mbtn--flip {
+  padding: 0 calc(var(--h) * 1.05) 0 calc(var(--h) * 1.35);
+}
+.mbtn--flip svg {
+  transform: scaleX(-1);
+}
 
 .mbtn .mb-hot { opacity: 0; transition: opacity 0.12s; }
 .mbtn .mb-idle { transition: opacity 0.12s; }
 
-/* état sélectionné : survol, focus clavier ou prop selected */
-.mbtn:is(:hover, :focus-visible, .mbtn--hot) .mb-hot { opacity: 1; }
-.mbtn:is(:hover, :focus-visible, .mbtn--hot) .mb-target { opacity: 0.9; }
-.mbtn:is(:hover, :focus-visible, .mbtn--hot) .mb-idle { opacity: 0; }
-.mbtn:is(:hover, :focus-visible, .mbtn--hot) .mbtn__label { color: #111; text-shadow: none; }
+/* état sélectionné : survol, focus clavier ou prop selected (sauf si désactivé) */
+.mbtn:not(:disabled, .mbtn--disabled):is(:hover, :focus-visible, .mbtn--hot) .mb-hot { opacity: 1; }
+.mbtn:not(:disabled, .mbtn--disabled):is(:hover, :focus-visible, .mbtn--hot) .mb-target { opacity: 0.9; }
+.mbtn:not(:disabled, .mbtn--disabled):is(:hover, :focus-visible, .mbtn--hot) .mb-idle { opacity: 0; }
+.mbtn:not(:disabled, .mbtn--disabled):is(:hover, :focus-visible, .mbtn--hot) .mbtn__label { color: #111; text-shadow: none; }
 .mbtn:focus-visible { outline: none; }
-.mbtn:active { filter: brightness(0.92); }
+.mbtn:active:not(:disabled, .mbtn--disabled) { filter: brightness(0.92); }
+.mbtn:is(:disabled, .mbtn--disabled) {
+  filter: grayscale(1) brightness(0.75);
+  opacity: 0.45;
+  cursor: not-allowed;
+}
 
 .mbtn .mb-flash { opacity: 0; }
-.mbtn:is(:hover, :focus-visible) .mb-flash { animation: mbflash 0.45s ease-out; }
+.mbtn:not(:disabled, .mbtn--disabled):is(:hover, :focus-visible) .mb-flash { animation: mbflash 0.45s ease-out; }
 @keyframes mbflash { 0% { opacity: 0.95; } 100% { opacity: 0; } }
 
 .mbtn .mb-ripple {

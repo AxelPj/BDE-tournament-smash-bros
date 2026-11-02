@@ -35,13 +35,13 @@ uv run uvicorn app.main:app --reload
 - Documentation interactive (contrat de l'API pour le frontend) : http://localhost:8000/api/docs
 - Schéma OpenAPI brut : http://localhost:8000/api/openapi.json
 
-## Créer un administrateur
+## Créer ou promouvoir un administrateur
 
 ```bash
-uv run python -m app.cli create-admin <username> [--display-name "Nom affiché"]
+uv run python -m app.cli create-admin <login_42> [--display-name "Nom affiché"]
 ```
 
-Crée le compte (mot de passe demandé de façon masquée) ou promeut un compte existant.
+Promeut un étudiant déjà connecté en administrateur, ou pré-crée le compte admin (qui sera automatiquement rattaché à son `intra_id` lors de sa première connexion via l'API 42).
 C'est la seule façon d'obtenir des droits admin : aucune route de l'API ne le permet.
 
 ## Tests

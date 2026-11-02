@@ -3,7 +3,7 @@
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
-  background: #050302;
+  background: #000;
   color: #fff4e6;
 }
 
@@ -89,7 +89,7 @@
 @keyframes si-ring { 0% { transform: scale(1); opacity: 0.9; } 100% { transform: scale(3.2); opacity: 0; } }
 .smash-intro.is-open .smash-intro__cta { opacity: 0; pointer-events: none; transform: translateX(-50%) translateY(20px); }
 
-/* boutons en haut à droite : n'apparaissent qu'après le dézoom */
+/* boutons en haut à droite (ex: Connexion) : n'apparaissent qu'après le dézoom */
 .smash-intro__actions {
   position: absolute;
   top: clamp(12px, 3vh, 24px);
@@ -103,6 +103,135 @@
   transition: opacity 0.5s ease 1.4s, transform 0.5s ease 1.4s;
 }
 .smash-intro.is-open .smash-intro__actions { opacity: 1; pointer-events: auto; transform: none; }
+
+/* Compteur de monnaie "Tilts" en haut à gauche (sans fond + pièce Mario à droite) */
+.smash-intro__tilts {
+  position: absolute;
+  top: clamp(14px, 3vh, 26px);
+  left: clamp(16px, 3vw, 28px);
+  z-index: 6;
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(6px, 0.7vw, 10px);
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  font-family: "Exo 2", system-ui, sans-serif;
+  font-style: italic;
+  font-weight: 900;
+  font-size: clamp(18px, 2vw, 28px);
+  color: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+  transition: opacity 0.5s ease 1.4s, transform 0.5s ease 1.4s;
+}
+.smash-intro.is-open .smash-intro__tilts { opacity: 1; pointer-events: auto; transform: none; }
+.smash-intro__tilts-val {
+  color: #ffe58a;
+  text-shadow: 0 2px 0 #2a1400, 0 0 12px rgba(0, 0, 0, 0.95);
+}
+.smash-intro__tilts-label {
+  font-size: 0.82em;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 2px 0 #15172b, 0 0 12px rgba(0, 0, 0, 0.95);
+}
+.smash-intro__tilts-coin {
+  width: clamp(22px, 2.3vw, 34px);
+  height: clamp(22px, 2.3vw, 34px);
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.85));
+}
+
+/* menu principal quand connecté : 2 colonnes de part et d'autre du logo en feu */
+.smash-intro__menu {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: clamp(32px, 8vh, 80px);
+  gap: clamp(20px, 3.5vh, 42px);
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 0.5s ease 1.4s, transform 0.5s ease 1.4s;
+}
+.smash-intro.is-open .smash-intro__menu {
+  opacity: 1;
+  transform: scale(1);
+}
+.smash-intro__menu-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(96vw, 1320px);
+  gap: clamp(110px, 34vw, 520px);
+}
+.smash-intro__menu-col {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 2.8vh, 32px);
+  pointer-events: auto;
+}
+.smash-intro__menu-col .mbtn {
+  --h: clamp(34px, 4.8vw, 64px);
+  min-width: clamp(115px, 22vw, 320px);
+}
+.smash-intro__menu-col--left {
+  align-items: flex-end;
+}
+.smash-intro__menu-col--left .mbtn:nth-child(2) {
+  margin-right: clamp(8px, 2.5vw, 40px);
+}
+.smash-intro__menu-col--right {
+  align-items: flex-start;
+}
+.smash-intro__menu-col--right .mbtn:nth-child(2) {
+  margin-left: clamp(8px, 2.5vw, 40px);
+}
+.smash-intro__menu-admin {
+  pointer-events: auto;
+}
+.smash-intro__menu-admin .mbtn {
+  --h: clamp(32px, 4.2vw, 58px);
+}
+
+/* Mobile / Portrait : réduit la vidéo avec bandes noires autour et garde la même disposition gauche/droite */
+@media (max-aspect-ratio: 4/3), (max-width: 768px) {
+  .smash-intro__video {
+    object-fit: contain;
+    background: #000;
+    transform-origin: 50% 50%;
+    transform: scale(1.22);
+  }
+  .smash-intro.is-open .smash-intro__video {
+    transform: scale(1);
+  }
+  .smash-intro__menu {
+    padding-bottom: clamp(16px, 4vh, 36px);
+  }
+  .smash-intro__menu-row {
+    width: 98vw;
+    gap: clamp(90px, 26vw, 220px);
+  }
+  .smash-intro__menu-col {
+    gap: clamp(10px, 1.8vh, 20px);
+  }
+  .smash-intro__menu-col .mbtn {
+    --h: clamp(28px, 6.8vw, 44px);
+    min-width: clamp(96px, 31vw, 180px);
+  }
+  .smash-intro__menu-admin .mbtn {
+    --h: clamp(26px, 6vw, 40px);
+  }
+}
 
 .smash-intro__error {
   position: absolute;

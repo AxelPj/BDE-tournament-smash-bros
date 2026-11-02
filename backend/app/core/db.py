@@ -38,18 +38,41 @@ def enum_column(enum_cls: type[StrEnum]) -> SAEnum:
 
 @event.listens_for(Engine, "connect")
 def _configure_sqlite(dbapi_connection, _connection_record) -> None:
-    """SQLite désactive les clés étrangères par défaut : on les active.
-    Le mode WAL permet de lire pendant qu'une écriture est en cours."""
+    """Optimise SQLite pour la concurrence (50+ connexions simultanées) :
+    - foreign_keys=ON : intégrité référentielle stricte
+    - journal_mode=WAL : lectures et écriture simultanées non bloquantes
+    - busy_timeout=30000 : attend jusqu'à 30s qu'un verrou d'écriture se libère
+    - synchronous=NORMAL : sûreté transactionnelle avec débit maximal en mode WAL
+    - temp_store=MEMORY & cache_size=-64000 : tris et index en RAM (64 Mo)"""
     if isinstance(dbapi_connection, sqlite3.Connection):
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA foreign_keys=ON")
         cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA busy_timeout=30000")
+        cursor.execute("PRAGMA synchronous=NORMAL")
+        cursor.execute("PRAGMA temp_store=MEMORY")
+        cursor.execute("PRAGMA cache_size=-64000")
+        try:
+            cols = [r[1] for r in cursor.execute("PRAGMA table_info(gages)").fetchall()]
+            if cols and "reward" not in cols:
+                cursor.execute("ALTER TABLE gages ADD COLUMN reward INTEGER NOT NULL DEFAULT 50")
+                dbapi_connection.commit()
+        except sqlite3.OperationalError:
+            pass
         cursor.close()
 
 
 def make_engine(url: str) -> Engine:
-    connect_args = {"check_same_thread": False} if url.startswith("sqlite") else {}
-    return create_engine(url, connect_args=connect_args)
+    is_sqlite = url.startswith("sqlite")
+    connect_args = {"check_same_thread": False, "timeout": 30} if is_sqlite else {}
+    return create_engine(
+        url,
+        connect_args=connect_args,
+        pool_size=25,
+        max_overflow=50,
+        pool_pre_ping=True,
+        pool_recycle=1800,
+    )
 
 
 engine = make_engine(get_settings().database_url)

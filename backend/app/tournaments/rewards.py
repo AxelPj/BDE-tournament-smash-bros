@@ -9,13 +9,12 @@ répercutées automatiquement, et rien ne peut être payé deux fois.
 
 from pydantic import BaseModel, Field
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.economy.models import TransactionKind
 from app.economy.service import reconcile_credits
-from app.gages.models import GageUse
-from app.gages.rules import winning_gage_uses
-from app.matchups import match_outcome
+from app.gages.models import GageUse, GageUseStatus
+from app.shop.models import InventoryItem
 from app.tournaments.bracket import GRAND_FINAL_ID, RESET_ID, MatchStatus, Side
 from app.tournaments.models import Tournament, TournamentMatch, TournamentStatus
 
@@ -64,6 +63,23 @@ def placement_tiers(tournament: Tournament) -> dict[int, str]:
     if tournament.status is not TournamentStatus.COMPLETED:
         return {}
     by_code = {m.code: m for m in tournament.matches}
+    if GRAND_FINAL_ID not in by_code:
+        wb_rounds = max((m.round for m in tournament.matches if m.side is Side.WINNERS), default=1)
+        final_wb = by_code.get(f"W{wb_rounds}-1")
+        tiers: dict[int, str] = {}
+        if tournament.champion_id is not None:
+            tiers[tournament.champion_id] = "champion"
+        if final_wb and _loser(final_wb) is not None:
+            tiers[_loser(final_wb)] = "finalist"
+        for match in tournament.matches:
+            loser = _loser(match)
+            if loser is not None and match.round < wb_rounds:
+                depth = wb_rounds - match.round
+                if depth == 1:
+                    tiers[loser] = "top4"
+                elif depth == 2:
+                    tiers[loser] = "top8"
+        return tiers
     reset = by_code[RESET_ID]
     final = reset if reset.status is MatchStatus.COMPLETED else by_code[GRAND_FINAL_ID]
 
@@ -106,11 +122,26 @@ def desired_rewards(db: Session, tournament: Tournament) -> dict[str, tuple[int,
     for user_id, tier in placement_tiers(tournament).items():
         add("placement", user_id, getattr(settings, tier), PLACEMENT_LABELS[tier])
 
-    uses = list(db.scalars(select(GageUse).where(GageUse.tournament_id == tournament.id)))
-    for code in sorted({use.match_code for use in uses}):
-        outcome = match_outcome(tournament, code)
-        for use in winning_gage_uses([u for u in uses if u.match_code == code], outcome):
-            add(f"gage:{use.id}", use.target_id, settings.win_with_gage, f"Victoire avec un gage ({code})")
+    uses = list(
+        db.scalars(
+            select(GageUse)
+            .options(selectinload(GageUse.item).selectinload(InventoryItem.gage))
+            .where(GageUse.tournament_id == tournament.id)
+        )
+    )
+    for use in uses:
+        if use.status is GageUseStatus.COMPLETED:
+            gage_reward = (
+                use.gage.reward
+                if getattr(use.gage, "reward", None) is not None and use.gage.reward > 0
+                else settings.win_with_gage
+            )
+            add(
+                f"gage:{use.id}",
+                use.imposer_id,
+                gage_reward,
+                f"Objet validé : {use.gage.name} ({use.match_code})",
+            )
     return rewards
 
 

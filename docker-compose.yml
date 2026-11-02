@@ -1,0 +1,81 @@
+services:
+
+  backend:
+    container_name: smash-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - ./backend/.env
+    environment:
+      - DATABASE_URL=sqlite:////data/smash.db
+    volumes:
+      - ./backend:/app
+      - sqlite_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/api/health\")' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: on-failure
+    networks:
+      - smash_net 
+
+  frontend:
+    container_name: smash-frontend
+    build:
+      context: ./smash-bros
+      dockerfile: Dockerfile
+      target: development
+    volumes:
+      - ./smash-bros:/app
+      - node_modules_front:/app/node_modules
+      - next_cache:/app/.next
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: on-failure
+    environment:
+      - WATCHPACK_POLLING=true
+      - BACKEND_ORIGIN=http://backend:8000
+    networks:
+      - smash_net
+
+  nginx:
+    container_name: smash-nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1/api/health > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    restart: on-failure
+    ports:
+      - "80:80"
+      - "3000:80"
+    networks:
+      - smash_net
+
+volumes:
+  sqlite_data:
+  node_modules_front:
+  next_cache:
+
+networks:
+  smash_net:
+    driver: bridge

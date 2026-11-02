@@ -52,6 +52,9 @@ class Tournament(Base):
     matches: Mapped[list["TournamentMatch"]] = relationship(
         back_populates="tournament", cascade="all, delete-orphan"
     )
+    gage_uses: Mapped[list["GageUse"]] = relationship(
+        cascade="all, delete-orphan"
+    )
 
 
 class Participant(Base):
@@ -110,7 +113,12 @@ class TournamentMatch(Base):
 
     @property
     def betting_open(self) -> bool:
-        return self.status is MatchStatus.READY and self.started_at is None
+        return (
+            self.status is MatchStatus.READY
+            and self.started_at is None
+            and self.result_order is None
+            and self.winner_id is None
+        )
 
     @property
     def is_bye(self) -> bool:

@@ -10,7 +10,6 @@ from app.core.db import get_db
 from app.game_settings.router import require_mode
 from app.game_settings.service import Mode
 from app.tournaments import service
-from app.tournaments.bracket import Side
 from app.tournaments.models import Tournament
 from app.tournaments.schemas import (
     MatchRead,
@@ -22,6 +21,7 @@ from app.tournaments.schemas import (
     TournamentDetail,
     TournamentSummary,
     TournamentUpdate,
+    matches_from_tournament,
 )
 from app.users.models import User
 
@@ -54,9 +54,12 @@ def _get_tournament(tournament_id: int, db: Session = Depends(get_db)) -> Tourna
 # --- Consultation (publique) ---
 
 
-@router.get("", response_model=list[TournamentSummary])
-def list_tournaments(db: Session = Depends(get_db)):
-    return [TournamentSummary.from_model(t) for t in service.list_tournaments(db)]
+@router.get("", response_model=list[TournamentDetail] | list[TournamentSummary])
+def list_tournaments(full: bool = False, db: Session = Depends(get_db)):
+    rows = service.list_tournaments(db, full=full)
+    if full:
+        return [TournamentDetail.from_model(t) for t in rows]
+    return [TournamentSummary.from_model(t) for t in rows]
 
 
 @router.get("/{tournament_id}", response_model=TournamentDetail)
@@ -64,13 +67,10 @@ def get_tournament(tournament: Tournament = Depends(_get_tournament)):
     return TournamentDetail.from_model(tournament)
 
 
-SIDE_ORDER = {Side.WINNERS: 0, Side.LOSERS: 1, Side.GRAND_FINAL: 2}
-
-
 @router.get("/{tournament_id}/matches", response_model=list[MatchRead])
 def list_matches(tournament: Tournament = Depends(_get_tournament)):
     """Tous les matchs du bracket, triés : WB, LB puis grande finale."""
-    return sorted(tournament.matches, key=lambda m: (SIDE_ORDER[m.side], m.round, m.position))
+    return matches_from_tournament(tournament)
 
 
 # --- Inscription par le joueur lui-même ---
@@ -113,7 +113,20 @@ def unregister(
 def create_tournament(
     body: TournamentCreate, db: Session = Depends(get_db), _admin: User = Depends(require_admin)
 ):
-    return TournamentDetail.from_model(service.create_tournament(db, body.name, body.rewards))
+    meta = {
+        k: v
+        for k, v in {
+            "starts_at": body.starts_at,
+            "date_label": body.date_label,
+            "max_players": body.max_players,
+            "has_losers_bracket": body.has_losers_bracket,
+            "rules": body.rules,
+        }.items()
+        if v is not None
+    }
+    return TournamentDetail.from_model(
+        service.create_tournament(db, body.name, body.rewards, meta=meta or None)
+    )
 
 
 @router.patch("/{tournament_id}", response_model=TournamentDetail)
@@ -139,6 +152,54 @@ def add_participant(
 ):
     with _http_errors():
         service.add_participant(db, tournament, body.user_id, by_admin=True)
+    return TournamentDetail.from_model(tournament)
+
+
+BOT_FIGHTERS = [
+    ("bot_fox", "Fox McCloud", "/fighters/fox.png"),
+    ("bot_falco", "Falco Lombardi", "/fighters/falco.png"),
+    ("bot_marth", "Marth", "/fighters/marth.png"),
+    ("bot_peach", "Peach", "/fighters/peach.png"),
+    ("bot_falcon", "Captain Falcon", "/fighters/captain_falcon.png"),
+    ("bot_sheik", "Sheik", "/fighters/sheik.png"),
+    ("bot_puff", "Rondoudou", "/fighters/purin.png"),
+]
+
+
+@router.post("/{tournament_id}/bots", response_model=TournamentDetail)
+def add_bot_participant(
+    tournament: Tournament = Depends(_get_tournament),
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    """Ajoute un joueur bot (avec avatar Smash) pour tester ou compléter un tournoi."""
+    from app.users.service import create_user, get_user_by_username
+
+    existing_ids = {p.user_id for p in tournament.participants}
+    chosen_user = None
+    for uname, dname, avatar in BOT_FIGHTERS:
+        u = get_user_by_username(db, uname)
+        if u is None:
+            u = create_user(db, username=uname, display_name=dname)
+            u.avatar_url = avatar
+            db.commit()
+            db.refresh(u)
+        if u.id not in existing_ids:
+            chosen_user = u
+            break
+
+    if chosen_user is None:
+        idx = len(existing_ids) + 1
+        uname = f"cpu_{idx}"
+        chosen_user = get_user_by_username(db, uname)
+        if chosen_user is None:
+            chosen_user = create_user(db, username=uname, display_name=f"CPU #{idx}")
+            chosen_user.avatar_url = "/fighters/mario.png"
+            db.commit()
+            db.refresh(chosen_user)
+
+    with _http_errors():
+        service.add_participant(db, tournament, chosen_user.id, by_admin=True)
     return TournamentDetail.from_model(tournament)
 
 

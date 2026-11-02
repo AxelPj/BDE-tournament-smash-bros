@@ -5,9 +5,41 @@ from sqlalchemy.orm import Session
 from app.auth.dependencies import get_current_user
 from app.core.db import get_db
 from app.users.models import User
-from app.users.schemas import UserPublic
+from app.users.schemas import UserAvatarUpdate, UserPublic, UserRead, UserStatsRead
+from app.users.service import get_user_stats, list_leaderboard
 
 router = APIRouter(prefix="/api/users", tags=["users"])
+
+
+@router.get("/leaderboard", response_model=list[UserStatsRead])
+def leaderboard(
+    db: Session = Depends(get_db),
+    _user: User = Depends(get_current_user),
+):
+    """Classement complet de tous les joueurs avec leurs statistiques et leur solde de Tilts."""
+    return list_leaderboard(db)
+
+
+@router.get("/me/stats", response_model=UserStatsRead)
+def my_stats(
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Statistiques de victoires/défaites/tournois/rang du joueur connecté."""
+    return get_user_stats(db, user)
+
+
+@router.patch("/me/avatar", response_model=UserRead)
+def update_my_avatar(
+    body: UserAvatarUpdate,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """Met à jour la photo de profil (ex: combattant choisi parmi les 84 personnages)."""
+    user.avatar_url = body.avatar_url.strip()
+    db.commit()
+    db.refresh(user)
+    return user
 
 
 @router.get("", response_model=list[UserPublic])

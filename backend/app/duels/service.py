@@ -11,7 +11,7 @@
 from datetime import UTC, datetime
 
 from sqlalchemy import or_, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.bets.service import settle_duel as settle_bets
 from app.gages.service import sync_duel as sync_gages
@@ -41,7 +41,11 @@ def _require_status(duel: Duel, *allowed: DuelStatus) -> None:
 
 
 def get_duel(db: Session, duel_id: int) -> Duel:
-    duel = db.get(Duel, duel_id)
+    duel = db.scalar(
+        select(Duel)
+        .options(selectinload(Duel.challenger), selectinload(Duel.opponent))
+        .where(Duel.id == duel_id)
+    )
     if duel is None:
         raise NotFoundError("Duel introuvable")
     return duel
@@ -50,7 +54,12 @@ def get_duel(db: Session, duel_id: int) -> Duel:
 def list_duels(
     db: Session, status: DuelStatus | None = None, user_id: int | None = None
 ) -> list[Duel]:
-    query = select(Duel).order_by(Duel.id.desc()).limit(200)
+    query = (
+        select(Duel)
+        .options(selectinload(Duel.challenger), selectinload(Duel.opponent))
+        .order_by(Duel.id.desc())
+        .limit(200)
+    )
     if status is not None:
         query = query.where(Duel.status == status)
     if user_id is not None:

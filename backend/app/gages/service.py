@@ -13,7 +13,7 @@ comme les autres récompenses.
 from datetime import UTC, datetime
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.duels.models import Duel
 from app.economy.models import TransactionKind
@@ -48,8 +48,10 @@ def _impose(
 ) -> GageUse:
     if outcome.players is None or user.id not in outcome.players:
         raise ForbiddenError("Seuls les joueurs du match peuvent imposer un gage")
-    if not outcome.open:
-        raise GageStateError("Les gages s'imposent avant le lancement du match")
+    if not outcome.open or outcome.started or outcome.winner is not None:
+        raise GageStateError(
+            "Impossible d'utiliser un objet sur un match déjà lancé ou validé par un admin"
+        )
     if target_id not in outcome.players:
         raise ValueError("La cible doit être un joueur du match")
     item = db.get(InventoryItem, item_id)
@@ -135,9 +137,6 @@ def validate(db: Session, use: GageUse, admin: User, completed: bool) -> GageUse
     Une décision déjà prise peut être corrigée."""
     if use.status is GageUseStatus.CANCELLED:
         raise GageStateError("Ce gage a été retiré ou annulé")
-    outcome = outcome_of(db, use)
-    if not outcome.started:
-        raise GageStateError("Le match n'a pas encore été lancé")
     use.status = GageUseStatus.COMPLETED if completed else GageUseStatus.FAILED
     use.validated_by_id = admin.id
     use.validated_at = datetime.now(UTC)
@@ -152,7 +151,14 @@ def validate(db: Session, use: GageUse, admin: User, completed: bool) -> GageUse
 
 
 def list_uses(db: Session, **filters) -> list[GageUse]:
-    return list(db.scalars(select(GageUse).filter_by(**filters).order_by(GageUse.id)))
+    return list(
+        db.scalars(
+            select(GageUse)
+            .options(selectinload(GageUse.item).selectinload(InventoryItem.gage))
+            .filter_by(**filters)
+            .order_by(GageUse.id)
+        )
+    )
 
 
 # --- Synchronisation après un changement du match (appelées sans commit) ---
@@ -182,18 +188,23 @@ def sync_tournament(db: Session, tournament: Tournament) -> None:
 
 
 def reconcile_duel_rewards(db: Session, duel: Duel) -> None:
-    amount = get_game_settings(db).duel_gage_win_reward
+    default_amount = get_game_settings(db).duel_gage_win_reward
     outcome = duel_outcome(duel)
     prefix = f"duel:{duel.id}:gage:"
-    desired = {
-        f"{prefix}{use.id}:user:{use.target_id}": (
-            use.target_id,
-            amount,
-            f"Victoire avec un gage — {outcome.label}",
-        )
-        for use in winning_gage_uses(list_uses(db, duel_id=duel.id), outcome)
-        if amount
-    }
+    desired = {}
+    for use in list_uses(db, duel_id=duel.id):
+        if use.status is GageUseStatus.COMPLETED:
+            gage_reward = (
+                use.gage.reward
+                if getattr(use.gage, "reward", None) is not None and use.gage.reward > 0
+                else default_amount
+            )
+            if gage_reward:
+                desired[f"{prefix}{use.id}:user:{use.imposer_id}"] = (
+                    use.imposer_id,
+                    gage_reward,
+                    f"Objet validé : {use.gage.name} — {outcome.label}",
+                )
     reconcile_credits(
         db,
         prefix=prefix,

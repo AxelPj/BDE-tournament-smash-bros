@@ -137,8 +137,21 @@ def _build_matches(size: int) -> dict[str, Match]:
     return matches
 
 
+def _build_single_matches(size: int) -> dict[str, Match]:
+    """Construit la structure vide d'un bracket à élimination simple de `size` places."""
+    k = size.bit_length() - 1
+    matches: dict[str, Match] = {}
+    for r in range(1, k + 1):
+        for i in range(size >> r):
+            winner_to = SlotRef(_wb_id(r + 1, i // 2), i % 2) if r < k else None
+            matches[_wb_id(r, i)] = Match(
+                _wb_id(r, i), Side.WINNERS, r, i + 1, winner_to, None
+            )
+    return matches
+
+
 class DoubleEliminationBracket:
-    def __init__(self, participants: list[int]):
+    def __init__(self, participants: list[int], double_elimination: bool = True):
         """`participants` : identifiants des joueurs, triés par tête de série
         (le premier est la tête de série n°1). Voir seeding.seed_participants."""
         if len(participants) < 2:
@@ -146,11 +159,14 @@ class DoubleEliminationBracket:
         if len(set(participants)) != len(participants):
             raise BracketError("Un participant apparaît plusieurs fois")
 
+        self.double_elimination = double_elimination
         self.participants = list(participants)
-        self.size = 2
-        while self.size < len(participants):
-            self.size *= 2
-        self.matches = _build_matches(self.size)
+        self.size = 1 << (len(participants) - 1).bit_length()
+        self.matches = (
+            _build_matches(self.size)
+            if double_elimination
+            else _build_single_matches(self.size)
+        )
 
         seeds = standard_seed_order(self.size)
         for index, seed in enumerate(seeds):
@@ -162,6 +178,10 @@ class DoubleEliminationBracket:
 
     @property
     def champion(self) -> int | None:
+        if not self.double_elimination:
+            k = self.size.bit_length() - 1
+            final_wb = self.matches[_wb_id(k, 0)]
+            return final_wb.winner if final_wb.status is MatchStatus.COMPLETED else None
         grand_final, reset = self.matches[GRAND_FINAL_ID], self.matches[RESET_ID]
         if reset.status is MatchStatus.COMPLETED:
             return reset.winner

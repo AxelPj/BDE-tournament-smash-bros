@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="mcRim" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFF394"/>
+      <stop offset="35%" stop-color="#FFD400"/>
+      <stop offset="72%" stop-color="#E59400"/>
+      <stop offset="100%" stop-color="#9E5800"/>
+    </linearGradient>
+    <linearGradient id="mcFace" x1="14" y1="12" x2="50" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFE863"/>
+      <stop offset="50%" stop-color="#FFC400"/>
+      <stop offset="100%" stop-color="#CC7A00"/>
+    </linearGradient>
+    <linearGradient id="mcSlot" x1="27" y1="16" x2="37" y2="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#9E5800"/>
+      <stop offset="45%" stop-color="#D48300"/>
+      <stop offset="100%" stop-color="#FFF085"/>
+    </linearGradient>
+  </defs>
+  <!-- Ombre portée -->
+  <ellipse cx="32" cy="34" rx="24" ry="27" fill="rgba(0,0,0,0.45)"/>
+  <!-- Bord extérieur doré -->
+  <ellipse cx="32" cy="32" rx="24" ry="27" fill="url(#mcRim)" stroke="#5A2D00" stroke-width="2.5"/>
+  <!-- Face interne -->
+  <ellipse cx="32" cy="32" rx="18.5" ry="21.5" fill="url(#mcFace)" stroke="#B86800" stroke-width="1.5"/>
+  <!-- Reflet brillant diagonale -->
+  <path d="M19 18C22 13 28 11 34 11.5C26 14 20 21 18.5 30C17.8 25.5 18 20.5 19 18Z" fill="#FFF9C4" opacity="0.75"/>
+  <!-- Encoche verticale emblématique de la pièce Mario -->
+  <rect x="27.5" y="16.5" width="9" height="31" rx="4.5" fill="url(#mcSlot)" stroke="#7A3E00" stroke-width="1.8"/>
+  <rect x="29.2" y="18.5" width="2.8" height="27" rx="1.4" fill="#FFF7B2" opacity="0.8"/>
+</svg>

@@ -8,10 +8,22 @@ from app.game_settings.router import require_mode
 from app.game_settings.service import Mode
 from app.shop import service
 from app.shop.models import Gage, InventoryStatus
-from app.shop.schemas import GageCreate, GageRead, GageUpdate, InventoryItemRead
+from app.shop.schemas import (
+    SMASH_SPRITES_CATALOG,
+    GageCreate,
+    GageRead,
+    GageUpdate,
+    InventoryItemRead,
+)
 from app.users.models import User
 
 router = APIRouter(tags=["shop"])
+
+
+@router.get("/api/shop/sprites")
+def list_sprites():
+    """Catalogue des sprites officiels Smash Bros disponibles pour les objets."""
+    return SMASH_SPRITES_CATALOG
 
 
 def _get_gage(gage_id: int, db: Session = Depends(get_db)) -> Gage:

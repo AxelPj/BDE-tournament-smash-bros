@@ -1,17 +1,26 @@
+from datetime import timedelta
+
 import pytest
 from fastapi.testclient import TestClient
 
+from app.auth.service import create_session
+from app.core.config import get_settings
+from app.core.db import get_db
 from app.main import app
-from app.users.service import create_user
+from app.users.service import create_user, get_user_by_username
 
-PASSWORD = "password-123"
+PASSWORD = None
 
 
 def login(username):
-    """Nouveau client HTTP connecté (chaque client a ses propres cookies)."""
+    """Nouveau client HTTP connecté avec une session en base."""
+    db_gen = app.dependency_overrides[get_db]()
+    db = next(db_gen)
+    user = get_user_by_username(db, username)
+    assert user is not None, f"User {username} introuvable en base de test"
+    token = create_session(db, user, timedelta(days=1))
     client = TestClient(app)
-    response = client.post("/api/auth/login", json={"username": username, "password": PASSWORD})
-    assert response.status_code == 200
+    client.cookies.set(get_settings().session_cookie_name, token)
     return client
 
 

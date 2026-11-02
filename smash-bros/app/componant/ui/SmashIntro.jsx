@@ -12,7 +12,7 @@ import "../css/SmashIntro.css";
  *  - children                  contenu affiché en haut à droite après le dézoom (ex: <MeleeButton text="Connexion" />)
  */
 export default function SmashIntro({
-  webmSrc = "/smash-video.webm",
+  webmSrc,
   mp4Src = "/smash-video.mp4",
   ctaText = "Cliquer",
   onOpen,
@@ -95,10 +95,11 @@ export default function SmashIntro({
         autoPlay muted loop playsInline preload="auto"
         aria-label="Logo en flammes"
         onClick={handleOpen}
+        onLoadedData={() => setError(false)}
         onError={() => setError(true)}
       >
-        <source src={webmSrc} type="video/webm" />
-        <source src={mp4Src} type="video/mp4" onError={() => setError(true)} />
+        {webmSrc && <source src={webmSrc} type="video/webm" />}
+        {mp4Src && <source src={mp4Src} type="video/mp4" onError={() => setError(true)} />}
       </video>
       <div className="smash-intro__vignette" />
       <canvas ref={canvasRef} className="smash-intro__embers" />
@@ -108,7 +109,7 @@ export default function SmashIntro({
         <span className="smash-intro__cta-text">{ctaText}</span>
       </button>
 
-      {children && <div className="smash-intro__actions">{children}</div>}
+      {children}
 
       {error && (
         <p className="smash-intro__error">

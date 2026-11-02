@@ -16,6 +16,8 @@ class Gage(Base):
     name: Mapped[str] = mapped_column(String(80))
     description: Mapped[str] = mapped_column(String(500), default="", server_default="")
     price: Mapped[int]
+    reward: Mapped[int] = mapped_column(default=50, server_default="50")
+    image_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
     # Visible et achetable dans la boutique (désactivable temporairement).
     is_available: Mapped[bool] = mapped_column(default=True, server_default="1")
     # Retiré définitivement de la boutique. Jamais supprimé, pour garder

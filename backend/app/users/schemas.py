@@ -1,6 +1,10 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class UserAvatarUpdate(BaseModel):
+    avatar_url: str = Field(min_length=1, max_length=500)
 
 
 class UserPublic(BaseModel):
@@ -11,6 +15,7 @@ class UserPublic(BaseModel):
     id: int
     username: str
     display_name: str
+    avatar_url: str | None = None
 
 
 class UserRead(BaseModel):
@@ -21,7 +26,22 @@ class UserRead(BaseModel):
     id: int
     username: str
     display_name: str
+    avatar_url: str | None = None
     is_admin: bool
     intra_id: int | None
     balance: int
     created_at: datetime
+
+
+class UserStatsRead(BaseModel):
+    id: int | None = None
+    login: str
+    display_name: str
+    avatar_url: str | None = None
+    is_admin: bool = False
+    campus: str
+    wins: int
+    losses: int
+    tournaments: int
+    rank: int
+    balance: int
