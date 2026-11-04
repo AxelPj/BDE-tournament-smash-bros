@@ -34,14 +34,21 @@ def _http_errors() -> Iterator[None]:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, str(exc))
 
 
-def _market(bets: list[Bet], outcome: Outcome) -> MarketRead:
-    total, staked = service.market(bets, outcome)
+def _market(db: Session, bets: list[Bet], outcome: Outcome) -> MarketRead:
+    state = service.market(bets, outcome)
+    min_cents = service.min_odds_cents(db)
     return MarketRead(
         betting_open=outcome.open,
-        total=total,
+        total=state.total,
+        total_bettors=state.total_bettors,
         players=[
-            PlayerOdds(user_id=player, staked=amount, odds=round(total / amount, 2) if amount else None)
-            for player, amount in staked.items()
+            PlayerOdds(
+                user_id=player,
+                staked=amount,
+                bettors=state.bettor_count(player),
+                odds=service.odds(state.total_bettors, state.bettor_count(player), min_cents),
+            )
+            for player, amount in state.staked.items()
         ],
     )
 
@@ -67,7 +74,7 @@ def _bet_read(bet: Bet, bet_status: str, payout: int | None) -> BetRead:
 @router.get("/api/duels/{duel_id}/bets", response_model=MarketRead)
 def duel_market(duel: Duel = Depends(_get_duel), db: Session = Depends(get_db)):
     """Total misé et cote de chaque joueur."""
-    return _market(service.duel_bets(db, duel), service.duel_outcome(duel))
+    return _market(db, service.duel_bets(db, duel), service.duel_outcome(duel))
 
 
 @router.post(
@@ -95,7 +102,9 @@ def match_market(
     code: str, tournament: Tournament = Depends(_get_tournament), db: Session = Depends(get_db)
 ):
     """Total misé et cote de chaque joueur."""
-    return _market(service.match_bets(db, tournament, code), service.match_outcome(tournament, code))
+    return _market(
+        db, service.match_bets(db, tournament, code), service.match_outcome(tournament, code)
+    )
 
 
 @router.post(

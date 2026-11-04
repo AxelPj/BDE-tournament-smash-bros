@@ -4,10 +4,11 @@
     engaged ─(retiré par son auteur avant le lancement, ou match annulé)→ owned
     engaged ─(un admin valide : réalisé ou non)→ consumed
 
-Récompense « gagner avec un gage » : pour chaque gage validé comme réalisé,
-si sa cible gagne le match. Montant réglable par tournoi (RewardSettings) et,
-pour les duels, dans les réglages globaux. Recalculée à chaque changement,
-comme les autres récompenses.
+Récompense « objet validé » : chaque gage validé comme respecté rapporte à
+celui qui l'a utilisé (l'imposeur), quel que soit le vainqueur du match. Montant
+propre au gage (`Gage.reward`) ; à défaut, `win_with_gage` du tournoi ou
+`duel_gage_win_reward` global pour les duels. Recalculée à chaque changement
+(validation corrigée, match annulé…), comme les autres récompenses.
 """
 
 from datetime import UTC, datetime
@@ -19,7 +20,6 @@ from app.duels.models import Duel
 from app.economy.models import TransactionKind
 from app.economy.service import reconcile_credits
 from app.gages.models import GageUse, GageUseStatus
-from app.gages.rules import winning_gage_uses
 from app.game_settings.service import get_game_settings
 from app.matchups import Outcome, duel_outcome, match_outcome
 from app.shop.models import InventoryItem, InventoryStatus

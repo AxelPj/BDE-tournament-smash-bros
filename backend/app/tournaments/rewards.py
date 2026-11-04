@@ -30,7 +30,7 @@ class RewardSettings(BaseModel):
     finalist: int = Field(default=100, ge=0, le=100_000)
     champion: int = Field(default=200, ge=0, le=100_000)
     win_with_gage: int = Field(
-        default=50, ge=0, le=100_000, description="Par gage réalisé dont la cible gagne le match"
+        default=50, ge=0, le=100_000, description="Par objet validé, si le gage n'a pas sa propre récompense"
     )
 
 

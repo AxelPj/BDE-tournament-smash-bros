@@ -300,3 +300,15 @@ def start_match(
     """Lance un match : les paris sont fermés. (La saisie d'un score ferme aussi les paris.)"""
     with _http_errors():
         return service.start_match(db, tournament, code)
+
+
+@router.delete("/{tournament_id}/matches/{code}/start", response_model=MatchRead)
+def unstart_match(
+    code: str,
+    tournament: Tournament = Depends(_get_tournament),
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    """Annule le lancement d'un match qui n'a pas encore de résultat : les paris rouvrent."""
+    with _http_errors():
+        return service.unstart_match(db, tournament, code)

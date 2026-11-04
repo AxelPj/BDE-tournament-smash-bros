@@ -294,6 +294,19 @@ def start_match(db: Session, tournament: Tournament, code: str) -> TournamentMat
     return match
 
 
+def unstart_match(db: Session, tournament: Tournament, code: str) -> TournamentMatch:
+    """Annule le lancement d'un match sans résultat : les paris rouvrent."""
+    match = _get_match(tournament, code)
+    if match.result_order is not None:
+        raise TournamentStateError(f"Le match {code} a déjà un résultat")
+    if match.started_at is None:
+        raise TournamentStateError(f"Le match {code} n'est pas lancé")
+    match.started_at = None
+    tournament.version += 1
+    db.commit()
+    return match
+
+
 def cancel_score(db: Session, tournament: Tournament, code: str) -> list[str]:
     """Supprime le résultat d'un match (il redevient à jouer)."""
     match = _get_match(tournament, code)

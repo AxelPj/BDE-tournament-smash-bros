@@ -58,6 +58,10 @@ export default function Home() {
   const [usingItem, setUsingItem] = useState<any | null>(null);
   const [pendingUnregister, setPendingUnregister] = useState<any | null>(null);
   const [pendingDeleteTournament, setPendingDeleteTournament] = useState<any | null>(null);
+  const [pendingCancelScore, setPendingCancelScore] = useState<{
+    tournamentId: number;
+    matchCode: string;
+  } | null>(null);
   const actionBusyRef = useRef(false);
 
   const close = () => setModal(null);
@@ -286,6 +290,23 @@ export default function Home() {
     return () => clearInterval(id);
   }, [modal, user, loadTournamentsAndMatches]);
 
+  // Rafraîchissement du solde de Tilts (toutes les 10s, onglet visible uniquement)
+  const userId = user?.id;
+  useEffect(() => {
+    if (!userId) return;
+    const refreshBalance = async () => {
+      if (document.visibilityState !== "visible" || actionBusyRef.current) return;
+      const me = await apiJson<User>("/api/auth/me").catch(() => null);
+      if (me) setBalance(me.balance);
+    };
+    const id = setInterval(refreshBalance, 10000);
+    document.addEventListener("visibilitychange", refreshBalance);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", refreshBalance);
+    };
+  }, [userId]);
+
   const handleLogin42 = async () => {
     try {
       const redirectUri = `${window.location.origin}/auth/callback`;
@@ -500,6 +521,56 @@ export default function Home() {
       }
     });
 
+  // lock = true : lance le match (ferme les paris) ; false : annule le lancement (rouvre les paris)
+  const handleStartMatch = (tournamentId: number, matchCode: string, lock = true) =>
+    withActionLock(async () => {
+      if (!user?.is_admin) return;
+      const ok = await apiJson(`/api/tournaments/${tournamentId}/matches/${matchCode}/start`, {
+        method: lock ? "POST" : "DELETE",
+      });
+      if (ok) {
+        await loadTournamentsAndMatches(user);
+      }
+    });
+
+  const handlePlaceBet = async (
+    tournamentId: number,
+    matchCode: string,
+    pickedPlayerId: number,
+    amount: number
+  ): Promise<{ ok: boolean; error?: string }> => {
+    if (!user) return { ok: false, error: "Connecte-toi pour parier" };
+    const result = await withActionLock(async () => {
+      const res = await fetch(`/api/tournaments/${tournamentId}/matches/${matchCode}/bets`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ picked_player_id: pickedPlayerId, amount }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        const detail = typeof data?.detail === "string" ? data.detail : "Pari refusé";
+        return { ok: false, error: detail };
+      }
+      await loadStats();
+      return { ok: true };
+    });
+    return result ?? { ok: false, error: "Action déjà en cours" };
+  };
+
+  const handleCancelScore = (pending: { tournamentId: number; matchCode: string } | null) =>
+    withActionLock(async () => {
+      if (!user?.is_admin || !pending) return;
+      const ok = await apiJson(
+        `/api/tournaments/${pending.tournamentId}/matches/${pending.matchCode}/score`,
+        { method: "DELETE" }
+      );
+      setPendingCancelScore(null);
+      if (ok) {
+        await Promise.all([loadTournamentsAndMatches(user), loadStats()]);
+      }
+      setModal("signup");
+    });
+
   const handleValidateGage = (useId: number, completed: boolean) =>
     withActionLock(async () => {
       if (!user?.is_admin) return;
@@ -680,6 +751,13 @@ export default function Home() {
         onAddBot={handleAddBot}
         onGenerateBracket={handleGenerateBracket}
         onReportScore={handleReportScore}
+        onCancelScore={(tournamentId: number, matchCode: string) => {
+          setPendingCancelScore({ tournamentId, matchCode });
+          setModal("confirm-cancel-score");
+        }}
+        onPlaceBet={handlePlaceBet}
+        onStartMatch={handleStartMatch}
+        balance={balance}
         onValidateGage={handleValidateGage}
         onDeleteTournament={(t: any) => {
           setPendingDeleteTournament(t);
@@ -763,6 +841,17 @@ export default function Home() {
         caption="Action irréversible : le tournoi et son arbre seront supprimés"
         onYes={() => handleDeleteTournament(pendingDeleteTournament)}
         onNo={() => setModal("signup")}
+      />
+
+      <ConfirmModal
+        open={modal === "confirm-cancel-score"}
+        question={`Dévalider le match ${pendingCancelScore?.matchCode ?? ""} ?`}
+        caption="Les gains déjà versés sont repris, les paris attendent le nouveau résultat. Les résultats des matchs suivants qui en dépendent sont aussi annulés."
+        onYes={() => handleCancelScore(pendingCancelScore)}
+        onNo={() => {
+          setPendingCancelScore(null);
+          setModal("signup");
+        }}
       />
 
       <ProfileModal

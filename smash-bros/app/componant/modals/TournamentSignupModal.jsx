@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import MeleeFrame, { Panel, PanelRow, Sep } from "../ui/MeleeFrame";
 import MeleeButton from "../ui/MeleeButton";
+import { apiJson, fmt } from "../../lib/utils";
 
 const SMASH_ITEM_IMAGES = {
   "trophee aide": "/items/item_img01.png",
@@ -140,6 +141,132 @@ function PlayerAvatar({ player }) {
   );
 }
 
+/**
+ * Bouton « Parier » + formulaire de pari sur un match de tournoi.
+ * Affiche les cotes actuelles (pari mutuel) récupérées depuis l'API.
+ */
+function BetBox({ tournamentId, match, getPlayerName, balance, market, onPlaceBet, onBetPlaced }) {
+  const [openForm, setOpenForm] = useState(false);
+  const [pick, setPick] = useState(null);
+  const [amount, setAmount] = useState(10);
+  const [msg, setMsg] = useState(null); // { ok: bool, text: string }
+
+  const players = [match.player1_id, match.player2_id];
+  const oddsOf = (uid) => market?.players?.find((p) => p.user_id === uid);
+
+  if (!openForm) {
+    return (
+      <MeleeButton
+        text="Parier"
+        height={38}
+        onClick={() => {
+          setOpenForm(true);
+          setMsg(null);
+        }}
+      />
+    );
+  }
+
+  const validAmount = Number.isInteger(amount) && amount >= 1 && amount <= (balance ?? 0);
+
+  const submit = async () => {
+    if (!pick || !validAmount) return;
+    const res = await onPlaceBet?.(tournamentId, match.code, pick, amount);
+    if (res?.ok) {
+      setMsg({ ok: true, text: `Pari de ${amount} Tilts sur ${getPlayerName(pick)} enregistré !` });
+      setPick(null);
+      onBetPlaced?.();
+    } else {
+      setMsg({ ok: false, text: res?.error || "Pari refusé" });
+    }
+  };
+
+  const choiceStyle = (selected) => ({
+    flex: 1,
+    cursor: "pointer",
+    fontSize: "clamp(11px, 1.05cqw, 16px)",
+    padding: ".35cqw .5cqw",
+    textAlign: "center",
+    borderColor: selected ? "#ffd000" : "#3a42e6",
+    background: selected ? "rgba(255, 208, 0, .25)" : "rgba(20, 24, 80, .6)",
+    color: "#fff",
+    display: "flex",
+    flexDirection: "column",
+    gap: ".15cqw",
+  });
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: ".5cqw" }}>
+      <span className="mm-ptag" style={{ color: "#ffd000" }}>
+        Parier · {market ? fmt(market.total_bettors) : "…"} parieur
+        {market?.total_bettors > 1 ? "s" : ""}
+      </span>
+      <div style={{ display: "flex", gap: ".4cqw" }}>
+        {players.map((uid) => {
+          const o = oddsOf(uid);
+          return (
+            <button
+              key={uid}
+              type="button"
+              className="mm-field"
+              style={choiceStyle(pick === uid)}
+              onClick={() => setPick(uid)}
+            >
+              <span style={{ fontWeight: 900, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {getPlayerName(uid)}
+              </span>
+              <span style={{ fontSize: "clamp(10px, .9cqw, 14px)", opacity: 0.85 }}>
+                {o?.odds
+                  ? `Cote x${o.odds} · ${o.bettors} parieur${o.bettors > 1 ? "s" : ""}`
+                  : "Aucun parieur"}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="mm-prow" style={{ alignItems: "center" }}>
+        <span style={{ fontSize: "clamp(12px, 1.15cqw, 18px)" }}>
+          Mise (solde {fmt(balance)})
+        </span>
+        <input
+          type="number"
+          min={1}
+          max={balance ?? 0}
+          className="mm-field"
+          style={{
+            width: "clamp(64px, 5.5cqw, 90px)",
+            padding: "clamp(4px, .35cqw, 8px) clamp(6px, .5cqw, 10px)",
+            fontSize: "clamp(13px, 1.25cqw, 20px)",
+          }}
+          value={amount}
+          onChange={(e) => setAmount(Math.floor(Number(e.target.value)))}
+        />
+      </div>
+      {msg && (
+        <span
+          style={{
+            fontSize: "clamp(11px, 1cqw, 15px)",
+            fontWeight: 800,
+            color: msg.ok ? "#4ade80" : "#f87171",
+          }}
+        >
+          {msg.text}
+        </span>
+      )}
+      <div style={{ display: "flex", gap: ".4cqw" }}>
+        <MeleeButton
+          text="Confirmer"
+          selected={Boolean(pick) && validAmount}
+          disabled={!pick || !validAmount}
+          height={34}
+          onClick={submit}
+        />
+        <MeleeButton text="Annuler" height={34} onClick={() => setOpenForm(false)} />
+      </div>
+    </div>
+  );
+}
+
 function formatCountdown(startsAtIso, nowMs) {
   if (!startsAtIso || !nowMs) return null;
   const target = new Date(startsAtIso).getTime();
@@ -180,6 +307,10 @@ export default function TournamentSignupModal({
   onAddBot,
   onGenerateBracket,
   onReportScore,
+  onCancelScore,
+  onPlaceBet,
+  onStartMatch,
+  balance = 0,
   onValidateGage,
   onDeleteTournament,
   onOpenCreate,
@@ -192,7 +323,7 @@ export default function TournamentSignupModal({
   const [view, setView] = useState("info"); // "info" | "bracket"
   const [treeFilter, setTreeFilter] = useState("both"); // "both" | "winners" | "losers"
   const [selectedMatch, setSelectedMatch] = useState(null);
-  const [score1, setScore1] = useState(2);
+  const [score1, setScore1] = useState(0);
   const [score2, setScore2] = useState(0);
   const [nowMs, setNowMs] = useState(0);
   const autoLaunchedRef = useRef({});
@@ -248,6 +379,52 @@ export default function TournamentSignupModal({
     [visibleMatches]
   );
 
+  const activeMatch = useMemo(
+    () =>
+      (selectedMatch && visibleMatches.find((m) => m.code === selectedMatch.code)) ||
+      visibleMatches.find((m) => m.status === "ready") ||
+      visibleMatches[0] ||
+      null,
+    [selectedMatch, visibleMatches]
+  );
+
+  // Cotes du match affiché + mes mises dessus, rafraîchies toutes les 5s.
+  const [betInfo, setBetInfo] = useState(null); // { code, market, mine: { [playerId]: montant } }
+  const [betRefresh, setBetRefresh] = useState(0);
+  const betCode =
+    open && view === "bracket" && activeMatch?.player1_id && activeMatch?.player2_id
+      ? activeMatch.code
+      : null;
+  const tournamentId = t?.id;
+
+  useEffect(() => {
+    if (!betCode || !tournamentId) return;
+    let cancelled = false;
+    const load = async () => {
+      if (document.visibilityState !== "visible") return;
+      const [market, myBets] = await Promise.all([
+        apiJson(`/api/tournaments/${tournamentId}/matches/${betCode}/bets`).catch(() => null),
+        currentUserId ? apiJson("/api/bets/mine").catch(() => null) : Promise.resolve(null),
+      ]);
+      if (cancelled) return;
+      const mine = {};
+      for (const b of myBets || []) {
+        if (b.tournament_id === tournamentId && b.match_code === betCode && b.status !== "refunded") {
+          mine[b.picked_player_id] = (mine[b.picked_player_id] || 0) + b.amount;
+        }
+      }
+      setBetInfo({ code: betCode, market, mine });
+    };
+    load();
+    const id = setInterval(load, 5000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [betCode, tournamentId, currentUserId, betRefresh]);
+
+  const currentBetInfo = betInfo?.code === betCode ? betInfo : null;
+
   // Lancement automatique de l'arbre quand le compte à rebours atteint 0 (si >= 2 inscrits et admin connecté)
   useEffect(() => {
     if (
@@ -296,7 +473,7 @@ export default function TournamentSignupModal({
 
   const handleSelectMatch = (m) => {
     setSelectedMatch(m);
-    setScore1(m.score1 ?? 2);
+    setScore1(m.score1 ?? 0);
     setScore2(m.score2 ?? 0);
   };
 
@@ -404,10 +581,56 @@ export default function TournamentSignupModal({
   );
 
   if (view === "bracket" && hasBracket) {
-    const activeMatch =
-      selectedMatch && visibleMatches.find((m) => m.code === selectedMatch.code)
-        ? visibleMatches.find((m) => m.code === selectedMatch.code)
-        : visibleMatches.find((m) => m.status === "ready") || visibleMatches[0];
+    const oddsOf = (uid) => currentBetInfo?.market?.players?.find((p) => p.user_id === uid);
+    // « x1.83 · misé 20 » affiché à côté du nom du joueur
+    const betTag = (uid) => {
+      if (!currentBetInfo || !uid) return null;
+      const odds = oddsOf(uid)?.odds;
+      const mine = currentBetInfo.mine[uid] || 0;
+      return (
+        <span
+          style={{
+            display: "block",
+            fontSize: "clamp(10px, .9cqw, 14px)",
+            fontWeight: 800,
+            fontStyle: "normal",
+            color: "#ffe58a",
+          }}
+        >
+          {odds ? `Cote x${odds}` : "Cote —"}
+          {mine > 0 && <span style={{ color: "#4ade80" }}> · Ma mise {fmt(mine)}</span>}
+        </span>
+      );
+    };
+    const nameWithBet = (uid) => (
+      <span>
+        {getPlayerName(uid)}
+        {betTag(uid)}
+      </span>
+    );
+
+    // Pari possible : connecté, match ouvert aux paris, et le joueur n'y participe pas.
+    const canBet = Boolean(
+      currentUserId &&
+        onPlaceBet &&
+        activeMatch?.betting_open &&
+        activeMatch.player1_id &&
+        activeMatch.player2_id &&
+        currentUserId !== activeMatch.player1_id &&
+        currentUserId !== activeMatch.player2_id
+    );
+    const betBox = canBet ? (
+      <BetBox
+        key={`${t.id}-${activeMatch.code}`}
+        tournamentId={t.id}
+        match={activeMatch}
+        getPlayerName={getPlayerName}
+        balance={balance}
+        market={currentBetInfo?.market}
+        onPlaceBet={onPlaceBet}
+        onBetPlaced={() => setBetRefresh((n) => n + 1)}
+      />
+    ) : null;
 
     return (
       <MeleeFrame
@@ -495,7 +718,7 @@ export default function TournamentSignupModal({
                 <>
                   <div className="mm-prow" style={{ alignItems: "center" }}>
                     <span style={{ fontSize: "clamp(12px, 1.15cqw, 18px)" }}>
-                      {getPlayerName(activeMatch.player1_id)}
+                      {nameWithBet(activeMatch.player1_id)}
                     </span>
                     <input
                       type="number"
@@ -513,7 +736,7 @@ export default function TournamentSignupModal({
                   </div>
                   <div className="mm-prow" style={{ alignItems: "center" }}>
                     <span style={{ fontSize: "clamp(12px, 1.15cqw, 18px)" }}>
-                      {getPlayerName(activeMatch.player2_id)}
+                      {nameWithBet(activeMatch.player2_id)}
                     </span>
                     <input
                       type="number"
@@ -529,28 +752,50 @@ export default function TournamentSignupModal({
                       onChange={(e) => setScore2(Number(e.target.value))}
                     />
                   </div>
-                  <MeleeButton
-                    text="Valider"
-                    selected={score1 !== score2}
-                    height={38}
-                    onClick={() =>
-                      score1 !== score2 &&
-                      onReportScore?.(t.id, activeMatch.code, Number(score1), Number(score2))
-                    }
-                  />
+                  {betBox}
+                  {activeMatch.status === "ready" && onStartMatch && (
+                    <MeleeButton
+                      text={activeMatch.started_at ? "Delock le match" : "Lock le match"}
+                      selected={Boolean(activeMatch.started_at)}
+                      height={38}
+                      onClick={() =>
+                        onStartMatch(t.id, activeMatch.code, !activeMatch.started_at)
+                      }
+                    />
+                  )}
+                  {activeMatch.status === "completed" ? (
+                    <MeleeButton
+                      text="Dévalider"
+                      selected
+                      height={38}
+                      onClick={() => onCancelScore?.(t.id, activeMatch.code)}
+                    />
+                  ) : (
+                    <MeleeButton
+                      text="Valider"
+                      selected={score1 !== score2}
+                      disabled={score1 === score2}
+                      height={38}
+                      onClick={() =>
+                        score1 !== score2 &&
+                        onReportScore?.(t.id, activeMatch.code, Number(score1), Number(score2))
+                      }
+                    />
+                  )}
                 </>
               ) : (
                 <>
                   <PanelRow
-                    label={getPlayerName(activeMatch.player1_id)}
+                    label={nameWithBet(activeMatch.player1_id)}
                     value={activeMatch.score1 ?? "-"}
                     gold={activeMatch.winner_id && activeMatch.winner_id === activeMatch.player1_id}
                   />
                   <PanelRow
-                    label={getPlayerName(activeMatch.player2_id)}
+                    label={nameWithBet(activeMatch.player2_id)}
                     value={activeMatch.score2 ?? "-"}
                     gold={activeMatch.winner_id && activeMatch.winner_id === activeMatch.player2_id}
                   />
+                  {betBox}
                 </>
               )}
 

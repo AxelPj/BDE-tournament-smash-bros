@@ -7,6 +7,7 @@ from app.bets import service as bets
 from app.duels import service as duels
 from app.economy.models import TiltTransaction, TransactionKind
 from app.economy.service import InsufficientFundsError, record_transaction
+from app.game_settings.service import GameSettings, update_game_settings
 from app.tournaments import service as tournaments
 from app.users.models import User
 from app.users.service import create_user
@@ -49,17 +50,52 @@ def finish(db, duel, challenger_wins=True):
 # --- Calcul des gains ---
 
 
-def test_parimutuel_payout(db, duel_setup):
+def test_odds_count_bettors_not_amounts(db, duel_setup):
     duel, _, mario, luigi, a, b, c = duel_setup
     bets.place_duel_bet(db, a, duel, mario.id, 200)
     bets.place_duel_bet(db, b, duel, mario.id, 100)
     bets.place_duel_bet(db, c, duel, luigi.id, 100)
 
-    finish(db, duel)  # Mario gagne : 400 Tilt à partager entre 300 misés sur lui
+    finish(db, duel)  # Mario gagne : 3 parieurs dont 2 sur lui -> cote 1.5
 
-    assert balance(db, a) == 800 + 200 * 400 // 300  # 266
-    assert balance(db, b) == 900 + 100 * 400 // 300  # 133
+    assert balance(db, a) == 800 + 300
+    assert balance(db, b) == 900 + 150
     assert balance(db, c) == 900
+
+
+def test_several_bets_count_as_one_bettor(db, duel_setup):
+    duel, _, mario, luigi, a, _, c = duel_setup
+    bets.place_duel_bet(db, a, duel, mario.id, 50)
+    bets.place_duel_bet(db, a, duel, mario.id, 50)  # même parieur
+    bets.place_duel_bet(db, c, duel, luigi.id, 10)
+
+    finish(db, duel)  # 2 parieurs dont 1 sur Mario -> cote 2
+
+    assert balance(db, a) == 900 + 200
+
+
+def test_min_odds_guarantees_a_profit(db, duel_setup):
+    duel, _, mario, luigi, a, b, c = duel_setup
+    bets.place_duel_bet(db, a, duel, mario.id, 100)
+    bets.place_duel_bet(db, b, duel, mario.id, 50)  # personne sur Luigi : cote mutuelle 1
+
+    finish(db, duel)
+
+    assert balance(db, a) == 900 + 120  # cote minimale 1.2 par défaut, payée par la banque
+    assert balance(db, b) == 950 + 60
+
+
+def test_min_odds_is_configurable(db, duel_setup):
+    duel, _, mario, luigi, a, b, c = duel_setup
+    update_game_settings(db, GameSettings(bet_min_odds=1.5))
+    for fan in (a, b, c):
+        bets.place_duel_bet(db, fan, duel, mario.id, 10)
+    bets.place_duel_bet(db, luigi, duel, luigi.id, 10)  # cote de Mario : 4 / 3 = 1.33
+
+    finish(db, duel)
+
+    assert balance(db, a) == 990 + 15
+    assert balance(db, luigi) == 990
 
 
 def test_nobody_on_winner_means_refund(db, duel_setup):
@@ -91,7 +127,7 @@ def test_correction_moves_payouts(db, duel_setup):
 
     finish(db, duel, challenger_wins=False)  # correction : Luigi a gagné
 
-    assert (balance(db, a), balance(db, b), balance(db, c)) == (800, 900, 900 + 400)
+    assert (balance(db, a), balance(db, b), balance(db, c)) == (800, 900, 900 + 300)  # cote 3
 
 
 def test_reclaimed_payout_never_makes_balance_negative(db, duel_setup):
@@ -168,7 +204,7 @@ def test_tournament_match_bet_settled_by_score(db, bracket):
 
     win(db, t, "W1-1")  # p0 gagne
 
-    assert balance(db, fan) == 1000 + 100  # 200 / 100 misés sur p0 : cote 2
+    assert balance(db, fan) == 1000 + 100  # 2 parieurs dont 1 sur p0 : cote 2
     assert get(t, "W1-1").betting_open is False
 
 
@@ -201,12 +237,28 @@ def test_correction_refunds_bets_on_changed_pairing_and_reopens_betting(db, brac
 def test_cancelled_score_reclaims_payout_and_keeps_betting_closed(db, bracket):
     t, (p0, *_), fan = bracket
     bets.place_match_bet(db, fan, t, "W1-1", p0.id, 100)
-    win(db, t, "W1-1")  # seul parieur, sur le vainqueur : remboursé (cote 1)
+    win(db, t, "W1-1")  # seul parieur, sur le vainqueur : cote minimale 1.2
+    assert balance(db, fan) == 1020
 
     tournaments.cancel_score(db, t, "W1-1")
 
     assert balance(db, fan) == 900  # pari en attente du nouveau résultat
     assert get(t, "W1-1").betting_open is False  # le match a déjà été joué
+
+
+def test_unstart_reopens_tournament_bets(db, bracket):
+    t, (p0, *_), fan = bracket
+    tournaments.start_match(db, t, "W1-1")
+
+    tournaments.unstart_match(db, t, "W1-1")
+
+    assert get(t, "W1-1").betting_open is True
+    bets.place_match_bet(db, fan, t, "W1-1", p0.id, 10)
+    with pytest.raises(tournaments.TournamentStateError):
+        tournaments.unstart_match(db, t, "W1-1")  # pas lancé
+    win(db, t, "W1-1")
+    with pytest.raises(tournaments.TournamentStateError):
+        tournaments.unstart_match(db, t, "W1-1")  # résultat déjà saisi
 
 
 def test_reset_bracket_refunds_bets(db, bracket):
@@ -220,8 +272,8 @@ def test_reset_bracket_refunds_bets(db, bracket):
 
 @pytest.mark.parametrize("seed", range(5))
 def test_random_tournament_with_bets_conserves_tilt(db, seed):
-    """Les gains d'un match ne dépassent jamais les mises, et chaque solde
-    reste égal à la somme de son journal, malgré les corrections."""
+    """Chaque solde reste égal à la somme de son journal et ne devient jamais
+    négatif, malgré les corrections."""
     rng = random.Random(seed)
     t, ids = setup_tournament(db, 6)
     fans = [player(db, f"fan{i}") for i in range(4)]
@@ -249,7 +301,6 @@ def test_random_tournament_with_bets_conserves_tilt(db, seed):
         return db.scalar(select(func.coalesce(func.sum(TiltTransaction.amount), 0)).where(TiltTransaction.kind == kind))
 
     assert total(TransactionKind.BET_STAKE) < 0 and total(TransactionKind.BET_PAYOUT) > 0
-    assert total(TransactionKind.BET_PAYOUT) <= -total(TransactionKind.BET_STAKE)
     for user_id in ids + [f.id for f in fans]:
         journal = db.scalar(select(func.sum(TiltTransaction.amount)).where(TiltTransaction.user_id == user_id))
         assert balance(db, db.get(User, user_id)) == journal >= 0
@@ -279,9 +330,9 @@ def test_api_bets(client, db):
     assert fan_c.post(url, json={"picked_player_id": mario.id, "amount": 5000}).status_code == 409
 
     market = fan_c.get(url).json()
-    assert market["total"] == 400
-    odds = {p["user_id"]: p["odds"] for p in market["players"]}
-    assert odds == {mario.id: 1.33, luigi.id: 4.0}
+    assert (market["total"], market["total_bettors"]) == (400, 2)
+    odds = {p["user_id"]: (p["bettors"], p["odds"]) for p in market["players"]}
+    assert odds == {mario.id: (1, 2.0), luigi.id: (1, 2.0)}  # 300 contre 100, mais 1 parieur chacun
     assert fan_c.get("/api/bets/mine").json()[0]["status"] == "open"
 
     admin_c.post(f"/api/admin/duels/{duel_id}/start")
@@ -289,6 +340,6 @@ def test_api_bets(client, db):
     admin_c.put(f"/api/admin/duels/{duel_id}/result", json={"challenger_score": 2, "opponent_score": 1})
 
     mine = fan_c.get("/api/bets/mine").json()[0]
-    assert (mine["status"], mine["payout"]) == ("won", 400)
+    assert (mine["status"], mine["payout"]) == ("won", 600)
     assert luigi_c.get("/api/bets/mine").json()[0]["status"] == "lost"
-    assert fan_c.get("/api/auth/me").json()["balance"] == 1000 - 300 + 400
+    assert fan_c.get("/api/auth/me").json()["balance"] == 1000 - 300 + 600

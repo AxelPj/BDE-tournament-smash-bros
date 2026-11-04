@@ -38,8 +38,14 @@ class GameSettings(BaseModel):
     max_gages_per_player: int = Field(
         default=3, ge=0, le=20, description="Gages qu'un joueur peut imposer par match"
     )
+    bet_min_odds: float = Field(
+        default=1.2,
+        ge=1.0,
+        le=10.0,
+        description="Cote minimale garantie sur un pari gagnant (la banque paie la différence ; 1.0 = désactivé)",
+    )
     duel_gage_win_reward: int = Field(
-        default=50, ge=0, le=100_000, description="Tilt par gage validé quand sa cible gagne le duel"
+        default=50, ge=0, le=100_000, description="Tilt par objet validé dans un duel, si le gage n'a pas sa propre récompense"
     )
 
 

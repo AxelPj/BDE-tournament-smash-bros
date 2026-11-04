@@ -28,6 +28,7 @@ services:
       context: ./smash-bros
       dockerfile: Dockerfile
       target: development
+      network: host
     volumes:
       - ./smash-bros:/app
       - node_modules_front:/app/node_modules

@@ -12,14 +12,17 @@ class BetCreate(BaseModel):
 class PlayerOdds(BaseModel):
     user_id: int
     staked: int = Field(description="Total misé sur ce joueur")
+    bettors: int = Field(description="Nombre de parieurs sur ce joueur")
     odds: float | None = Field(
-        description="Gain pour 1 Tilt misé si ce joueur gagne (None tant que personne n'a misé dessus)"
+        description="Gain pour 1 Tilt misé si ce joueur gagne : parieurs du match / parieurs "
+        "sur ce joueur, avec la cote minimale (None tant que personne n'a parié dessus)"
     )
 
 
 class MarketRead(BaseModel):
     betting_open: bool
-    total: int
+    total: int = Field(description="Total misé sur le match")
+    total_bettors: int = Field(description="Nombre de parieurs sur le match")
     players: list[PlayerOdds]
 
 

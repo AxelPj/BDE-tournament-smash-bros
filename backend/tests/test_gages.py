@@ -17,9 +17,9 @@ def balance(db, user_id):
     return db.get(User, user_id).balance
 
 
-def give_gages(db, user, count=1):
-    """Ajoute des gages gratuits à l'inventaire d'un joueur."""
-    gage = shop.create_gage(db, name="Kirby only", price=0)
+def give_gages(db, user, count=1, **fields):
+    """Ajoute des gages gratuits à l'inventaire d'un joueur (récompense 50 par défaut)."""
+    gage = shop.create_gage(db, name="Kirby only", price=0, **fields)
     return [shop.purchase(db, user.id, gage.id) for _ in range(count)]
 
 
@@ -120,33 +120,40 @@ def test_withdraw(db, duel_setup):
 # --- Validation et récompense ---
 
 
-def test_validation_requires_started_match(db, duel_setup):
+def test_validation_allowed_before_start(db, duel_setup):
     duel, admin, mario, luigi = duel_setup
     (item,) = give_gages(db, mario)
     use = gages.impose_on_duel(db, mario, duel, item.id, luigi.id)
 
-    with pytest.raises(gages.GageStateError):
-        gages.validate(db, use, admin, completed=True)
+    gages.validate(db, use, admin, completed=True)  # pas besoin que le match soit lancé
 
-    duels.start(db, duel)
-    gages.validate(db, use, admin, completed=True)
     assert item.status is InventoryStatus.CONSUMED
     assert item.used_at is not None
 
 
-def test_winning_with_a_gage_is_rewarded(db, duel_setup):
+def test_validated_gage_rewards_its_user_whoever_wins(db, duel_setup):
     duel, admin, mario, luigi = duel_setup
     item1, item2 = give_gages(db, mario, 2)
     use1 = gages.impose_on_duel(db, mario, duel, item1.id, luigi.id)
     use2 = gages.impose_on_duel(db, mario, duel, item2.id, luigi.id)
     duels.start(db, duel)
     gages.validate(db, use1, admin, completed=True)
-    gages.validate(db, use2, admin, completed=False)  # non réalisé : pas de récompense
+    gages.validate(db, use2, admin, completed=False)  # non respecté : pas de récompense
 
-    finish(db, duel, challenger_wins=False)  # Luigi gagne malgré le gage
+    finish(db, duel, challenger_wins=False)  # Mario perd : il touche quand même son objet
 
-    assert balance(db, luigi.id) == 50
-    assert balance(db, mario.id) == 0
+    assert balance(db, mario.id) == 50
+    assert balance(db, luigi.id) == 0
+
+
+def test_reward_is_set_per_gage(db, duel_setup):
+    duel, admin, mario, luigi = duel_setup
+    (item,) = give_gages(db, mario, reward=80)
+    use = gages.impose_on_duel(db, mario, duel, item.id, luigi.id)
+
+    gages.validate(db, use, admin, completed=True)
+
+    assert balance(db, mario.id) == 80
 
 
 def test_self_imposed_gage(db, duel_setup):
@@ -161,21 +168,20 @@ def test_self_imposed_gage(db, duel_setup):
     assert balance(db, mario.id) == 50
 
 
-def test_reward_follows_corrections(db, duel_setup):
+def test_reward_follows_validation_not_result(db, duel_setup):
     duel, admin, mario, luigi = duel_setup
     (item,) = give_gages(db, mario)
     use = gages.impose_on_duel(db, mario, duel, item.id, luigi.id)
     duels.start(db, duel)
     gages.validate(db, use, admin, completed=True)
     finish(db, duel, challenger_wins=False)
-    assert balance(db, luigi.id) == 50
+    assert balance(db, mario.id) == 50
 
-    finish(db, duel, challenger_wins=True)  # correction du résultat
-    assert balance(db, luigi.id) == 0
+    finish(db, duel, challenger_wins=True)  # correction du résultat : sans effet
+    assert balance(db, mario.id) == 50
 
-    finish(db, duel, challenger_wins=False)
     gages.validate(db, use, admin, completed=False)  # correction de la validation
-    assert balance(db, luigi.id) == 0
+    assert balance(db, mario.id) == 0
 
 
 def test_cancelled_duel_returns_engaged_gages(db, duel_setup):
@@ -203,13 +209,19 @@ def test_tournament_gage_reward_and_corrections(db):
     use = gages.impose_on_match(db, user0, t, "W1-1", item.id, p3)
     tournaments.start_match(db, t, "W1-1")
     gages.validate(db, use, admin, completed=True)
-    before = balance(db, p3)
+    before0, before3 = balance(db, p0), balance(db, p3)
+    assert before0 == 100 + 50  # participation + objet validé
 
-    win(db, t, "W1-1", first_player_wins=False)  # p3 gagne avec le gage
-    assert balance(db, p3) == before + 10 + 20 + 50
+    win(db, t, "W1-1", first_player_wins=False)  # p3 gagne
+    assert balance(db, p0) == before0 + 10  # p0 garde la récompense de son objet
+    assert balance(db, p3) == before3 + 10 + 20
 
     win(db, t, "W1-1")  # correction : p0 a gagné
-    assert balance(db, p3) == before + 10
+    assert balance(db, p0) == before0 + 10 + 20
+    assert balance(db, p3) == before3 + 10
+
+    gages.validate(db, use, admin, completed=False)
+    assert balance(db, p0) == before0 - 50 + 10 + 20
 
 
 def test_tournament_pairing_change_returns_engaged_gage(db):
@@ -279,11 +291,11 @@ def test_api_gage_flow(client, db):
     assert [u["id"] for u in admin.get("/api/admin/gage-uses?status=engaged").json()] == [use["id"]]
 
     url = f"/api/admin/gage-uses/{use['id']}/validation"
-    assert admin.put(url, json={"completed": True}).status_code == 409  # pas lancé
     admin.post(f"/api/admin/duels/{duel_id}/start")
     assert mario_c.put(url, json={"completed": True}).status_code == 403
     assert admin.put(url, json={"completed": True}).json()["status"] == "completed"
     admin.put(f"/api/admin/duels/{duel_id}/result", json={"challenger_score": 0, "opponent_score": 2})
 
-    assert luigi_c.get("/api/auth/me").json()["balance"] == 50
+    assert mario_c.get("/api/auth/me").json()["balance"] == 50  # celui qui a utilisé l'objet
+    assert luigi_c.get("/api/auth/me").json()["balance"] == 0
     assert mario_c.get("/api/inventory").json()[0]["status"] == "consumed"
