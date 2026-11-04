@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import MeleeFrame, { Panel, PanelRow, Sep } from "../ui/MeleeFrame";
 import MeleeButton from "../ui/MeleeButton";
-import { apiJson, fmt } from "../../lib/utils";
+import BetBox, { BetTag, useBetMarket } from "../ui/BetBox";
+import PlayerAvatar from "../ui/PlayerAvatar";
 
 const SMASH_ITEM_IMAGES = {
   "trophee aide": "/items/item_img01.png",
@@ -117,154 +118,6 @@ function resolveGageImg(g, shopItems = []) {
     if (key.includes(k) || k.includes(key)) return url;
   }
   return "/items/item_list29.png";
-}
-
-function PlayerAvatar({ player }) {
-  const [imgErr, setImgErr] = useState(false);
-  if (!player) {
-    return <span className="mm-bavatar">?</span>;
-  }
-  const src =
-    !imgErr &&
-    (player.avatar_url ||
-      (player.username ? `https://cdn.intra.42.fr/users/${player.username}.jpg` : null));
-  const initial = (player.display_name || player.username || "?").charAt(0).toUpperCase();
-
-  return (
-    <span className="mm-bavatar">
-      {src ? (
-        <img src={src} alt={player.display_name || player.username} onError={() => setImgErr(true)} />
-      ) : (
-        initial
-      )}
-    </span>
-  );
-}
-
-/**
- * Bouton « Parier » + formulaire de pari sur un match de tournoi.
- * Affiche les cotes actuelles (pari mutuel) récupérées depuis l'API.
- */
-function BetBox({ tournamentId, match, getPlayerName, balance, market, onPlaceBet, onBetPlaced }) {
-  const [openForm, setOpenForm] = useState(false);
-  const [pick, setPick] = useState(null);
-  const [amount, setAmount] = useState(10);
-  const [msg, setMsg] = useState(null); // { ok: bool, text: string }
-
-  const players = [match.player1_id, match.player2_id];
-  const oddsOf = (uid) => market?.players?.find((p) => p.user_id === uid);
-
-  if (!openForm) {
-    return (
-      <MeleeButton
-        text="Parier"
-        height={38}
-        onClick={() => {
-          setOpenForm(true);
-          setMsg(null);
-        }}
-      />
-    );
-  }
-
-  const validAmount = Number.isInteger(amount) && amount >= 1 && amount <= (balance ?? 0);
-
-  const submit = async () => {
-    if (!pick || !validAmount) return;
-    const res = await onPlaceBet?.(tournamentId, match.code, pick, amount);
-    if (res?.ok) {
-      setMsg({ ok: true, text: `Pari de ${amount} Tilts sur ${getPlayerName(pick)} enregistré !` });
-      setPick(null);
-      onBetPlaced?.();
-    } else {
-      setMsg({ ok: false, text: res?.error || "Pari refusé" });
-    }
-  };
-
-  const choiceStyle = (selected) => ({
-    flex: 1,
-    cursor: "pointer",
-    fontSize: "clamp(11px, 1.05cqw, 16px)",
-    padding: ".35cqw .5cqw",
-    textAlign: "center",
-    borderColor: selected ? "#ffd000" : "#3a42e6",
-    background: selected ? "rgba(255, 208, 0, .25)" : "rgba(20, 24, 80, .6)",
-    color: "#fff",
-    display: "flex",
-    flexDirection: "column",
-    gap: ".15cqw",
-  });
-
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: ".5cqw" }}>
-      <span className="mm-ptag" style={{ color: "#ffd000" }}>
-        Parier · {market ? fmt(market.total_bettors) : "…"} parieur
-        {market?.total_bettors > 1 ? "s" : ""}
-      </span>
-      <div style={{ display: "flex", gap: ".4cqw" }}>
-        {players.map((uid) => {
-          const o = oddsOf(uid);
-          return (
-            <button
-              key={uid}
-              type="button"
-              className="mm-field"
-              style={choiceStyle(pick === uid)}
-              onClick={() => setPick(uid)}
-            >
-              <span style={{ fontWeight: 900, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {getPlayerName(uid)}
-              </span>
-              <span style={{ fontSize: "clamp(10px, .9cqw, 14px)", opacity: 0.85 }}>
-                {o?.odds
-                  ? `Cote x${o.odds} · ${o.bettors} parieur${o.bettors > 1 ? "s" : ""}`
-                  : "Aucun parieur"}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-      <div className="mm-prow" style={{ alignItems: "center" }}>
-        <span style={{ fontSize: "clamp(12px, 1.15cqw, 18px)" }}>
-          Mise (solde {fmt(balance)})
-        </span>
-        <input
-          type="number"
-          min={1}
-          max={balance ?? 0}
-          className="mm-field"
-          style={{
-            width: "clamp(64px, 5.5cqw, 90px)",
-            padding: "clamp(4px, .35cqw, 8px) clamp(6px, .5cqw, 10px)",
-            fontSize: "clamp(13px, 1.25cqw, 20px)",
-          }}
-          value={amount}
-          onChange={(e) => setAmount(Math.floor(Number(e.target.value)))}
-        />
-      </div>
-      {msg && (
-        <span
-          style={{
-            fontSize: "clamp(11px, 1cqw, 15px)",
-            fontWeight: 800,
-            color: msg.ok ? "#4ade80" : "#f87171",
-          }}
-        >
-          {msg.text}
-        </span>
-      )}
-      <div style={{ display: "flex", gap: ".4cqw" }}>
-        <MeleeButton
-          text="Confirmer"
-          selected={Boolean(pick) && validAmount}
-          disabled={!pick || !validAmount}
-          height={34}
-          onClick={submit}
-        />
-        <MeleeButton text="Annuler" height={34} onClick={() => setOpenForm(false)} />
-      </div>
-    </div>
-  );
 }
 
 function formatCountdown(startsAtIso, nowMs) {
@@ -390,41 +243,16 @@ export default function TournamentSignupModal({
   );
 
   // Cotes du match affiché + mes mises dessus, rafraîchies toutes les 5s.
-  const [betInfo, setBetInfo] = useState(null); // { code, market, mine: { [playerId]: montant } }
-  const [betRefresh, setBetRefresh] = useState(0);
   const betCode =
     open && view === "bracket" && activeMatch?.player1_id && activeMatch?.player2_id
       ? activeMatch.code
       : null;
   const tournamentId = t?.id;
-
-  useEffect(() => {
-    if (!betCode || !tournamentId) return;
-    let cancelled = false;
-    const load = async () => {
-      if (document.visibilityState !== "visible") return;
-      const [market, myBets] = await Promise.all([
-        apiJson(`/api/tournaments/${tournamentId}/matches/${betCode}/bets`).catch(() => null),
-        currentUserId ? apiJson("/api/bets/mine").catch(() => null) : Promise.resolve(null),
-      ]);
-      if (cancelled) return;
-      const mine = {};
-      for (const b of myBets || []) {
-        if (b.tournament_id === tournamentId && b.match_code === betCode && b.status !== "refunded") {
-          mine[b.picked_player_id] = (mine[b.picked_player_id] || 0) + b.amount;
-        }
-      }
-      setBetInfo({ code: betCode, market, mine });
-    };
-    load();
-    const id = setInterval(load, 5000);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, [betCode, tournamentId, currentUserId, betRefresh]);
-
-  const currentBetInfo = betInfo?.code === betCode ? betInfo : null;
+  const bets = useBetMarket(
+    betCode && tournamentId ? `/api/tournaments/${tournamentId}/matches/${betCode}/bets` : null,
+    (b) => b.tournament_id === tournamentId && b.match_code === betCode,
+    currentUserId
+  );
 
   // Lancement automatique de l'arbre quand le compte à rebours atteint 0 (si >= 2 inscrits et admin connecté)
   useEffect(() => {
@@ -582,31 +410,10 @@ export default function TournamentSignupModal({
   );
 
   if (view === "bracket" && hasBracket) {
-    const oddsOf = (uid) => currentBetInfo?.market?.players?.find((p) => p.user_id === uid);
-    // « x1.83 · misé 20 » affiché à côté du nom du joueur
-    const betTag = (uid) => {
-      if (!currentBetInfo || !uid) return null;
-      const odds = oddsOf(uid)?.odds;
-      const mine = currentBetInfo.mine[uid] || 0;
-      return (
-        <span
-          style={{
-            display: "block",
-            fontSize: "clamp(10px, .9cqw, 14px)",
-            fontWeight: 800,
-            fontStyle: "normal",
-            color: "#ffe58a",
-          }}
-        >
-          {odds ? `Cote x${odds}` : "Cote —"}
-          {mine > 0 && <span style={{ color: "#4ade80" }}> · Ma mise {fmt(mine)}</span>}
-        </span>
-      );
-    };
     const nameWithBet = (uid) => (
       <span>
         {getPlayerName(uid)}
-        {betTag(uid)}
+        <BetTag market={bets.market} mine={bets.mine} playerId={uid} />
       </span>
     );
 
@@ -623,13 +430,12 @@ export default function TournamentSignupModal({
     const betBox = canBet ? (
       <BetBox
         key={`${t.id}-${activeMatch.code}`}
-        tournamentId={t.id}
-        match={activeMatch}
+        players={[activeMatch.player1_id, activeMatch.player2_id]}
         getPlayerName={getPlayerName}
         balance={balance}
-        market={currentBetInfo?.market}
-        onPlaceBet={onPlaceBet}
-        onBetPlaced={() => setBetRefresh((n) => n + 1)}
+        market={bets.market}
+        onPlaceBet={(pick, amount) => onPlaceBet(t.id, activeMatch.code, pick, amount)}
+        onBetPlaced={bets.refresh}
       />
     ) : null;
 

@@ -7,6 +7,7 @@ import ShopModal from "./componant/modals/ShopModal";
 import InventoryModal from "./componant/modals/InventoryModal";
 import UseItemModal from "./componant/modals/UseItemModal";
 import TournamentSignupModal from "./componant/modals/TournamentSignupModal";
+import DuelsModal from "./componant/modals/DuelsModal";
 import TournamentCreateModal from "./componant/modals/TournamentCreateModal";
 import ConfirmModal from "./componant/modals/ConfirmModal";
 import ProfileModal from "./componant/modals/ProfileModal";
@@ -62,6 +63,12 @@ export default function Home() {
   const [pendingCancelScore, setPendingCancelScore] = useState<{
     tournamentId: number;
     matchCode: string;
+  } | null>(null);
+  const [duels, setDuels] = useState<Duel[]>([]);
+  // Action sur un duel en attente de confirmation (ConfirmModal)
+  const [pendingDuelAction, setPendingDuelAction] = useState<{
+    type: "cancel-result" | "cancel-duel";
+    duel: Duel;
   } | null>(null);
   const actionBusyRef = useRef(false);
 
@@ -169,10 +176,7 @@ export default function Home() {
   const loadTournamentsAndMatches = useCallback(async (loggedUser: User | null) => {
     try {
       // 1 seule requête HTTP au lieu de 1 + 2N requêtes (évite l'effet N+1 à 50 joueurs)
-      const [rawTournaments, duels] = await Promise.all([
-        apiJson<RawTournament[]>("/api/tournaments?full=true"),
-        loggedUser ? apiJson<Duel[]>("/api/duels/mine") : Promise.resolve(null),
-      ]);
+      const rawTournaments = await apiJson<RawTournament[]>("/api/tournaments?full=true");
       if (!rawTournaments) return;
 
       const detailed = rawTournaments.map((detail): Tournament => {
@@ -232,22 +236,7 @@ export default function Home() {
           }
         }
 
-        if (duels) {
-          for (const d of duels) {
-            if (d.status === "validated") {
-              const opp = d.challenger.id === loggedUser.id ? d.opponent : d.challenger;
-              userMatches.push({
-                id: `d-${d.id}`,
-                kind: "duel",
-                duelId: d.id,
-                targetId: opp.id,
-                opponent: opp.display_name || opp.username,
-                info: `Duel · Mise ${d.stake} Tilt`,
-              });
-            }
-          }
-        }
-
+        // Pas d'objet sur les duels : seuls les matchs de tournoi sont proposés.
         setPlayableMatches(userMatches);
       }
     } catch (err) {
@@ -281,6 +270,31 @@ export default function Home() {
         setAuthChecked(true);
       });
   }, [loadShopAndInventory, loadStats, loadTournamentsAndMatches]);
+
+  const loadDuels = useCallback(async () => {
+    const data = await apiJson<Duel[]>("/api/duels").catch(() => null);
+    if (data) setDuels(data);
+  }, []);
+
+  // Duels (et donc la notification du menu) rechargés au démarrage, toutes les 5s,
+  // et dès qu'on revient sur l'onglet.
+  const duelsUserId = user?.id;
+  useEffect(() => {
+    if (!duelsUserId) return;
+    const refresh = () => {
+      if (document.visibilityState === "visible" && !actionBusyRef.current) {
+        loadDuels();
+      }
+    };
+    const first = setTimeout(loadDuels, 0);
+    const id = setInterval(refresh, 5000);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      clearTimeout(first);
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [duelsUserId, loadDuels]);
 
   // Synchronisation temps-réel légère (toutes les 5s) lorsque la modale Tournois est ouverte
   useEffect(() => {
@@ -560,6 +574,87 @@ export default function Home() {
     return result ?? { ok: false, error: "Action déjà en cours" };
   };
 
+  // --- Duels ---
+
+  // Appel API qui renvoie le message d'erreur du backend (pour l'afficher)
+  const apiAction = async (
+    url: string,
+    method: string,
+    body?: unknown
+  ): Promise<{ ok: boolean; error?: string }> => {
+    const res = await fetch(url, {
+      method,
+      headers: body ? { "Content-Type": "application/json" } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    if (res.ok) return { ok: true };
+    const data = await res.json().catch(() => null);
+    return { ok: false, error: typeof data?.detail === "string" ? data.detail : "Action refusée" };
+  };
+
+  const duelAction = async (url: string, method: string, body?: unknown, refreshStats = false) => {
+    const result = await withActionLock(async () => {
+      const res = await apiAction(url, method, body);
+      if (res.ok) await Promise.all([loadDuels(), refreshStats ? loadStats() : null]);
+      return res;
+    });
+    return result ?? { ok: false, error: "Action déjà en cours" };
+  };
+
+  const handleChallenge = (opponentId: number) =>
+    duelAction("/api/duels", "POST", { opponent_id: opponentId });
+
+  const handleRespondDuel = (duelId: number, accept: boolean) =>
+    duelAction(`/api/duels/${duelId}/${accept ? "accept" : "refuse"}`, "POST");
+
+  const handleValidateDuel = (duelId: number) =>
+    duelAction(`/api/admin/duels/${duelId}/validate`, "POST");
+
+  // lock = true : lance le duel (ferme les paris) ; false : dé-lock (rouvre les paris)
+  const handleLockDuel = (duelId: number, lock: boolean) =>
+    duelAction(`/api/admin/duels/${duelId}/start`, lock ? "POST" : "DELETE");
+
+  const handleReportDuelResult = (duelId: number, challengerScore: number, opponentScore: number) =>
+    duelAction(
+      `/api/admin/duels/${duelId}/result`,
+      "PUT",
+      { challenger_score: challengerScore, opponent_score: opponentScore },
+      true
+    );
+
+  const handlePlaceDuelBet = (duelId: number, pickedPlayerId: number, amount: number) =>
+    duelAction(
+      `/api/duels/${duelId}/bets`,
+      "POST",
+      { picked_player_id: pickedPlayerId, amount },
+      true
+    );
+
+  const handleConfirmDuelAction = async () => {
+    const action = pendingDuelAction;
+    setPendingDuelAction(null);
+    if (action?.type === "cancel-result") {
+      await duelAction(`/api/admin/duels/${action.duel.id}/result`, "DELETE", undefined, true);
+    } else if (action?.type === "cancel-duel") {
+      await duelAction(`/api/duels/${action.duel.id}/cancel`, "POST", undefined, true);
+    }
+    setModal("duels");
+  };
+
+  const duelPlayers = (d?: Duel) =>
+    d
+      ? `${d.challenger.display_name || d.challenger.username} vs ${
+          d.opponent.display_name || d.opponent.username
+        }`
+      : "";
+
+  // Duels qui attendent une action de ma part (réponse, ou confirmation si admin)
+  const duelsToHandle = duels.filter(
+    (d) =>
+      (d.status === "pending" && d.opponent.id === user?.id) ||
+      (d.status === "accepted" && user?.is_admin)
+  ).length;
+
   const handleCancelScore = (pending: { tournamentId: number; matchCode: string } | null) =>
     withActionLock(async () => {
       if (!user?.is_admin || !pending) return;
@@ -665,6 +760,13 @@ export default function Home() {
                 onClick={() => {
                   loadTournamentsAndMatches(user);
                   setModal("signup");
+                }}
+              />
+              <MeleeButton
+                text={duelsToHandle ? `Duels (${duelsToHandle})` : "Duels"}
+                onClick={() => {
+                  loadDuels();
+                  setModal("duels");
                 }}
               />
             </div>
@@ -854,6 +956,48 @@ export default function Home() {
         onNo={() => {
           setPendingCancelScore(null);
           setModal("signup");
+        }}
+      />
+
+      <DuelsModal
+        open={modal === "duels"}
+        onClose={close}
+        duels={duels}
+        currentUserId={user?.id}
+        isAdmin={!!user?.is_admin}
+        balance={balance}
+        onChallenge={handleChallenge}
+        onRespond={handleRespondDuel}
+        onValidateDuel={handleValidateDuel}
+        onLockDuel={handleLockDuel}
+        onReportResult={handleReportDuelResult}
+        onPlaceBet={handlePlaceDuelBet}
+        onCancelResult={(duel: Duel) => {
+          setPendingDuelAction({ type: "cancel-result", duel });
+          setModal("confirm-duel-action");
+        }}
+        onCancelDuel={(duel: Duel) => {
+          setPendingDuelAction({ type: "cancel-duel", duel });
+          setModal("confirm-duel-action");
+        }}
+      />
+
+      <ConfirmModal
+        open={modal === "confirm-duel-action"}
+        question={
+          pendingDuelAction?.type === "cancel-result"
+            ? `Dévalider le duel ${duelPlayers(pendingDuelAction?.duel)} ?`
+            : `Annuler le duel ${duelPlayers(pendingDuelAction?.duel)} ?`
+        }
+        caption={
+          pendingDuelAction?.type === "cancel-result"
+            ? "Les gains déjà versés sont repris, les paris attendent le nouveau résultat."
+            : "Le duel est définitivement annulé et tous les paris sont remboursés."
+        }
+        onYes={handleConfirmDuelAction}
+        onNo={() => {
+          setPendingDuelAction(null);
+          setModal("duels");
         }}
       />
 

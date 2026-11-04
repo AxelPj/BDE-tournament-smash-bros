@@ -5,7 +5,7 @@ import pytest
 from app.duels import service as duels
 from app.shop import service as shop
 from app.tournaments import service as tournaments
-from app.users.service import create_user
+from app.users.service import create_user, get_user_by_username
 from tests.test_scores import setup_tournament
 from tests.test_tournaments_api import PASSWORD, login
 
@@ -129,12 +129,16 @@ def test_bets_mode(ctx):
     assert ctx["mario"].post(f"/api/duels/{ctx['duel_id']}/bets", json=body).status_code == 409
 
 
-def test_gages_mode(ctx):
-    url = f"/api/duels/{ctx['duel_id']}/gages"
-    body = {"inventory_item_id": ctx["item_id"], "target_id": ctx["luigi_id"]}
+def test_gages_mode(ctx, db):
+    t = ctx["tournament"]  # 2 joueurs : W1-1 = p0 contre p1
+    p0, p1 = get_user_by_username(db, "p0"), get_user_by_username(db, "p1")
+    item = shop.purchase(db, p0.id, ctx["gage_id"])
+    p0_client = login("p0")
+    url = f"/api/tournaments/{t.id}/matches/W1-1/gages"
+    body = {"inventory_item_id": item.id, "target_id": p1.id}
     disable(ctx, "gages")
 
-    assert ctx["mario"].post(url, json=body).status_code == 403
+    assert p0_client.post(url, json=body).status_code == 403
 
     enable(ctx, "gages")
-    assert ctx["mario"].post(url, json=body).status_code == 201
+    assert p0_client.post(url, json=body).status_code == 201
