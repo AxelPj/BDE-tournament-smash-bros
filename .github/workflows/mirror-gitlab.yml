@@ -21,7 +21,7 @@ jobs:
   mirror:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -30,9 +30,14 @@ jobs:
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
           GITLAB_REPO: ${{ vars.GITLAB_REPO }}
         run: |
+          # Retire espaces / retours à la ligne collés par erreur, et un éventuel https://
+          GITLAB_TOKEN="$(printf '%s' "$GITLAB_TOKEN" | tr -d '[:space:]')"
+          GITLAB_REPO="$(printf '%s' "$GITLAB_REPO" | tr -d '[:space:]')"
+          GITLAB_REPO="${GITLAB_REPO#https://}"
           if [ -z "$GITLAB_TOKEN" ] || [ -z "$GITLAB_REPO" ]; then
             echo "::error::GITLAB_TOKEN (secret) ou GITLAB_REPO (variable) non configuré"
             exit 1
           fi
+          echo "Push de ${GITHUB_REF} vers https://${GITLAB_REPO}"
           git remote add gitlab "https://oauth2:${GITLAB_TOKEN}@${GITLAB_REPO}"
           git push gitlab "HEAD:${GITHUB_REF}"

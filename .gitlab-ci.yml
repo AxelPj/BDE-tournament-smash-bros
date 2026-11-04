@@ -80,7 +80,8 @@ frontend_typecheck:
   extends: .frontend
   stage: lint
   script:
-    - npx tsc --noEmit
+    # next typegen génère les types globaux (LayoutProps, PageProps...) absents d'un clone neuf
+    - npm run typecheck
 
 compose_config:
   stage: lint
