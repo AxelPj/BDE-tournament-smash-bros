@@ -8,6 +8,7 @@ import { fmt } from "../../lib/utils";
  * Affiche tous les joueurs classés par victoires puis solde de Tilts,
  * avec la fiche détaillée du joueur sélectionné dans le panneau de droite.
  */
+/** @param {Record<string, any>} props */
 export default function LeaderboardModal({
   open,
   onClose,

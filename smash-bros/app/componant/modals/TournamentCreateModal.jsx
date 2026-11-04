@@ -17,6 +17,7 @@ const RULES = [
 ];
 const PLAYERS = [8, 16, 32, 64];
 
+/** @param {Record<string, any>} props */
 export default function TournamentCreateModal({
   onPublish,
   onOpenShopAdmin,

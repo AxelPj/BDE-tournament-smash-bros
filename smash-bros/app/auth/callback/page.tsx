@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
 function CallbackHandler() {
@@ -60,9 +61,9 @@ function CallbackHandler() {
       {error ? (
         <div style={{ textAlign: "center" }}>
           <p style={{ color: "#ff5555", marginBottom: "1rem" }}>{error}</p>
-          <a href="/" style={{ color: "#ffd000", textDecoration: "underline" }}>
+          <Link href="/" style={{ color: "#ffd000", textDecoration: "underline" }}>
             Retour à l&apos;accueil
-          </a>
+          </Link>
         </div>
       ) : (
         <p>Connexion avec 42 en cours...</p>

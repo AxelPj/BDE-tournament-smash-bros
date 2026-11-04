@@ -29,6 +29,7 @@ function blip(f1, f2, d, vol = 0.05) {
   } catch (e) {}
 }
 
+/** @param {Record<string, any>} props */
 export default function MeleeButton({
   text,
   href,

@@ -26,7 +26,10 @@ def db(engine):
 def client(db):
     """Client HTTP de test branché sur la base temporaire. Il garde les cookies
     entre deux requêtes, comme un navigateur."""
-    app.dependency_overrides[get_db] = lambda: db
+    def override_get_db():
+        yield db
+
+    app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as test_client:
         yield test_client
     app.dependency_overrides.clear()

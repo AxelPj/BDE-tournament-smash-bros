@@ -7,6 +7,7 @@ import { fmt } from "../../lib/utils";
  * Modale Admin : Voir l'intégralité des joueurs, leurs stats, leur solde de Tilts,
  * et donner (ou retirer) des Tilts à un joueur, plusieurs joueurs, ou tous les inscrits d'un tournoi.
  */
+/** @param {Record<string, any>} props */
 export default function AdminUsersModal({
   open,
   onClose,

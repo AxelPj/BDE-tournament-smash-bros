@@ -7,6 +7,7 @@ import { fmt } from "./ShopModal";
  * Inventaire : objets possédés (avec quantité). « Utiliser » ouvre le choix du combat.
  * Props : items [{ id, name, gage, gain, qty, image }], slots (9), onUse(item), onClose, open
  */
+/** @param {Record<string, any>} props */
 export default function InventoryModal({ items = [], slots = 9, onUse, onClose, open }) {
   const [sel, setSel] = useState(0);
   const it = items[sel];

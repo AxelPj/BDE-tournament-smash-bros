@@ -11,6 +11,7 @@ import "../css/SmashIntro.css";
  *  - onOpen          (func)    appelé au moment du dézoom
  *  - children                  contenu affiché en haut à droite après le dézoom (ex: <MeleeButton text="Connexion" />)
  */
+/** @param {Record<string, any>} props */
 export default function SmashIntro({
   webmSrc,
   mp4Src = "/smash-video.mp4",
@@ -113,7 +114,7 @@ export default function SmashIntro({
 
       {error && (
         <p className="smash-intro__error">
-          La vidéo n'a pas pu être chargée. Vérifie les chemins <b>{webmSrc}</b> et <b>{mp4Src}</b>.
+          La vidéo n&apos;a pas pu être chargée. Vérifie les chemins <b>{webmSrc}</b> et <b>{mp4Src}</b>.
         </p>
       )}
     </section>

@@ -3,7 +3,8 @@ import type { NextConfig } from "next";
 const backendOrigin = process.env.BACKEND_ORIGIN ?? "http://localhost:8000";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Image Docker de prod : serveur autonome dans .next/standalone
+  output: "standalone",
   async rewrites() {
     return [
       {

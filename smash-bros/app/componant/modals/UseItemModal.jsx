@@ -7,6 +7,7 @@ import { fmt } from "./ShopModal";
  * Choix du combat où utiliser un objet.
  * Props : item, matches [{ id, opponent, info, disabled }], onConfirm(item, match), onBack, onClose, open
  */
+/** @param {Record<string, any>} props */
 export default function UseItemModal({ item, matches = [], onConfirm, onBack, onClose, open }) {
   const first = matches.findIndex((x) => !x.disabled);
   const [sel, setSel] = useState(first < 0 ? null : first);

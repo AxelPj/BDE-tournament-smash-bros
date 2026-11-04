@@ -297,6 +297,7 @@ function groupByRound(matches) {
 /**
  * Consultation, compte à rebours, inscription et arbre(s) de tournoi avec photos des joueurs.
  */
+/** @param {Record<string, any>} props */
 export default function TournamentSignupModal({
   tournaments = [],
   shopItems = [],

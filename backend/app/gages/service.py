@@ -2,7 +2,7 @@
 
     owned ─(un joueur du match l'impose, avant le lancement)→ engaged
     engaged ─(retiré par son auteur avant le lancement, ou match annulé)→ owned
-    engaged ─(un admin valide : réalisé ou non)→ consumed
+    engaged ─(un admin valide : respecté ou non)→ consumed
 
 Récompense « objet validé » : chaque gage validé comme respecté rapporte à
 celui qui l'a utilisé (l'imposeur), quel que soit le vainqueur du match. Montant

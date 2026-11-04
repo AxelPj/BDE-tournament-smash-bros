@@ -10,6 +10,7 @@ import "../css/CharacterSelectScreen.css";
  */
 const W = 1280, H = 720;
 
+/** @param {Record<string, any>} props */
 export default function CharacterSelectScreen({
   characters = [],
   selectedId,
@@ -31,8 +32,10 @@ export default function CharacterSelectScreen({
     nameRef = useRef(null),
     loginRef = useRef(null);
   const st = useRef({ drag: false, gun: false, ptr: null, gunT: null });
-  st.current.drag = drag;
-  st.current.gun = gun;
+  useLayoutEffect(() => {
+    st.current.drag = drag;
+    st.current.gun = gun;
+  }, [drag, gun]);
   const A = (f) => `${assetsPath}/${f}`;
 
   useEffect(() => {

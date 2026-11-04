@@ -9,6 +9,7 @@ export { fmt };
  * Shop : grille d'objets-gages, détail de l'objet sélectionné à droite.
  * Props : items [{ id, name, gage, price, gain, image }], balance, onBuy(item), onClose, open
  */
+/** @param {Record<string, any>} props */
 export default function ShopModal({ items = [], balance = 0, isAdmin = false, onAdminShop, onBuy, onClose, open }) {
   const [sel, setSel] = useState(0);
   const it = items[sel];

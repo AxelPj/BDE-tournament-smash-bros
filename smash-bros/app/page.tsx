@@ -15,24 +15,25 @@ import CharacterSelectScreen from "./componant/modals/CharacterSelectScreen";
 import LeaderboardModal from "./componant/modals/LeaderboardModal";
 import AdminUsersModal from "./componant/modals/AdminUsersModal";
 import { apiJson, fmt, formatShortDate } from "./lib/utils";
-
-interface User {
-  id: number;
-  username: string;
-  display_name: string;
-  avatar_url?: string | null;
-  is_admin: boolean;
-  intra_id: number | null;
-  balance: number;
-}
-
-interface UserStats {
-  wins: number;
-  losses: number;
-  tournaments: number;
-  rank: number | null;
-  avatar_url?: string | null;
-}
+import type {
+  Duel,
+  Fighter,
+  Gage,
+  GagePayload,
+  InventoryEntry,
+  InventoryItem,
+  LeaderboardEntry,
+  Participant,
+  PlayableMatch,
+  RawTournament,
+  Settings,
+  ShopItem,
+  Sprite,
+  Tournament,
+  TournamentFormData,
+  User,
+  UserStats,
+} from "./lib/types";
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
@@ -47,17 +48,17 @@ export default function Home() {
     tournaments: 0,
     rank: null,
   });
-  const [shopItems, setShopItems] = useState<any[]>([]);
-  const [adminGages, setAdminGages] = useState<any[]>([]);
-  const [sprites, setSprites] = useState<any[]>([]);
-  const [fighters, setFighters] = useState<any[]>([]);
-  const [inventory, setInventory] = useState<any[]>([]);
-  const [leaderboard, setLeaderboard] = useState<any[]>([]);
-  const [tournaments, setTournaments] = useState<any[]>([]);
-  const [playableMatches, setPlayableMatches] = useState<any[]>([]);
-  const [usingItem, setUsingItem] = useState<any | null>(null);
-  const [pendingUnregister, setPendingUnregister] = useState<any | null>(null);
-  const [pendingDeleteTournament, setPendingDeleteTournament] = useState<any | null>(null);
+  const [shopItems, setShopItems] = useState<ShopItem[]>([]);
+  const [adminGages, setAdminGages] = useState<Gage[]>([]);
+  const [sprites, setSprites] = useState<Sprite[]>([]);
+  const [fighters, setFighters] = useState<Fighter[]>([]);
+  const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [playableMatches, setPlayableMatches] = useState<PlayableMatch[]>([]);
+  const [usingItem, setUsingItem] = useState<InventoryItem | null>(null);
+  const [pendingUnregister, setPendingUnregister] = useState<Tournament | null>(null);
+  const [pendingDeleteTournament, setPendingDeleteTournament] = useState<Tournament | null>(null);
   const [pendingCancelScore, setPendingCancelScore] = useState<{
     tournamentId: number;
     matchCode: string;
@@ -79,14 +80,14 @@ export default function Home() {
   const loadShopAndInventory = useCallback(async (loggedUser: User | null) => {
     try {
       const [gages, settings] = await Promise.all([
-        apiJson<any[]>("/api/shop/gages"),
-        apiJson<any>("/api/settings"),
+        apiJson<Gage[]>("/api/shop/gages"),
+        apiJson<Settings>("/api/settings"),
       ]);
       const gageGain = settings?.duel_gage_win_reward ?? 50;
 
       if (gages) {
         setShopItems(
-          gages.map((g: any) => ({
+          gages.map((g) => ({
             id: g.id,
             name: g.name,
             gage: g.description,
@@ -98,10 +99,12 @@ export default function Home() {
       }
 
       if (loggedUser) {
-        const rawInv = await apiJson<any[]>("/api/inventory?status=owned");
+        const rawInv = await apiJson<InventoryEntry[]>("/api/inventory?status=owned");
         if (rawInv) {
-          const validEntries = rawInv.filter((e) => e.gage);
-          const groupedByGageId = Map.groupBy(validEntries, (e) => e.gage.id as number);
+          const validEntries = rawInv.filter(
+            (e): e is InventoryEntry & { gage: Gage } => e.gage !== null
+          );
+          const groupedByGageId = Map.groupBy(validEntries, (e) => e.gage.id);
           const invList = Array.from(groupedByGageId.values()).map((entries) => {
             const g = entries[0].gage;
             return {
@@ -120,8 +123,8 @@ export default function Home() {
 
         if (loggedUser.is_admin) {
           const [admGages, spList] = await Promise.all([
-            apiJson<any[]>("/api/admin/gages"),
-            apiJson<any[]>("/api/shop/sprites"),
+            apiJson<Gage[]>("/api/admin/gages"),
+            apiJson<Sprite[]>("/api/shop/sprites"),
           ]);
           if (admGages) setAdminGages(admGages);
           if (spList) setSprites(spList);
@@ -134,7 +137,7 @@ export default function Home() {
 
   const loadLeaderboard = useCallback(async () => {
     try {
-      const data = await apiJson<any[]>("/api/users/leaderboard");
+      const data = await apiJson<LeaderboardEntry[]>("/api/users/leaderboard");
       if (data) setLeaderboard(data);
     } catch (err) {
       console.error("Erreur chargement classement :", err);
@@ -146,7 +149,7 @@ export default function Home() {
       const [meData, statsData, lbData] = await Promise.all([
         apiJson<User>("/api/auth/me"),
         apiJson<UserStats>("/api/users/me/stats"),
-        apiJson<any[]>("/api/users/leaderboard"),
+        apiJson<LeaderboardEntry[]>("/api/users/leaderboard"),
       ]);
       if (meData) {
         setUser(meData);
@@ -167,16 +170,16 @@ export default function Home() {
     try {
       // 1 seule requête HTTP au lieu de 1 + 2N requêtes (évite l'effet N+1 à 50 joueurs)
       const [rawTournaments, duels] = await Promise.all([
-        apiJson<any[]>("/api/tournaments?full=true"),
-        loggedUser ? apiJson<any[]>("/api/duels/mine") : Promise.resolve(null),
+        apiJson<RawTournament[]>("/api/tournaments?full=true"),
+        loggedUser ? apiJson<Duel[]>("/api/duels/mine") : Promise.resolve(null),
       ]);
       if (!rawTournaments) return;
 
-      const detailed = rawTournaments.map((detail: any) => {
+      const detailed = rawTournaments.map((detail): Tournament => {
         const fallbackDate = formatShortDate(detail.created_at);
         const rulesList =
           Array.isArray(detail.rules) && detail.rules.length > 0
-            ? detail.rules.map((r: any) =>
+            ? detail.rules.map((r) =>
                 typeof r === "string" ? r : r.value || `${r.label} : ${r.value}`
               )
             : ["1 contre 1", "Double Élimination", "3 vies · 7 min", "Objets : Off"];
@@ -193,10 +196,10 @@ export default function Home() {
       setTournaments(detailed);
 
       if (loggedUser) {
-        const userMatches: any[] = [];
+        const userMatches: PlayableMatch[] = [];
         for (const t of detailed) {
           const pMap = Object.fromEntries(
-            (t.participants || []).map((p: any) => [
+            (t.participants || []).map((p: Participant) => [
               p.user_id,
               p.display_name || p.username,
             ])
@@ -211,7 +214,7 @@ export default function Home() {
             ) {
               const oppId = m.player1_id === loggedUser.id ? m.player2_id : m.player1_id;
               const alreadyUsedByMe = (m.gages || []).some(
-                (g: any) => g.imposer_id === loggedUser.id && g.status !== "cancelled"
+                (g) => g.imposer_id === loggedUser.id && g.status !== "cancelled"
               );
               userMatches.push({
                 id: `t-${t.id}-${m.code}`,
@@ -253,7 +256,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    apiJson<any[]>("/fighters/catalog.json")
+    apiJson<Fighter[]>("/fighters/catalog.json")
       .then((data) => setFighters(Array.isArray(data) ? data : []))
       .catch(() => {});
 
@@ -325,7 +328,7 @@ export default function Home() {
     }
   };
 
-  const handleBuy = (item: any) =>
+  const handleBuy = (item: ShopItem) =>
     withActionLock(async () => {
       if (!user) return;
       const ok = await apiJson(`/api/shop/gages/${item.id}/purchase`, {
@@ -336,7 +339,7 @@ export default function Home() {
       }
     });
 
-  const handleSaveGage = (gageId: number, payload: any) =>
+  const handleSaveGage = (gageId: number, payload: GagePayload) =>
     withActionLock(async () => {
       if (!user) return;
       const ok = await apiJson(`/api/admin/gages/${gageId}`, {
@@ -348,7 +351,7 @@ export default function Home() {
       }
     });
 
-  const handleCreateGage = (payload: any) =>
+  const handleCreateGage = (payload: GagePayload) =>
     withActionLock(async () => {
       if (!user) return null;
       const created = await apiJson("/api/admin/gages", {
@@ -374,7 +377,7 @@ export default function Home() {
       }
     });
 
-  const handleEquip = (item: any, match: any) =>
+  const handleEquip = (item: InventoryItem | null, match: PlayableMatch | null) =>
     withActionLock(async () => {
       if (!user || !item || !match || match.disabled) return;
       const inventoryItemId = item.inventoryItemIds?.[0];
@@ -402,7 +405,7 @@ export default function Home() {
       }
     });
 
-  const handlePublishTournament = (data: any) =>
+  const handlePublishTournament = (data: TournamentFormData) =>
     withActionLock(async () => {
       if (!user) return;
       const dateLabel = data.date
@@ -438,7 +441,7 @@ export default function Home() {
       }
     });
 
-  const handleSignupTournament = (t: any) =>
+  const handleSignupTournament = (t: Tournament | null) =>
     withActionLock(async () => {
       if (!user || !t) return;
       const ok = await apiJson(`/api/tournaments/${t.id}/register`, {
@@ -449,7 +452,7 @@ export default function Home() {
       }
     });
 
-  const handleUnregisterTournament = (t: any) =>
+  const handleUnregisterTournament = (t: Tournament | null) =>
     withActionLock(async () => {
       if (!user || !t) return;
       const ok = await apiJson(`/api/tournaments/${t.id}/register`, {
@@ -462,7 +465,7 @@ export default function Home() {
       }
     });
 
-  const handleDeleteTournament = (t: any) =>
+  const handleDeleteTournament = (t: Tournament | null) =>
     withActionLock(async () => {
       if (!user?.is_admin || !t) return;
       const ok = await apiJson(`/api/tournaments/${t.id}`, {
@@ -479,7 +482,7 @@ export default function Home() {
       }
     });
 
-  const handleGenerateBracket = (t: any) =>
+  const handleGenerateBracket = (t: Tournament | null) =>
     withActionLock(async () => {
       if (!user || !t) return;
       const ok = await apiJson(`/api/tournaments/${t.id}/generate`, {
@@ -490,7 +493,7 @@ export default function Home() {
       }
     });
 
-  const handleAddBot = (t: any) =>
+  const handleAddBot = (t: Tournament | null) =>
     withActionLock(async () => {
       if (!user || !t) return;
       const ok = await apiJson(`/api/tournaments/${t.id}/bots`, {
@@ -720,7 +723,7 @@ export default function Home() {
       <InventoryModal
         open={modal === "inv"}
         items={inventory}
-        onUse={(it: any) => {
+        onUse={(it: InventoryItem) => {
           setUsingItem(it);
           loadTournamentsAndMatches(user);
           setModal("use");
@@ -744,7 +747,7 @@ export default function Home() {
         currentUserId={user?.id}
         isAdmin={!!user?.is_admin}
         onSignup={handleSignupTournament}
-        onUnregister={(t: any) => {
+        onUnregister={(t: Tournament) => {
           setPendingUnregister(t);
           setModal("confirm");
         }}
@@ -759,7 +762,7 @@ export default function Home() {
         onStartMatch={handleStartMatch}
         balance={balance}
         onValidateGage={handleValidateGage}
-        onDeleteTournament={(t: any) => {
+        onDeleteTournament={(t: Tournament) => {
           setPendingDeleteTournament(t);
           setModal("confirm-delete-tournament");
         }}
@@ -780,7 +783,7 @@ export default function Home() {
         open={modal === "create"}
         tournaments={tournaments}
         onClose={close}
-        onDeleteTournament={(t: any) => {
+        onDeleteTournament={(t: Tournament) => {
           setPendingDeleteTournament(t);
           setModal("confirm-delete-tournament");
         }}
@@ -869,7 +872,7 @@ export default function Home() {
             stats.avatar_url ||
             user?.avatar_url ||
             (user?.username ? `https://cdn.intra.42.fr/users/${user.username}.jpg` : undefined),
-          avatarColor: fighterColorByImage.get(stats.avatar_url || user?.avatar_url),
+          avatarColor: fighterColorByImage.get(stats.avatar_url || user?.avatar_url || ""),
           wins: stats.wins,
           losses: stats.losses,
           tournaments: stats.tournaments,
@@ -884,7 +887,7 @@ export default function Home() {
         selectedId={stats.avatar_url || user?.avatar_url}
         login={user?.username ?? "player"}
         assetsPath="/smash"
-        onSelect={async (char: any) => {
+        onSelect={async (char: Fighter | null) => {
           if (char?.image) {
             const res = await fetch("/api/users/me/avatar", {
               method: "PATCH",

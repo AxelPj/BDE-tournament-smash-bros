@@ -38,7 +38,7 @@ uv run uvicorn app.main:app --reload
 ## Créer ou promouvoir un administrateur
 
 ```bash
-uv run python -m app.cli create-admin <login_42> [--display-name "Nom affiché"]
+docker compose exec backend python -m app.cli create-admin ton_login_42
 ```
 
 Promeut un étudiant déjà connecté en administrateur, ou pré-crée le compte admin (qui sera automatiquement rattaché à son `intra_id` lors de sa première connexion via l'API 42).

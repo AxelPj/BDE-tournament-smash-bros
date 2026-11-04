@@ -14,7 +14,7 @@ PASSWORD = None
 
 def login(username):
     """Nouveau client HTTP connecté avec une session en base."""
-    db = app.dependency_overrides[get_db]()  # la fixture `client` renvoie la Session du test
+    db = next(app.dependency_overrides[get_db]())  # la fixture `client` fournit la Session du test
     user = get_user_by_username(db, username)
     assert user is not None, f"User {username} introuvable en base de test"
     token = create_session(db, user, timedelta(days=1))

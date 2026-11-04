@@ -131,6 +131,16 @@ def test_validation_allowed_before_start(db, duel_setup):
     assert item.used_at is not None
 
 
+def test_validation_of_withdrawn_gage_is_refused(db, duel_setup):
+    duel, admin, mario, luigi = duel_setup
+    (item,) = give_gages(db, mario)
+    use = gages.impose_on_duel(db, mario, duel, item.id, luigi.id)
+    gages.withdraw(db, use, mario)
+
+    with pytest.raises(gages.GageStateError):
+        gages.validate(db, use, admin, completed=True)
+
+
 def test_validated_gage_rewards_its_user_whoever_wins(db, duel_setup):
     duel, admin, mario, luigi = duel_setup
     item1, item2 = give_gages(db, mario, 2)
@@ -182,6 +192,9 @@ def test_reward_follows_validation_not_result(db, duel_setup):
 
     gages.validate(db, use, admin, completed=False)  # correction de la validation
     assert balance(db, mario.id) == 0
+
+    gages.validate(db, use, admin, completed=True)
+    assert balance(db, mario.id) == 50
 
 
 def test_cancelled_duel_returns_engaged_gages(db, duel_setup):

@@ -9,6 +9,7 @@ import { fmt } from "./ShopModal";
  * - Modifier leur sprite (parmi les 87 sprites officiels Smash Bros), nom, définition (gage) et prix
  * - Créer un nouvel objet ou archiver un objet existant
  */
+/** @param {Record<string, any>} props */
 export default function ShopAdminModal({
   open,
   onClose,
@@ -262,7 +263,7 @@ export default function ShopAdminModal({
         <Sep />
 
         <label className="mm-fieldwrap">
-          <span className="mm-ptag">Nom de l'objet</span>
+          <span className="mm-ptag">Nom de l&apos;objet</span>
           <input
             className="mm-field"
             style={{ fontSize: "1.6cqw", padding: ".6cqw .8cqw" }}

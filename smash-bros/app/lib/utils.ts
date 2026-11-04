@@ -18,7 +18,7 @@ export const formatShortDate = (isoOrDate: string | Date): string => {
   return Number.isNaN(d.getTime()) ? "" : FR_SHORT_DATE.format(d);
 };
 
-export async function apiJson<T = any>(
+export async function apiJson<T = unknown>(
   url: string,
   init?: RequestInit
 ): Promise<T | null> {

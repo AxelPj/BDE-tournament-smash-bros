@@ -7,6 +7,7 @@ import { fmt } from "./ShopModal";
  * Props : player { login, campus, avatar, wins, losses, tournaments, rank, balance }, onClose, open
  * Le taux de victoire est calculé et affiché façon « pourcentage de dégâts ».
  */
+/** @param {Record<string, any>} props */
 export default function ProfileModal({ player: p, onAvatarClick, onOpenInventory, onClose, open }) {
   if (!p) return null;
   const total = (p.wins || 0) + (p.losses || 0);
