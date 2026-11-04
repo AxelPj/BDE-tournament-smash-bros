@@ -17,8 +17,8 @@ export default function ShopModal({ items = [], balance = 0, isAdmin = false, on
   return (
     <MeleeFrame open={open} onClose={onClose} title="Shop" sideLabel="Objet" caption={`Solde : ${fmt(balance)} Tilts`}>
       <div className="mm-main">
-        <div className="mm-grid">
-          {items.slice(0, 6).map((o, i) => (
+        <div className="mm-grid mm-shop-grid">
+          {items.map((o, i) => (
             <button key={o.id ?? i} className={`mm-tile${i === sel ? " mm-tile--on" : ""}`} onClick={() => setSel(i)}>
               <ItemImage src={o.image} alt={o.name} selected={i === sel} />
               <span className="mm-tile-name">{o.name}</span>

@@ -103,6 +103,12 @@
 
 /* Grille d'objets */
 .mm-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: calc(.9 * var(--u)); }
+.mm-shop-grid {
+  max-height: calc(34 * var(--u));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: calc(.3 * var(--u));
+}
 .mm-tile {
   position: relative; display: flex; flex-direction: column; gap: calc(.45 * var(--u)); padding: calc(.65 * var(--u)); border-radius: calc(.9 * var(--u)); cursor: pointer; text-align: left;
   background: rgba(20, 24, 80, .35); border: calc(.25 * var(--u)) solid transparent; font-family: inherit; color: #fff;
