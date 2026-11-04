@@ -84,7 +84,13 @@ def logout(request: Request, response: Response, db: Session = Depends(get_db)):
     token = request.cookies.get(settings.session_cookie_name)
     if token:
         service.delete_session(db, token)
-    response.delete_cookie(settings.session_cookie_name)
+    # Mêmes options qu'à la création, sinon le navigateur peut garder le cookie (HTTPS).
+    response.delete_cookie(
+        settings.session_cookie_name,
+        httponly=True,
+        secure=settings.cookie_secure,
+        samesite="lax",
+    )
 
 
 @router.get("/me", response_model=UserRead)

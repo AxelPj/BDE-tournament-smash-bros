@@ -83,7 +83,8 @@ def _impose(
 
 
 def impose_on_duel(db: Session, user: User, duel: Duel, item_id: int, target_id: int) -> GageUse:
-    return _impose(db, user, duel_outcome(duel), item_id, target_id, duel_id=duel.id)
+    """Les objets sont interdits sur les duels (seulement sur les matchs de tournoi)."""
+    raise GageStateError("Aucun objet ne peut être utilisé sur un duel")
 
 
 def impose_on_match(

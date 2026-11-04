@@ -121,12 +121,27 @@ export interface DuelUser {
   display_name?: string | null;
 }
 
+export type DuelStatus =
+  | "pending"
+  | "accepted"
+  | "refused"
+  | "validated"
+  | "in_progress"
+  | "completed"
+  | "cancelled";
+
 export interface Duel {
   id: number;
-  status: string;
-  stake: number;
+  status: DuelStatus;
   challenger: DuelUser;
   opponent: DuelUser;
+  challenger_score: number | null;
+  opponent_score: number | null;
+  winner_id: number | null;
+  created_at: string;
+  started_at: string | null;
+  completed_at: string | null;
+  betting_open: boolean;
 }
 
 /** Match (tournoi ou duel) sur lequel un objet de l'inventaire peut être équipé */
