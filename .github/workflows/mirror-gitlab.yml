@@ -1,0 +1,38 @@
+# Recopie chaque push GitHub sur GitLab, ce qui déclenche la pipeline .gitlab-ci.yml
+# (lint -> tests -> build -> déploiement VPS sur main).
+#
+# À configurer dans GitHub (Settings > Secrets and variables > Actions) :
+#   Secret   GITLAB_TOKEN : Project Access Token GitLab, rôle Maintainer, scope write_repository
+#   Variable GITLAB_REPO  : chemin du dépôt sans https://, ex : gitlab.com/<user>/BDE-tournament-smash-bros.git
+
+name: Miroir vers GitLab
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["**"]
+
+# Un seul miroir à la fois par ref, dans l'ordre des pushs
+concurrency:
+  group: mirror-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push sur GitLab
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+          GITLAB_REPO: ${{ vars.GITLAB_REPO }}
+        run: |
+          if [ -z "$GITLAB_TOKEN" ] || [ -z "$GITLAB_REPO" ]; then
+            echo "::error::GITLAB_TOKEN (secret) ou GITLAB_REPO (variable) non configuré"
+            exit 1
+          fi
+          git remote add gitlab "https://oauth2:${GITLAB_TOKEN}@${GITLAB_REPO}"
+          git push gitlab "HEAD:${GITHUB_REF}"
