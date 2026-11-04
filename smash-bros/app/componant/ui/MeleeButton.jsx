@@ -72,7 +72,7 @@ export default function MeleeButton({
         ...(height
           ? {
               "--h-base": `${height}px`,
-              "--h-cqw": `${(height * 0.1).toFixed(2)}cqw`,
+              "--h-cqw": `calc(${(height * 0.1).toFixed(2)} * var(--u, 1cqw))`,
               "--h": `${height}px`,
             }
           : {}),

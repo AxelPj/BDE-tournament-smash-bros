@@ -4,6 +4,8 @@ import "../css/melee.css";
 const F = "M246 155 A30 30 0 0 1 276 125 L600 125 L650 75 L1080 75 A30 30 0 0 1 1110 105 L1110 626 A30 30 0 0 1 1080 656 L276 656 A30 30 0 0 1 246 626 Z";
 const TAB = "M600 125 L690 125 L740 75 L650 75 Z";
 const LIGHT = "#9aa0ff", DARK = "#3a42e6";
+// Même condition que le @media "feuille plein écran" de melee.css
+export const SHEET_QUERY = "(max-width: 760px), (max-height: 520px)";
 
 /**
  * Cadre commun à toutes les modales.
@@ -35,7 +37,10 @@ export default function MeleeFrame({ title, sideLabel, caption, open = true, ful
     const fit = () => {
       const box = capBoxRef.current;
       const txt = capTextRef.current;
-      if (box && txt) {
+      // Téléphone : taille fixe, le texte passe à la ligne (voir melee.css)
+      if (box && txt && window.matchMedia(SHEET_QUERY).matches) {
+        txt.style.fontSize = "15px";
+      } else if (box && txt) {
         const maxH = box.clientHeight || 48;
         const maxW = Math.max(40, box.clientWidth - Math.round(maxH * 0.6));
         let size = Math.min(fullScreen ? 26 : 32, Math.max(12, Math.floor(maxH * 0.54)));
@@ -50,8 +55,12 @@ export default function MeleeFrame({ title, sideLabel, caption, open = true, ful
       const tEl = titleRef.current;
       if (fBox && tEl) {
         const w = fBox.clientWidth || 800;
-        const maxTW = w * 0.36;
-        let tSize = Math.min(fullScreen ? 38 : 46, Math.max(14, Math.floor(w * (fullScreen ? 0.028 : 0.045))));
+        const sheet = window.matchMedia(SHEET_QUERY).matches;
+        // En feuille (téléphone) le titre a toute la largeur, moins le bouton fermer
+        const maxTW = sheet ? w - 72 : w * 0.36;
+        let tSize = sheet
+          ? 30
+          : Math.min(fullScreen ? 38 : 46, Math.max(14, Math.floor(w * (fullScreen ? 0.028 : 0.045))));
         tEl.style.fontSize = `${tSize}px`;
         while (tEl.scrollWidth > maxTW && tSize > 12) {
           tSize -= 1;
@@ -113,6 +122,11 @@ export default function MeleeFrame({ title, sideLabel, caption, open = true, ful
           )}
         </svg>
         <span ref={titleRef} className="mm-title">{title}</span>
+        {onClose && (
+          <button type="button" className="mm-close" aria-label="Fermer" onClick={onClose}>
+            ✕
+          </button>
+        )}
         {side && <span className="mm-sidelabel">{sideLabel}</span>}
         <div className={`mm-body${side ? " mm-body--side" : ""}`}>{children}</div>
         {caption && (

@@ -10,7 +10,7 @@ import MeleeButton from "../ui/MeleeButton";
 export default function ConfirmModal({ title = "Attention", question, caption, yesLabel = "Oui", noLabel = "Non", defaultNo = true, onYes, onNo, open }) {
   return (
     <MeleeFrame open={open} onClose={onNo} title={title} caption={caption}>
-      <div className="mm-center" style={{ gap: "3cqw" }}>
+      <div className="mm-center" style={{ gap: "calc(3 * var(--u))" }}>
         <span className="mm-big">{question}</span>
         <div className="mm-btns">
           <MeleeButton text={yesLabel} mirror selected={!defaultNo} height={56} onClick={onYes} />

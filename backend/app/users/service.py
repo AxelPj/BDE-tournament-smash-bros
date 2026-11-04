@@ -77,7 +77,10 @@ def get_or_create_42_user(
     ou l'inscrit automatiquement dans la table users."""
     user = get_user_by_intra_id(db, intra_id)
     if user is not None:
-        if avatar_url and user.avatar_url != avatar_url:
+        # La photo 42 suit l'intra, sauf si le joueur a choisi un combattant
+        # (chemin local /fighters/...) : son choix n'est pas écrasé à la reconnexion.
+        chose_fighter = (user.avatar_url or "").startswith("/fighters/")
+        if avatar_url and not chose_fighter and user.avatar_url != avatar_url:
             user.avatar_url = avatar_url
             db.commit()
             db.refresh(user)

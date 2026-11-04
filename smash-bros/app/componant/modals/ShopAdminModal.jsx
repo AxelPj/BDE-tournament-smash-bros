@@ -92,15 +92,15 @@ export default function ShopAdminModal({
         title="Choisir un Sprite"
         caption={`${sprites.length} objets officiels Super Smash Bros.`}
       >
-        <div className="mm-main" style={{ gap: "1.2cqw" }}>
+        <div className="mm-main" style={{ gap: "calc(1.2 * var(--u))" }}>
           <div
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(6, minmax(0, 1fr))",
-              gap: "1cqw",
-              maxHeight: "34cqw",
+              gap: "calc(1 * var(--u))",
+              maxHeight: "calc(34 * var(--u))",
               overflowY: "auto",
-              padding: ".6cqw",
+              padding: "calc(.6 * var(--u))",
             }}
           >
             {sprites.map((sp) => (
@@ -108,11 +108,11 @@ export default function ShopAdminModal({
                 key={sp.url + sp.name}
                 type="button"
                 className={`mm-tile${imageUrl === sp.url ? " mm-tile--on" : ""}`}
-                style={{ alignItems: "center", textAlign: "center", padding: ".6cqw" }}
+                style={{ alignItems: "center", textAlign: "center", padding: "calc(.6 * var(--u))" }}
                 onClick={() => handleSelectSprite(sp)}
               >
                 <ItemImage src={sp.url} alt={sp.name} selected={imageUrl === sp.url} />
-                <span className="mm-tile-name" style={{ fontSize: "1.15cqw" }}>
+                <span className="mm-tile-name" style={{ fontSize: "calc(1.15 * var(--u))" }}>
                   {sp.name}
                 </span>
               </button>
@@ -134,9 +134,9 @@ export default function ShopAdminModal({
       sideLabel="Éditer"
       caption={`${activeCount} / 6 objets actifs au Shop`}
     >
-      <div className="mm-main" style={{ gap: ".8cqw", padding: "0 1cqw 0 2cqw" }}>
+      <div className="mm-main" style={{ gap: "calc(.8 * var(--u))", padding: "0 calc(1 * var(--u)) 0 calc(2 * var(--u))" }}>
         {(onOpenTournamentCreate || onOpenAdminUsers) && (
-          <div className="mm-seg" style={{ marginBottom: ".2cqw" }}>
+          <div className="mm-seg" style={{ marginBottom: "calc(.2 * var(--u))" }}>
             {onOpenTournamentCreate && (
               <button type="button" onClick={onOpenTournamentCreate}>
                 Nouveau Tournoi
@@ -156,9 +156,9 @@ export default function ShopAdminModal({
         <div
           className="mm-grid"
           style={{
-            maxHeight: "25cqw",
+            maxHeight: "calc(25 * var(--u))",
             overflowY: "auto",
-            paddingRight: ".4cqw",
+            paddingRight: "calc(.4 * var(--u))",
           }}
         >
           {gages.map((g) => {
@@ -183,7 +183,7 @@ export default function ShopAdminModal({
                   style={{
                     background: g.is_available ? "#16a34a" : "#3f3f46",
                     borderColor: "#fff",
-                    fontSize: "1.05cqw",
+                    fontSize: "calc(1.05 * var(--u))",
                   }}
                 >
                   {g.is_available ? "SHOP" : "OFF"}
@@ -200,16 +200,16 @@ export default function ShopAdminModal({
               alignItems: "center",
               borderStyle: "dashed",
               borderColor: "#9aa0ff",
-              minHeight: "9cqw",
+              minHeight: "calc(9 * var(--u))",
             }}
             onClick={() => setSelId("new")}
           >
-            <span className="mm-big" style={{ fontSize: "3.2cqw" }}>+</span>
+            <span className="mm-big" style={{ fontSize: "calc(3.2 * var(--u))" }}>+</span>
             <span className="mm-tile-name">Nouvel objet</span>
           </button>
         </div>
 
-        <div className="mm-btns" style={{ gap: ".6cqw" }}>
+        <div className="mm-btns" style={{ gap: "calc(.6 * var(--u))" }}>
           <MeleeButton
             text="Enregistrer"
             selected={!!name.trim()}
@@ -229,15 +229,15 @@ export default function ShopAdminModal({
       </div>
 
       <Panel>
-        <div style={{ display: "flex", alignItems: "center", gap: "1cqw" }}>
-          <div style={{ width: "6.5cqw", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "calc(1 * var(--u))" }}>
+          <div style={{ width: "calc(6.5 * var(--u))", flexShrink: 0 }}>
             <ItemImage src={imageUrl} alt={name} selected />
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: ".5cqw", flex: 1 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "calc(.5 * var(--u))", flex: 1 }}>
             <button
               type="button"
               className="mm-field"
-              style={{ cursor: "pointer", fontSize: "1.4cqw", padding: ".6cqw .8cqw", textAlign: "center" }}
+              style={{ cursor: "pointer", fontSize: "calc(1.4 * var(--u))", padding: "calc(.6 * var(--u)) calc(.8 * var(--u))", textAlign: "center" }}
               onClick={() => setPickingSprite(true)}
             >
               Changer Sprite
@@ -247,8 +247,8 @@ export default function ShopAdminModal({
               className="mm-field"
               style={{
                 cursor: "pointer",
-                fontSize: "1.3cqw",
-                padding: ".5cqw .8cqw",
+                fontSize: "calc(1.3 * var(--u))",
+                padding: "calc(.5 * var(--u)) calc(.8 * var(--u))",
                 textAlign: "center",
                 borderColor: isAvailable ? "#ffd000" : "#3a42e6",
                 background: isAvailable ? "rgba(255, 208, 0, .22)" : "rgba(20, 24, 80, .55)",
@@ -266,7 +266,7 @@ export default function ShopAdminModal({
           <span className="mm-ptag">Nom de l&apos;objet</span>
           <input
             className="mm-field"
-            style={{ fontSize: "1.6cqw", padding: ".6cqw .8cqw" }}
+            style={{ fontSize: "calc(1.6 * var(--u))", padding: "calc(.6 * var(--u)) calc(.8 * var(--u))" }}
             value={name}
             placeholder="Ex: Carapace bleue"
             onChange={(e) => setName(e.target.value)}
@@ -278,14 +278,14 @@ export default function ShopAdminModal({
           <textarea
             className="mm-field"
             rows={2}
-            style={{ fontSize: "1.45cqw", padding: ".6cqw .8cqw", resize: "none", lineHeight: 1.2 }}
+            style={{ fontSize: "calc(1.45 * var(--u))", padding: "calc(.6 * var(--u)) calc(.8 * var(--u))", resize: "none", lineHeight: 1.2 }}
             value={description}
             placeholder="Ex: Jouer tout le match sans bouclier"
             onChange={(e) => setDescription(e.target.value)}
           />
         </label>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: ".6cqw" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "calc(.6 * var(--u))" }}>
           <label className="mm-fieldwrap">
             <span className="mm-ptag">Prix</span>
             <input
@@ -294,7 +294,7 @@ export default function ShopAdminModal({
               max={100000}
               step={50}
               className="mm-field"
-              style={{ fontSize: "1.5cqw", padding: ".5cqw .7cqw" }}
+              style={{ fontSize: "calc(1.5 * var(--u))", padding: "calc(.5 * var(--u)) calc(.7 * var(--u))" }}
               value={price}
               onChange={(e) => setPrice(Number(e.target.value))}
             />
@@ -309,7 +309,7 @@ export default function ShopAdminModal({
               max={100000}
               step={50}
               className="mm-field"
-              style={{ fontSize: "1.5cqw", padding: ".5cqw .7cqw" }}
+              style={{ fontSize: "calc(1.5 * var(--u))", padding: "calc(.5 * var(--u)) calc(.7 * var(--u))" }}
               value={reward}
               onChange={(e) => setReward(Number(e.target.value))}
             />

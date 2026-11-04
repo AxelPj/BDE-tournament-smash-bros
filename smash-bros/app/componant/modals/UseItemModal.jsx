@@ -22,11 +22,11 @@ export default function UseItemModal({ item, matches = [], onConfirm, onBack, on
   if (!item) return null;
   return (
     <MeleeFrame open={open} onClose={onClose} title="Utiliser" sideLabel="Équipé" caption="1 objet par combat">
-      <div className="mm-main" style={{ gap: "1cqw" }}>
+      <div className="mm-main" style={{ gap: "calc(1 * var(--u))" }}>
         <span className="mm-label">Choisis ton combat</span>
         <div className="mm-list">
           {matches.length === 0 ? (
-            <span className="mm-sub" style={{ padding: "1.4cqw 0" }}>
+            <span className="mm-sub" style={{ padding: "calc(1.4 * var(--u)) 0" }}>
               Aucun combat jouable en attente. Inscris-toi à un tournoi ou lance un duel !
             </span>
           ) : (
@@ -41,7 +41,7 @@ export default function UseItemModal({ item, matches = [], onConfirm, onBack, on
             ))
           )}
         </div>
-        <div className="mm-btns" style={{ marginTop: ".8cqw" }}>
+        <div className="mm-btns" style={{ marginTop: "calc(.8 * var(--u))" }}>
           <MeleeButton text="Retour" mirror height={46} onClick={onBack ?? onClose} />
           <MeleeButton text="Confirmer" selected={!!m} disabled={!m} height={46} onClick={() => m && onConfirm?.(item, m)} />
         </div>

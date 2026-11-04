@@ -3,672 +3,672 @@
     "id": "mario",
     "name": "Mario",
     "image": "/fighters/mario.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/mario/main.png",
-    "tile": "/fighters/tile/mario.png",
+    "portrait": "/fighters/portrait/mario.webp",
+    "tile": "/fighters/tile/mario.webp",
     "color": "#d04c4a"
   },
   {
     "id": "donkey_kong",
     "name": "Donkey Kong",
     "image": "/fighters/donkey_kong.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/donkey_kong/main.png",
-    "tile": "/fighters/tile/donkey_kong.png",
+    "portrait": "/fighters/portrait/donkey_kong.webp",
+    "tile": "/fighters/tile/donkey_kong.webp",
     "color": "#f9da4a"
   },
   {
     "id": "link",
     "name": "Link",
     "image": "/fighters/link.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/link/main.png",
-    "tile": "/fighters/tile/link.png",
+    "portrait": "/fighters/portrait/link.webp",
+    "tile": "/fighters/tile/link.webp",
     "color": "#1c94c3"
   },
   {
     "id": "samus",
     "name": "Samus",
     "image": "/fighters/samus.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/samus/main.png",
-    "tile": "/fighters/tile/samus.png",
+    "portrait": "/fighters/portrait/samus.webp",
+    "tile": "/fighters/tile/samus.webp",
     "color": "#353f56"
   },
   {
     "id": "dark_samus",
     "name": "Samus Sombre",
     "image": "/fighters/dark_samus.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/dark_samus/main.png",
-    "tile": "/fighters/tile/dark_samus.png",
+    "portrait": "/fighters/portrait/dark_samus.webp",
+    "tile": "/fighters/tile/dark_samus.webp",
     "color": "#353f56"
   },
   {
     "id": "yoshi",
     "name": "Yoshi",
     "image": "/fighters/yoshi.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/yoshi/main.png",
-    "tile": "/fighters/tile/yoshi.png",
+    "portrait": "/fighters/portrait/yoshi.webp",
+    "tile": "/fighters/tile/yoshi.webp",
     "color": "#83cd65"
   },
   {
     "id": "kirby",
     "name": "Kirby",
     "image": "/fighters/kirby.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/kirby/main.png",
-    "tile": "/fighters/tile/kirby.png",
+    "portrait": "/fighters/portrait/kirby.webp",
+    "tile": "/fighters/tile/kirby.webp",
     "color": "#f2c0c4"
   },
   {
     "id": "fox",
     "name": "Fox",
     "image": "/fighters/fox.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/fox/main.png",
-    "tile": "/fighters/tile/fox.png",
+    "portrait": "/fighters/portrait/fox.webp",
+    "tile": "/fighters/tile/fox.webp",
     "color": "#307cdf"
   },
   {
     "id": "pikachu",
     "name": "Pikachu",
     "image": "/fighters/pikachu.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/pikachu/main.png",
-    "tile": "/fighters/tile/pikachu.png",
+    "portrait": "/fighters/portrait/pikachu.webp",
+    "tile": "/fighters/tile/pikachu.webp",
     "color": "#fddd05"
   },
   {
     "id": "luigi",
     "name": "Luigi",
     "image": "/fighters/luigi.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/luigi/main.png",
-    "tile": "/fighters/tile/luigi.png",
+    "portrait": "/fighters/portrait/luigi.webp",
+    "tile": "/fighters/tile/luigi.webp",
     "color": "#5ea444"
   },
   {
     "id": "ness",
     "name": "Ness",
     "image": "/fighters/ness.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/ness/main.png",
-    "tile": "/fighters/tile/ness.png",
+    "portrait": "/fighters/portrait/ness.webp",
+    "tile": "/fighters/tile/ness.webp",
     "color": "#de413d"
   },
   {
     "id": "captain_falcon",
     "name": "Captain Falcon",
     "image": "/fighters/captain_falcon.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/captain_falcon/main.png",
-    "tile": "/fighters/tile/captain_falcon.png",
+    "portrait": "/fighters/portrait/captain_falcon.webp",
+    "tile": "/fighters/tile/captain_falcon.webp",
     "color": "#8e8adc"
   },
   {
     "id": "purin",
     "name": "Rondoudou",
     "image": "/fighters/purin.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/purin/main.png",
-    "tile": "/fighters/tile/purin.png",
+    "portrait": "/fighters/portrait/purin.webp",
+    "tile": "/fighters/tile/purin.webp",
     "color": "#f29bf6"
   },
   {
     "id": "peach",
     "name": "Peach",
     "image": "/fighters/peach.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/peach/main.png",
-    "tile": "/fighters/tile/peach.png",
+    "portrait": "/fighters/portrait/peach.webp",
+    "tile": "/fighters/tile/peach.webp",
     "color": "#f5c9f0"
   },
   {
     "id": "daisy",
     "name": "Daisy",
     "image": "/fighters/daisy.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/daisy/main.png",
-    "tile": "/fighters/tile/daisy.png",
+    "portrait": "/fighters/portrait/daisy.webp",
+    "tile": "/fighters/tile/daisy.webp",
     "color": "#f5bf2d"
   },
   {
     "id": "koopa",
     "name": "Bowser",
     "image": "/fighters/koopa.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/koopa/main.png",
-    "tile": "/fighters/tile/koopa.png",
+    "portrait": "/fighters/portrait/koopa.webp",
+    "tile": "/fighters/tile/koopa.webp",
     "color": "#44745e"
   },
   {
     "id": "ice_climber",
     "name": "Ice Climbers",
     "image": "/fighters/ice_climber.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/ice_climber/main.png",
-    "tile": "/fighters/tile/ice_climber.png",
+    "portrait": "/fighters/portrait/ice_climber.webp",
+    "tile": "/fighters/tile/ice_climber.webp",
     "color": "#a0cafe"
   },
   {
     "id": "sheik",
     "name": "Sheik",
     "image": "/fighters/sheik.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/sheik/main.png",
-    "tile": "/fighters/tile/sheik.png",
+    "portrait": "/fighters/portrait/sheik.webp",
+    "tile": "/fighters/tile/sheik.webp",
     "color": "#756fd0"
   },
   {
     "id": "zelda",
     "name": "Zelda",
     "image": "/fighters/zelda.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/zelda/main.png",
-    "tile": "/fighters/tile/zelda.png",
+    "portrait": "/fighters/portrait/zelda.webp",
+    "tile": "/fighters/tile/zelda.webp",
     "color": "#fdeaa4"
   },
   {
     "id": "dr_mario",
     "name": "Dr. Mario",
     "image": "/fighters/dr_mario.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/dr_mario/main.png",
-    "tile": "/fighters/tile/dr_mario.png",
+    "portrait": "/fighters/portrait/dr_mario.webp",
+    "tile": "/fighters/tile/dr_mario.webp",
     "color": "#e86c6d"
   },
   {
     "id": "pichu",
     "name": "Pichu",
     "image": "/fighters/pichu.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/pichu/main.png",
-    "tile": "/fighters/tile/pichu.png",
+    "portrait": "/fighters/portrait/pichu.webp",
+    "tile": "/fighters/tile/pichu.webp",
     "color": "#e5e333"
   },
   {
     "id": "falco",
     "name": "Falco",
     "image": "/fighters/falco.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/falco/main.png",
-    "tile": "/fighters/tile/falco.png",
+    "portrait": "/fighters/portrait/falco.webp",
+    "tile": "/fighters/tile/falco.webp",
     "color": "#69b0de"
   },
   {
     "id": "marth",
     "name": "Marth",
     "image": "/fighters/marth.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/marth/main.png",
-    "tile": "/fighters/tile/marth.png",
+    "portrait": "/fighters/portrait/marth.webp",
+    "tile": "/fighters/tile/marth.webp",
     "color": "#5da8c8"
   },
   {
     "id": "lucina",
     "name": "Lucina",
     "image": "/fighters/lucina.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/lucina/main.png",
-    "tile": "/fighters/tile/lucina.png",
+    "portrait": "/fighters/portrait/lucina.webp",
+    "tile": "/fighters/tile/lucina.webp",
     "color": "#7ea6c7"
   },
   {
     "id": "young_link",
     "name": "Link Enfant",
     "image": "/fighters/young_link.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/young_link/main.png",
-    "tile": "/fighters/tile/young_link.png",
+    "portrait": "/fighters/portrait/young_link.webp",
+    "tile": "/fighters/tile/young_link.webp",
     "color": "#a5d160"
   },
   {
     "id": "ganondorf",
     "name": "Ganondorf",
     "image": "/fighters/ganondorf.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/ganondorf/main.png",
-    "tile": "/fighters/tile/ganondorf.png",
+    "portrait": "/fighters/portrait/ganondorf.webp",
+    "tile": "/fighters/tile/ganondorf.webp",
     "color": "#7974a4"
   },
   {
     "id": "mewtwo",
     "name": "Mewtwo",
     "image": "/fighters/mewtwo.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/mewtwo/main.png",
-    "tile": "/fighters/tile/mewtwo.png",
+    "portrait": "/fighters/portrait/mewtwo.webp",
+    "tile": "/fighters/tile/mewtwo.webp",
     "color": "#927bc5"
   },
   {
     "id": "roy",
     "name": "Roy",
     "image": "/fighters/roy.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/roy/main.png",
-    "tile": "/fighters/tile/roy.png",
+    "portrait": "/fighters/portrait/roy.webp",
+    "tile": "/fighters/tile/roy.webp",
     "color": "#74b65b"
   },
   {
     "id": "chrom",
     "name": "Chrom",
     "image": "/fighters/chrom.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/chrom/main.png",
-    "tile": "/fighters/tile/chrom.png",
+    "portrait": "/fighters/portrait/chrom.webp",
+    "tile": "/fighters/tile/chrom.webp",
     "color": "#74b65b"
   },
   {
     "id": "mr_game_and_watch",
     "name": "Mr. Game & Watch",
     "image": "/fighters/mr_game_and_watch.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/mr_game_and_watch/main.png",
-    "tile": "/fighters/tile/mr_game_and_watch.png",
+    "portrait": "/fighters/portrait/mr_game_and_watch.webp",
+    "tile": "/fighters/tile/mr_game_and_watch.webp",
     "color": "#a4a190"
   },
   {
     "id": "meta_knight",
     "name": "Meta Knight",
     "image": "/fighters/meta_knight.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/meta_knight/main.png",
-    "tile": "/fighters/tile/meta_knight.png",
+    "portrait": "/fighters/portrait/meta_knight.webp",
+    "tile": "/fighters/tile/meta_knight.webp",
     "color": "#5367b0"
   },
   {
     "id": "pit",
     "name": "Pit",
     "image": "/fighters/pit.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/pit/main.png",
-    "tile": "/fighters/tile/pit.png",
+    "portrait": "/fighters/portrait/pit.webp",
+    "tile": "/fighters/tile/pit.webp",
     "color": "#acdafa"
   },
   {
     "id": "black_pit",
     "name": "Pit Maléfique",
     "image": "/fighters/black_pit.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/black_pit/main.png",
-    "tile": "/fighters/tile/black_pit.png",
+    "portrait": "/fighters/portrait/black_pit.webp",
+    "tile": "/fighters/tile/black_pit.webp",
     "color": "#875cbe"
   },
   {
     "id": "zero_suit_samus",
     "name": "Samus sans Armure",
     "image": "/fighters/zero_suit_samus.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/zero_suit_samus/main.png",
-    "tile": "/fighters/tile/zero_suit_samus.png",
+    "portrait": "/fighters/portrait/zero_suit_samus.webp",
+    "tile": "/fighters/tile/zero_suit_samus.webp",
     "color": "#205ba4"
   },
   {
     "id": "wario",
     "name": "Wario",
     "image": "/fighters/wario.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/wario/main.png",
-    "tile": "/fighters/tile/wario.png",
+    "portrait": "/fighters/portrait/wario.webp",
+    "tile": "/fighters/tile/wario.webp",
     "color": "#fde51b"
   },
   {
     "id": "snake",
     "name": "Snake",
     "image": "/fighters/snake.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/snake/main.png",
-    "tile": "/fighters/tile/snake.png",
+    "portrait": "/fighters/portrait/snake.webp",
+    "tile": "/fighters/tile/snake.webp",
     "color": "#658198"
   },
   {
     "id": "ike",
     "name": "Ike",
     "image": "/fighters/ike.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/ike/main.png",
-    "tile": "/fighters/tile/ike.png",
+    "portrait": "/fighters/portrait/ike.webp",
+    "tile": "/fighters/tile/ike.webp",
     "color": "#b64f3e"
   },
   {
     "id": "pokemon_trainer",
     "name": "Dresseur de Pokémon",
     "image": "/fighters/pokemon_trainer.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/pokemon_trainer/main.png",
-    "tile": "/fighters/tile/pokemon_trainer.png",
+    "portrait": "/fighters/portrait/pokemon_trainer.webp",
+    "tile": "/fighters/tile/pokemon_trainer.webp",
     "color": "#ffc004"
   },
   {
     "id": "diddy_kong",
     "name": "Diddy Kong",
     "image": "/fighters/diddy_kong.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/diddy_kong/main.png",
-    "tile": "/fighters/tile/diddy_kong.png",
+    "portrait": "/fighters/portrait/diddy_kong.webp",
+    "tile": "/fighters/tile/diddy_kong.webp",
     "color": "#e15951"
   },
   {
     "id": "lucas",
     "name": "Lucas",
     "image": "/fighters/lucas.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/lucas/main.png",
-    "tile": "/fighters/tile/lucas.png",
+    "portrait": "/fighters/portrait/lucas.webp",
+    "tile": "/fighters/tile/lucas.webp",
     "color": "#e06833"
   },
   {
     "id": "sonic",
     "name": "Sonic",
     "image": "/fighters/sonic.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/sonic/main.png",
-    "tile": "/fighters/tile/sonic.png",
+    "portrait": "/fighters/portrait/sonic.webp",
+    "tile": "/fighters/tile/sonic.webp",
     "color": "#659deb"
   },
   {
     "id": "dedede",
     "name": "Roi Dadidou",
     "image": "/fighters/dedede.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/dedede/main.png",
-    "tile": "/fighters/tile/dedede.png",
+    "portrait": "/fighters/portrait/dedede.webp",
+    "tile": "/fighters/tile/dedede.webp",
     "color": "#fce87b"
   },
   {
     "id": "pikmin_and_olimar",
     "name": "Olimar",
     "image": "/fighters/pikmin_and_olimar.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/pikmin_and_olimar/main.png",
-    "tile": "/fighters/tile/pikmin_and_olimar.png",
+    "portrait": "/fighters/portrait/pikmin_and_olimar.webp",
+    "tile": "/fighters/tile/pikmin_and_olimar.webp",
     "color": "#ccefb0"
   },
   {
     "id": "lucario",
     "name": "Lucario",
     "image": "/fighters/lucario.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/lucario/main.png",
-    "tile": "/fighters/tile/lucario.png",
+    "portrait": "/fighters/portrait/lucario.webp",
+    "tile": "/fighters/tile/lucario.webp",
     "color": "#b8e3fc"
   },
   {
     "id": "robot",
     "name": "R.O.B.",
     "image": "/fighters/robot.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/robot/main.png",
-    "tile": "/fighters/tile/robot.png",
+    "portrait": "/fighters/portrait/robot.webp",
+    "tile": "/fighters/tile/robot.webp",
     "color": "#b2b8bd"
   },
   {
     "id": "toon_link",
     "name": "Link Cartoon",
     "image": "/fighters/toon_link.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/toon_link/main.png",
-    "tile": "/fighters/tile/toon_link.png",
+    "portrait": "/fighters/portrait/toon_link.webp",
+    "tile": "/fighters/tile/toon_link.webp",
     "color": "#8ce689"
   },
   {
     "id": "wolf",
     "name": "Wolf",
     "image": "/fighters/wolf.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/wolf/main.png",
-    "tile": "/fighters/tile/wolf.png",
+    "portrait": "/fighters/portrait/wolf.webp",
+    "tile": "/fighters/tile/wolf.webp",
     "color": "#cccccc"
   },
   {
     "id": "murabito",
     "name": "Villageois",
     "image": "/fighters/murabito.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/murabito/main.png",
-    "tile": "/fighters/tile/murabito.png",
+    "portrait": "/fighters/portrait/murabito.webp",
+    "tile": "/fighters/tile/murabito.webp",
     "color": "#83a88e"
   },
   {
     "id": "rockman",
     "name": "Mega Man",
     "image": "/fighters/rockman.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/rockman/main.png",
-    "tile": "/fighters/tile/rockman.png",
+    "portrait": "/fighters/portrait/rockman.webp",
+    "tile": "/fighters/tile/rockman.webp",
     "color": "#86c1e0"
   },
   {
     "id": "wii_fit_trainer",
     "name": "Entraîneuse Wii Fit",
     "image": "/fighters/wii_fit_trainer.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/wii_fit_trainer/main.png",
-    "tile": "/fighters/tile/wii_fit_trainer.png",
+    "portrait": "/fighters/portrait/wii_fit_trainer.webp",
+    "tile": "/fighters/tile/wii_fit_trainer.webp",
     "color": "#99d481"
   },
   {
     "id": "rosetta_and_chiko",
     "name": "Harmonie & Luma",
     "image": "/fighters/rosetta_and_chiko.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/rosetta_and_chiko/main.png",
-    "tile": "/fighters/tile/rosetta_and_chiko.png",
+    "portrait": "/fighters/portrait/rosetta_and_chiko.webp",
+    "tile": "/fighters/tile/rosetta_and_chiko.webp",
     "color": "#98d5cd"
   },
   {
     "id": "little_mac",
     "name": "Little Mac",
     "image": "/fighters/little_mac.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/little_mac/main.png",
-    "tile": "/fighters/tile/little_mac.png",
+    "portrait": "/fighters/portrait/little_mac.webp",
+    "tile": "/fighters/tile/little_mac.webp",
     "color": "#5d8f72"
   },
   {
     "id": "gekkouga",
     "name": "Amphinobi",
     "image": "/fighters/gekkouga.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/gekkouga/main.png",
-    "tile": "/fighters/tile/gekkouga.png",
+    "portrait": "/fighters/portrait/gekkouga.webp",
+    "tile": "/fighters/tile/gekkouga.webp",
     "color": "#5673a5"
   },
   {
     "id": "mii_fighter",
     "name": "Combattant Mii",
     "image": "/fighters/mii_fighter.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/mii_fighter/main.png",
-    "tile": "/fighters/tile/mii_fighter.png",
+    "portrait": "/fighters/portrait/mii_fighter.webp",
+    "tile": "/fighters/tile/mii_fighter.webp",
     "color": "#5dc1e6"
   },
   {
     "id": "palutena",
     "name": "Palutena",
     "image": "/fighters/palutena.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/palutena/main.png",
-    "tile": "/fighters/tile/palutena.png",
+    "portrait": "/fighters/portrait/palutena.webp",
+    "tile": "/fighters/tile/palutena.webp",
     "color": "#91e5c1"
   },
   {
     "id": "pac_man",
     "name": "PAC-MAN",
     "image": "/fighters/pac_man.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/pac_man/main.png",
-    "tile": "/fighters/tile/pac_man.png",
+    "portrait": "/fighters/portrait/pac_man.webp",
+    "tile": "/fighters/tile/pac_man.webp",
     "color": "#fbe17f"
   },
   {
     "id": "reflet",
     "name": "Daraen",
     "image": "/fighters/reflet.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/reflet/main.png",
-    "tile": "/fighters/tile/reflet.png",
+    "portrait": "/fighters/portrait/reflet.webp",
+    "tile": "/fighters/tile/reflet.webp",
     "color": "#c387d9"
   },
   {
     "id": "shulk",
     "name": "Shulk",
     "image": "/fighters/shulk.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/shulk/main.png",
-    "tile": "/fighters/tile/shulk.png",
+    "portrait": "/fighters/portrait/shulk.webp",
+    "tile": "/fighters/tile/shulk.webp",
     "color": "#d5647a"
   },
   {
     "id": "koopa_jr",
     "name": "Bowser Jr.",
     "image": "/fighters/koopa_jr.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/koopa_jr/main.png",
-    "tile": "/fighters/tile/koopa_jr.png",
+    "portrait": "/fighters/portrait/koopa_jr.webp",
+    "tile": "/fighters/tile/koopa_jr.webp",
     "color": "#59bf38"
   },
   {
     "id": "duck_hunt",
     "name": "Duo Duck Hunt",
     "image": "/fighters/duck_hunt.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/duck_hunt/main.png",
-    "tile": "/fighters/tile/duck_hunt.png",
+    "portrait": "/fighters/portrait/duck_hunt.webp",
+    "tile": "/fighters/tile/duck_hunt.webp",
     "color": "#8c5d3a"
   },
   {
     "id": "ryu",
     "name": "Ryu",
     "image": "/fighters/ryu.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/ryu/main.png",
-    "tile": "/fighters/tile/ryu.png",
+    "portrait": "/fighters/portrait/ryu.webp",
+    "tile": "/fighters/tile/ryu.webp",
     "color": "#d0504d"
   },
   {
     "id": "ken",
     "name": "Ken",
     "image": "/fighters/ken.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/ken/main.png",
-    "tile": "/fighters/tile/ken.png",
+    "portrait": "/fighters/portrait/ken.webp",
+    "tile": "/fighters/tile/ken.webp",
     "color": "#d0504d"
   },
   {
     "id": "cloud",
     "name": "Cloud",
     "image": "/fighters/cloud.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/cloud/main.png",
-    "tile": "/fighters/tile/cloud.png",
+    "portrait": "/fighters/portrait/cloud.webp",
+    "tile": "/fighters/tile/cloud.webp",
     "color": "#419384"
   },
   {
     "id": "kamui",
     "name": "Corrin",
     "image": "/fighters/kamui.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/kamui/main.png",
-    "tile": "/fighters/tile/kamui.png",
+    "portrait": "/fighters/portrait/kamui.webp",
+    "tile": "/fighters/tile/kamui.webp",
     "color": "#63a7c0"
   },
   {
     "id": "bayonetta",
     "name": "Bayonetta",
     "image": "/fighters/bayonetta.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/bayonetta/main.png",
-    "tile": "/fighters/tile/bayonetta.png",
+    "portrait": "/fighters/portrait/bayonetta.webp",
+    "tile": "/fighters/tile/bayonetta.webp",
     "color": "#a5a1e0"
   },
   {
     "id": "inkling",
     "name": "Inkling",
     "image": "/fighters/inkling.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/inkling/main.png",
-    "tile": "/fighters/tile/inkling.png",
+    "portrait": "/fighters/portrait/inkling.webp",
+    "tile": "/fighters/tile/inkling.webp",
     "color": "#f8934b"
   },
   {
     "id": "ridley",
     "name": "Ridley",
     "image": "/fighters/ridley.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/ridley/main.png",
-    "tile": "/fighters/tile/ridley.png",
+    "portrait": "/fighters/portrait/ridley.webp",
+    "tile": "/fighters/tile/ridley.webp",
     "color": "#f8934b"
   },
   {
     "id": "simon",
     "name": "Simon",
     "image": "/fighters/simon.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/simon/main.png",
-    "tile": "/fighters/tile/simon.png",
+    "portrait": "/fighters/portrait/simon.webp",
+    "tile": "/fighters/tile/simon.webp",
     "color": "#f8934b"
   },
   {
     "id": "richter",
     "name": "Richter",
     "image": "/fighters/richter.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/richter/main.png",
-    "tile": "/fighters/tile/richter.png",
+    "portrait": "/fighters/portrait/richter.webp",
+    "tile": "/fighters/tile/richter.webp",
     "color": "#f8934b"
   },
   {
     "id": "king_k_rool",
     "name": "King K. Rool",
     "image": "/fighters/king_k_rool.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/king_k_rool/main.png",
-    "tile": "/fighters/tile/king_k_rool.png",
+    "portrait": "/fighters/portrait/king_k_rool.webp",
+    "tile": "/fighters/tile/king_k_rool.webp",
     "color": "#f8934b"
   },
   {
     "id": "shizue",
     "name": "Marie",
     "image": "/fighters/shizue.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/shizue/main.png",
-    "tile": "/fighters/tile/shizue.png",
+    "portrait": "/fighters/portrait/shizue.webp",
+    "tile": "/fighters/tile/shizue.webp",
     "color": "#f8934b"
   },
   {
     "id": "gaogaen",
     "name": "Félinferno",
     "image": "/fighters/gaogaen.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/gaogaen/main.png",
-    "tile": "/fighters/tile/gaogaen.png",
+    "portrait": "/fighters/portrait/gaogaen.webp",
+    "tile": "/fighters/tile/gaogaen.webp",
     "color": "#f8934b"
   },
   {
     "id": "packun_flower",
     "name": "Plante Piranha",
     "image": "/fighters/packun_flower.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/packun_flower/main.png",
-    "tile": "/fighters/tile/packun_flower.png",
+    "portrait": "/fighters/portrait/packun_flower.webp",
+    "tile": "/fighters/tile/packun_flower.webp",
     "color": "#f8934b"
   },
   {
     "id": "joker",
     "name": "Joker",
     "image": "/fighters/joker.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/joker/main.png",
-    "tile": "/fighters/tile/joker.png",
+    "portrait": "/fighters/portrait/joker.webp",
+    "tile": "/fighters/tile/joker.webp",
     "color": "#f8934b"
   },
   {
     "id": "dq_hero",
     "name": "Héros",
     "image": "/fighters/dq_hero.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/dq_hero/main.png",
-    "tile": "/fighters/tile/dq_hero.png",
+    "portrait": "/fighters/portrait/dq_hero.webp",
+    "tile": "/fighters/tile/dq_hero.webp",
     "color": "#f8934b"
   },
   {
     "id": "banjo_and_kazooie",
     "name": "Banjo & Kazooie",
     "image": "/fighters/banjo_and_kazooie.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/banjo_and_kazooie/main.png",
-    "tile": "/fighters/tile/banjo_and_kazooie.png",
+    "portrait": "/fighters/portrait/banjo_and_kazooie.webp",
+    "tile": "/fighters/tile/banjo_and_kazooie.webp",
     "color": "#f8934b"
   },
   {
     "id": "terry",
     "name": "Terry",
     "image": "/fighters/terry.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/terry/main.png",
-    "tile": "/fighters/tile/terry.png",
+    "portrait": "/fighters/portrait/terry.webp",
+    "tile": "/fighters/tile/terry.webp",
     "color": "#7db9ff"
   },
   {
     "id": "byleth",
     "name": "Byleth",
     "image": "/fighters/byleth.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/byleth/main.png",
-    "tile": "/fighters/tile/byleth.png",
+    "portrait": "/fighters/portrait/byleth.webp",
+    "tile": "/fighters/tile/byleth.webp",
     "color": "#96e6b4"
   },
   {
     "id": "minmin",
     "name": "Min Min",
     "image": "/fighters/minmin.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/minmin/main.png",
-    "tile": "/fighters/tile/minmin.png",
+    "portrait": "/fighters/portrait/minmin.webp",
+    "tile": "/fighters/tile/minmin.webp",
     "color": "#ffff5a"
   },
   {
     "id": "steve",
     "name": "Steve / Alex",
     "image": "/fighters/steve.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/steve/main.png",
-    "tile": "/fighters/tile/steve.png",
+    "portrait": "/fighters/portrait/steve.webp",
+    "tile": "/fighters/tile/steve.webp",
     "color": "#ffff5a"
   },
   {
     "id": "sephiroth",
     "name": "Séphiroth",
     "image": "/fighters/sephiroth.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/sephiroth/main.png",
-    "tile": "/fighters/tile/sephiroth.png",
+    "portrait": "/fighters/portrait/sephiroth.webp",
+    "tile": "/fighters/tile/sephiroth.webp",
     "color": "#374b4b"
   },
   {
     "id": "homura",
     "name": "Pyra / Mythra",
     "image": "/fighters/homura.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/homura/main.png",
-    "tile": "/fighters/tile/homura.png",
+    "portrait": "/fighters/portrait/homura.webp",
+    "tile": "/fighters/tile/homura.webp",
     "color": "#69e6c3"
   },
   {
     "id": "kazuya",
     "name": "Kazuya",
     "image": "/fighters/kazuya.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/kazuya/main.png",
-    "tile": "/fighters/tile/kazuya.png",
+    "portrait": "/fighters/portrait/kazuya.webp",
+    "tile": "/fighters/tile/kazuya.webp",
     "color": "#a52319"
   },
   {
     "id": "sora",
     "name": "Sora",
     "image": "/fighters/sora.png",
-    "portrait": "https://www.smashbros.com/assets_v2/img/fighter/sora/main.png",
-    "tile": "/fighters/tile/sora.png",
+    "portrait": "/fighters/portrait/sora.webp",
+    "tile": "/fighters/tile/sora.webp",
     "color": "#f9f9f9"
   }
 ]

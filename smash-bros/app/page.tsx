@@ -1055,7 +1055,8 @@ export default function Home() {
               body: JSON.stringify({ avatar_url: char.image }),
             });
             if (res.ok) {
-              await Promise.all([loadStats(), loadTournamentsAndMatches(user)]);
+              // Rafraîchit partout où l'avatar apparaît (profil, classement, tournois, duels)
+              await Promise.all([loadStats(), loadTournamentsAndMatches(user), loadDuels()]);
             }
           }
           setModal("profile");

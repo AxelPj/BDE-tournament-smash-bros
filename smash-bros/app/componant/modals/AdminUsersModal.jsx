@@ -161,7 +161,7 @@ export default function AdminUsersModal({
           : `${realPlayers.length} joueurs inscrits`
       }
     >
-      <div className="mm-main" style={{ gap: ".55cqw", padding: "0 1cqw 0 2cqw" }}>
+      <div className="mm-main" style={{ gap: "calc(.55 * var(--u))", padding: "0 calc(1 * var(--u)) 0 calc(2 * var(--u))" }}>
         <div className="mm-seg">
           {onOpenTournamentCreate && (
             <button type="button" onClick={onOpenTournamentCreate}>
@@ -178,15 +178,15 @@ export default function AdminUsersModal({
           </button>
         </div>
 
-        <div style={{ display: "flex", flexWrap: "wrap", gap: ".45cqw", alignItems: "center" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "calc(.45 * var(--u))", alignItems: "center" }}>
           <button
             type="button"
             className="mm-field"
             style={{
               width: "auto",
               cursor: "pointer",
-              fontSize: "1.15cqw",
-              padding: ".35cqw .7cqw",
+              fontSize: "calc(1.15 * var(--u))",
+              padding: "calc(.35 * var(--u)) calc(.7 * var(--u))",
               borderColor:
                 targetCount === realPlayers.length && realPlayers.length > 1 ? "#ffd000" : "#3a42e6",
               background:
@@ -219,8 +219,8 @@ export default function AdminUsersModal({
                   width: "auto",
                   cursor: tp.userIds.length > 0 ? "pointer" : "not-allowed",
                   opacity: tp.userIds.length > 0 ? 1 : 0.55,
-                  fontSize: "1.15cqw",
-                  padding: ".35cqw .7cqw",
+                  fontSize: "calc(1.15 * var(--u))",
+                  padding: "calc(.35 * var(--u)) calc(.7 * var(--u))",
                   borderColor: isAllSelected ? "#ffd000" : "#3a42e6",
                   background: isAllSelected
                     ? "rgba(255, 208, 0, .25)"
@@ -240,8 +240,8 @@ export default function AdminUsersModal({
               style={{
                 width: "auto",
                 cursor: "pointer",
-                fontSize: "1.15cqw",
-                padding: ".35cqw .7cqw",
+                fontSize: "calc(1.15 * var(--u))",
+                padding: "calc(.35 * var(--u)) calc(.7 * var(--u))",
                 borderColor: "#f87171",
               }}
               onClick={() => setSelectedIds([currentPlayer.id])}
@@ -253,7 +253,7 @@ export default function AdminUsersModal({
 
         <input
           className="mm-field"
-          style={{ padding: ".55cqw 1cqw", fontSize: "1.45cqw" }}
+          style={{ padding: "calc(.55 * var(--u)) calc(1 * var(--u))", fontSize: "calc(1.45 * var(--u))" }}
           placeholder="Rechercher un joueur (login ou pseudo)... (clic case [✓] pour multi-sélection)"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -262,9 +262,9 @@ export default function AdminUsersModal({
         <div
           className="mm-list"
           style={{
-            maxHeight: "20.5cqw",
+            maxHeight: "calc(20.5 * var(--u))",
             overflowY: "auto",
-            paddingRight: ".4cqw",
+            paddingRight: "calc(.4 * var(--u))",
           }}
         >
           {filtered.map((pl) => {
@@ -279,10 +279,10 @@ export default function AdminUsersModal({
               <div
                 key={pl.id ?? pl.login}
                 className={`mm-match${isSel ? " mm-on" : ""}`}
-                style={{ padding: ".55cqw .9cqw", cursor: "pointer" }}
+                style={{ padding: "calc(.55 * var(--u)) calc(.9 * var(--u))", cursor: "pointer" }}
                 onClick={() => togglePlayer(pl.id, false)}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: ".75cqw", minWidth: 0, flex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "calc(.75 * var(--u))", minWidth: 0, flex: 1 }}>
                   <button
                     type="button"
                     title="Ajouter / retirer de la sélection multiple"
@@ -291,14 +291,14 @@ export default function AdminUsersModal({
                       togglePlayer(pl.id, true);
                     }}
                     style={{
-                      width: "2cqw",
-                      height: "2cqw",
-                      borderRadius: ".35cqw",
+                      width: "calc(2 * var(--u))",
+                      height: "calc(2 * var(--u))",
+                      borderRadius: "calc(.35 * var(--u))",
                       border: `2px solid ${isSel ? "#ffd000" : "#5a63ff"}`,
                       background: isSel ? "#ffd000" : "rgba(10, 14, 50, .7)",
                       color: isSel ? "#080b2a" : "#fff",
                       fontWeight: 900,
-                      fontSize: "1.2cqw",
+                      fontSize: "calc(1.2 * var(--u))",
                       display: "inline-flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -312,14 +312,14 @@ export default function AdminUsersModal({
                     style={{
                       fontWeight: 900,
                       fontStyle: "italic",
-                      fontSize: "1.35cqw",
-                      minWidth: "2.3cqw",
+                      fontSize: "calc(1.35 * var(--u))",
+                      minWidth: "calc(2.3 * var(--u))",
                       color: "#9aa0ff",
                     }}
                   >
                     #{pl.rank}
                   </span>
-                  <span className="mm-bavatar" style={{ width: "2.5cqw", height: "2.5cqw" }}>
+                  <span className="mm-bavatar" style={{ width: "calc(2.5 * var(--u))", height: "calc(2.5 * var(--u))" }}>
                     {avatarSrc ? (
                       <img src={avatarSrc} alt={pl.display_name || pl.login} />
                     ) : (
@@ -330,18 +330,18 @@ export default function AdminUsersModal({
                     <div
                       className="mm-match-title"
                       style={{
-                        fontSize: "1.6cqw",
+                        fontSize: "calc(1.6 * var(--u))",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
                       }}
                     >
                       {pl.display_name || pl.login}{" "}
-                      <span style={{ fontSize: "1.15cqw", color: "#9aa0ff" }}>
+                      <span style={{ fontSize: "calc(1.15 * var(--u))", color: "#9aa0ff" }}>
                         (@{pl.login})
                       </span>
                     </div>
-                    <div className="mm-match-info" style={{ fontSize: "1.18cqw" }}>
+                    <div className="mm-match-info" style={{ fontSize: "calc(1.18 * var(--u))" }}>
                       {pl.wins}V · {pl.losses}D ({plRate}%) · {pl.tournaments} tournois ·{" "}
                       <b style={{ color: "#ffe58a" }}>{fmt(pl.balance)} Tilts</b>
                     </div>
@@ -353,7 +353,7 @@ export default function AdminUsersModal({
           })}
         </div>
 
-        <div className="mm-btns" style={{ gap: ".6cqw" }}>
+        <div className="mm-btns" style={{ gap: "calc(.6 * var(--u))" }}>
           <MeleeButton
             text={
               targetCount > 1
@@ -378,7 +378,7 @@ export default function AdminUsersModal({
               <span className="mm-ptag" style={{ color: "#ffe58a" }}>
                 Distribution groupée
               </span>
-              <span className="mm-pname" style={{ fontSize: "1.85cqw" }}>
+              <span className="mm-pname" style={{ fontSize: "calc(1.85 * var(--u))" }}>
                 {targetCount} joueurs ciblés
               </span>
               <PanelRow
@@ -400,7 +400,7 @@ export default function AdminUsersModal({
                 <span
                   className="mm-pname"
                   style={{
-                    fontSize: "1.9cqw",
+                    fontSize: "calc(1.9 * var(--u))",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
@@ -420,13 +420,13 @@ export default function AdminUsersModal({
           <Sep />
 
           <span className="mm-ptag">Donner / Retirer des Tilts</span>
-          <div className="mm-seg" style={{ gap: ".4cqw" }}>
+          <div className="mm-seg" style={{ gap: "calc(.4 * var(--u))" }}>
             {[50, 100, 500, -100].map((v) => (
               <button
                 key={v}
                 type="button"
                 className={numAmount === v ? "on" : ""}
-                style={{ fontSize: "1.25cqw", padding: ".45cqw 0" }}
+                style={{ fontSize: "calc(1.25 * var(--u))", padding: "calc(.45 * var(--u)) 0" }}
                 onClick={() => setAmount(v)}
               >
                 {v > 0 ? `+${v}` : v}
@@ -440,7 +440,7 @@ export default function AdminUsersModal({
               type="number"
               step={10}
               className="mm-field"
-              style={{ fontSize: "1.55cqw", padding: ".5cqw .7cqw" }}
+              style={{ fontSize: "calc(1.55 * var(--u))", padding: "calc(.5 * var(--u)) calc(.7 * var(--u))" }}
               value={amount}
               onChange={(e) => setAmount(Number(e.target.value))}
             />
@@ -450,7 +450,7 @@ export default function AdminUsersModal({
             <span className="mm-ptag">Motif</span>
             <input
               className="mm-field"
-              style={{ fontSize: "1.35cqw", padding: ".5cqw .7cqw" }}
+              style={{ fontSize: "calc(1.35 * var(--u))", padding: "calc(.5 * var(--u)) calc(.7 * var(--u))" }}
               value={reason}
               placeholder="Bonus Admin BDE"
               onChange={(e) => setReason(e.target.value)}
@@ -462,7 +462,7 @@ export default function AdminUsersModal({
               style={{
                 color: "#4ade80",
                 fontWeight: 800,
-                fontSize: "1.2cqw",
+                fontSize: "calc(1.2 * var(--u))",
                 textAlign: "center",
               }}
             >

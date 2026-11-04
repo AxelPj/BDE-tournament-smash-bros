@@ -14,7 +14,7 @@ export default function ProfileModal({ player: p, onAvatarClick, onOpenInventory
   const rate = total ? Math.round((p.wins / total) * 100) : 0;
   return (
     <MeleeFrame open={open} onClose={onClose} title="Profil" sideLabel="Stats" caption={p.rank ? `Rang #${p.rank}` : p.login}>
-      <div className="mm-main" style={{ gap: "1.8cqw" }}>
+      <div className="mm-main" style={{ gap: "calc(1.8 * var(--u))" }}>
         <div className="mm-split" style={{ paddingLeft: 0 }}>
           <button
             type="button"
@@ -39,17 +39,17 @@ export default function ProfileModal({ player: p, onAvatarClick, onOpenInventory
             )}
             <span className="mm-avatar-edit">✎ Choisir perso</span>
           </button>
-          <div style={{ display: "flex", flexDirection: "column", gap: ".8cqw", alignItems: "flex-start", minWidth: 0 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "calc(.8 * var(--u))", alignItems: "flex-start", minWidth: 0 }}>
             <span
               style={{
                 fontStyle: "italic",
                 fontWeight: 900,
                 fontSize:
                   (p.login || "").length > 14
-                    ? "2.6cqw"
+                    ? "calc(2.6 * var(--u))"
                     : (p.login || "").length > 10
-                    ? "3.3cqw"
-                    : "4.2cqw",
+                    ? "calc(3.3 * var(--u))"
+                    : "calc(4.2 * var(--u))",
                 lineHeight: 1.05,
                 maxWidth: "100%",
                 overflowWrap: "break-word",
@@ -60,7 +60,7 @@ export default function ProfileModal({ player: p, onAvatarClick, onOpenInventory
             <span
               style={{
                 fontWeight: 600,
-                fontSize: "1.8cqw",
+                fontSize: "calc(1.8 * var(--u))",
                 color: "#9aa0ff",
                 maxWidth: "100%",
                 overflow: "hidden",
@@ -70,8 +70,8 @@ export default function ProfileModal({ player: p, onAvatarClick, onOpenInventory
             >
               {p.campus}
             </span>
-            <div className="mm-percent" style={{ marginTop: "1.2cqw" }}><b>{rate}</b><i>%</i></div>
-            <span className="mm-label" style={{ fontSize: "1.4cqw", color: "#c3c6d6" }}>Taux de victoire</span>
+            <div className="mm-percent" style={{ marginTop: "calc(1.2 * var(--u))" }}><b>{rate}</b><i>%</i></div>
+            <span className="mm-label" style={{ fontSize: "calc(1.4 * var(--u))", color: "#c3c6d6" }}>Taux de victoire</span>
           </div>
         </div>
         <div className="mm-btns">

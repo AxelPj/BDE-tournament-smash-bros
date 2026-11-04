@@ -20,15 +20,15 @@ const ACTIVE = ["pending", "accepted", "validated", "in_progress"];
 const playerName = (p) => p?.display_name || p?.username || "?";
 
 const scoreInputStyle = {
-  width: "clamp(52px, 4.5cqw, 76px)",
-  padding: "clamp(4px, .35cqw, 8px) clamp(6px, .5cqw, 10px)",
-  fontSize: "clamp(13px, 1.25cqw, 20px)",
+  width: "clamp(52px, calc(4.5 * var(--u)), 76px)",
+  padding: "clamp(4px, calc(.35 * var(--u)), 8px) clamp(6px, calc(.5 * var(--u)), 10px)",
+  fontSize: "clamp(13px, calc(1.25 * var(--u)), 20px)",
 };
 
 const cardGridStyle = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fill, minmax(clamp(155px, 12.8cqw, 235px), 1fr))",
-  gap: "clamp(8px, .7cqw, 14px)",
+  gridTemplateColumns: "repeat(auto-fill, minmax(clamp(155px, calc(12.8 * var(--u)), 235px), 1fr))",
+  gap: "clamp(8px, calc(.7 * var(--u)), 14px)",
 };
 
 /**
@@ -192,7 +192,7 @@ export default function DuelsModal({
   const renderPanel = () => {
     if (!duel) return <span className="mm-ptext">Aucun duel pour l&apos;instant</span>;
     const waitingText = (text) => (
-      <span className="mm-ptext" style={{ fontSize: "clamp(12px, 1.2cqw, 18px)" }}>
+      <span className="mm-ptext" style={{ fontSize: "clamp(12px, calc(1.2 * var(--u)), 18px)" }}>
         {text}
       </span>
     );
@@ -200,7 +200,7 @@ export default function DuelsModal({
     return (
       <>
         <span className="mm-ptag">Duel #{duel.id} · {STATUS_LABELS[duel.status] || duel.status}</span>
-        <span className="mm-pname" style={{ fontSize: "clamp(14px, 1.45cqw, 24px)" }}>
+        <span className="mm-pname" style={{ fontSize: "clamp(14px, calc(1.45 * var(--u)), 24px)" }}>
           {playerName(duel.challenger)} vs {playerName(duel.opponent)}
         </span>
         <Sep />
@@ -209,7 +209,7 @@ export default function DuelsModal({
           (currentUserId === opponentId ? (
             <>
               {waitingText(`${playerName(duel.challenger)} te défie !`)}
-              <div style={{ display: "flex", flexDirection: "column", gap: ".4cqw" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "calc(.4 * var(--u))" }}>
                 <MeleeButton text="Accepter" selected height={38} onClick={() => onRespond?.(duel.id, true)} />
                 <MeleeButton text="Refuser" height={38} onClick={() => onRespond?.(duel.id, false)} />
               </div>
@@ -239,7 +239,7 @@ export default function DuelsModal({
           (isAdmin ? (
             <>
               <div className="mm-prow" style={{ alignItems: "center" }}>
-                <span style={{ fontSize: "clamp(12px, 1.15cqw, 18px)" }}>{nameWithBet(challengerId)}</span>
+                <span style={{ fontSize: "clamp(12px, calc(1.15 * var(--u)), 18px)" }}>{nameWithBet(challengerId)}</span>
                 <input
                   type="number"
                   min={0}
@@ -251,7 +251,7 @@ export default function DuelsModal({
                 />
               </div>
               <div className="mm-prow" style={{ alignItems: "center" }}>
-                <span style={{ fontSize: "clamp(12px, 1.15cqw, 18px)" }}>{nameWithBet(opponentId)}</span>
+                <span style={{ fontSize: "clamp(12px, calc(1.15 * var(--u)), 18px)" }}>{nameWithBet(opponentId)}</span>
                 <input
                   type="number"
                   min={0}
@@ -320,7 +320,7 @@ export default function DuelsModal({
       sideLabel="Duel"
       caption="Défie n'importe quel joueur · le défi doit être accepté puis confirmé par un admin"
     >
-      <div className="mm-main" style={{ gap: ".8cqw", paddingRight: "1cqw" }}>
+      <div className="mm-main" style={{ gap: "calc(.8 * var(--u))", paddingRight: "calc(1 * var(--u))" }}>
         <div className="mm-seg">
           <button className={tab === "matches" ? "on" : ""} onClick={() => setTab("matches")}>
             Matchs
@@ -368,7 +368,7 @@ export default function DuelsModal({
                     placeholder="Rechercher un joueur…"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    style={{ fontSize: "clamp(13px, 1.2cqw, 18px)" }}
+                    style={{ fontSize: "clamp(13px, calc(1.2 * var(--u)), 18px)" }}
                   />
                   <div style={cardGridStyle}>
                     {candidates.slice(0, 24).map((u) => (

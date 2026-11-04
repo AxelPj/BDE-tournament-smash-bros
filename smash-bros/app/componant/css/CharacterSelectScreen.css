@@ -5,8 +5,10 @@
   display: grid; place-items: center; overflow: hidden;
   background: #05061a; padding: 8px; box-sizing: border-box;
 }
+/* Centrée en absolu : la scène (1280×720 ou 720×1280) peut être plus grande que
+   l'écran avant la mise à l'échelle, une grille centrée la ferait déborder. */
 .cs-stage {
-  position: relative; flex: none; width: 1280px; height: 720px; overflow: hidden; cursor: none; user-select: none;
+  position: absolute; left: 50%; top: 50%; flex: none; width: 1280px; height: 720px; overflow: hidden; cursor: none; user-select: none;
   transform-origin: center center;
   font-family: "Exo 2", sans-serif;
   background: repeating-linear-gradient(115deg, rgba(90, 100, 230, .07) 0 2px, transparent 2px 22px), linear-gradient(180deg, #0d0f2e, #05061a);
@@ -100,7 +102,7 @@
 .cs-layer { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
 .cs-coin { position: absolute; width: 36px; height: 36px; pointer-events: auto; touch-action: none; transition: transform .14s; filter: drop-shadow(0 3px 3px rgba(0, 0, 0, .6)); }
 .cs-coin.drag { pointer-events: none; transform: scale(1.22); filter: drop-shadow(0 12px 10px rgba(0, 0, 0, .6)); }
-.cs-coin-hit { position: absolute; inset: -18px; border-radius: 50%; }
+.cs-coin-hit { position: absolute; inset: -28px; border-radius: 50%; }
 .cs-coin img { position: absolute; inset: 0; width: 36px; height: 36px; border-radius: 50%; pointer-events: none; }
 .cs-hand { position: absolute; left: 0; top: 0; width: 70px; height: 60px; pointer-events: none; opacity: 0; will-change: transform; filter: drop-shadow(0 4px 3px rgba(0, 0, 0, .55)); }
 .cs-hand img { position: absolute; left: 0; top: 0; image-rendering: pixelated; }
@@ -108,3 +110,24 @@
 .cs-h-grab { width: 53px; height: 50px; }
 .cs-h-gun { width: 70px; height: 55px; }
 .cs-shot { position: absolute; width: 45px; height: 30px; image-rendering: pixelated; pointer-events: none; }
+
+/* ---------- Téléphone vertical : scène 720×1280 ----------
+   Grille en haut (7 vignettes par ligne), carte du joueur puis aperçu + boutons dessous. */
+.cs-stage--portrait { width: 720px; height: 1280px; }
+.cs-stage--portrait .cs-grid { padding: 24px 16px 16px; }
+.cs-stage--portrait .cs-bottom {
+  height: 530px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 300px minmax(0, 1fr);
+}
+.cs-stage--portrait .cs-p1 { clip-path: none; }
+.cs-stage--portrait .cs-bigname { left: 290px; right: 28px; }
+.cs-stage--portrait .cs-plate { right: 28px; }
+.cs-stage--portrait .cs-right {
+  margin-left: 0;
+  clip-path: none;
+  justify-content: center;
+  padding: 0 28px;
+  border-top: 4px solid #000;
+}
+.cs-stage--portrait .cs-actions .mbtn { --h: 58px; }

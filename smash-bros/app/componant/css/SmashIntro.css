@@ -233,6 +233,40 @@
   }
 }
 
+/* Téléphone en portrait : plus la place de mettre les boutons de part et d'autre du
+   logo (ils se chevauchaient). Le menu passe sous le logo, en 2 colonnes. */
+@media (max-aspect-ratio: 1/1) {
+  .smash-intro__menu {
+    justify-content: flex-end;
+    padding: 0 max(12px, env(safe-area-inset-right)) max(22px, calc(env(safe-area-inset-bottom) + 14px)) max(12px, env(safe-area-inset-left));
+  }
+  .smash-intro__menu-row {
+    width: 100%;
+    max-width: 460px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+  }
+  .smash-intro__menu-col {
+    gap: 12px;
+    min-width: 0;
+  }
+  .smash-intro__menu-col--left,
+  .smash-intro__menu-col--right { align-items: stretch; }
+  .smash-intro__menu-col .mbtn {
+    --h: clamp(38px, 10.5vw, 46px);
+    width: 100%;
+    min-width: 0;
+    margin: 0 !important;
+  }
+
+  /* Barre du haut : solde à gauche, bouton admin à droite, sans se toucher */
+  .smash-intro__tilts { font-size: clamp(16px, 4.6vw, 22px); max-width: 48vw; }
+  .smash-intro__actions { max-width: 50vw; }
+  .smash-intro__actions .mbtn { --h: clamp(30px, 8.5vw, 40px); }
+}
+
 .smash-intro__error {
   position: absolute;
   left: 50%;

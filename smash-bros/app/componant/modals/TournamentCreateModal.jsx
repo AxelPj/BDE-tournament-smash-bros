@@ -123,7 +123,7 @@ export default function TournamentCreateModal({
         sideLabel="Récap"
         caption="Étape 1 / 3 · Informations du tournoi"
       >
-        <div className="mm-main" style={{ gap: "1.1cqw", paddingRight: "3cqw" }}>
+        <div className="mm-main" style={{ gap: "calc(1.1 * var(--u))", paddingRight: "calc(3 * var(--u))" }}>
           {adminNav}
           <label className="mm-fieldwrap">
             <span className="mm-label">Nom du tournoi</span>
@@ -156,7 +156,7 @@ export default function TournamentCreateModal({
             </label>
           </div>
           {isPastDate && (
-            <span style={{ color: "#ff6b6b", fontWeight: 700, fontSize: "1.45cqw" }}>
+            <span style={{ color: "#ff6b6b", fontWeight: 700, fontSize: "calc(1.45 * var(--u))" }}>
               La date du tournoi ne peut pas être dans le passé.
             </span>
           )}
@@ -200,15 +200,15 @@ export default function TournamentCreateModal({
             Raccourcis Admin
           </span>
           {activeTournament && onOpenTournamentSignup && (
-            <div style={{ display: "flex", gap: ".4cqw" }}>
+            <div style={{ display: "flex", gap: "calc(.4 * var(--u))" }}>
               <button
                 type="button"
                 className="mm-field"
                 style={{
                   flex: 1,
                   cursor: "pointer",
-                  fontSize: "1.2cqw",
-                  padding: ".5cqw .6cqw",
+                  fontSize: "calc(1.2 * var(--u))",
+                  padding: "calc(.5 * var(--u)) calc(.6 * var(--u))",
                   textAlign: "center",
                   borderColor: "#ffd000",
                   background: "rgba(255, 208, 0, .18)",
@@ -227,8 +227,8 @@ export default function TournamentCreateModal({
                   style={{
                     width: "auto",
                     cursor: "pointer",
-                    fontSize: "1.2cqw",
-                    padding: ".5cqw .65cqw",
+                    fontSize: "calc(1.2 * var(--u))",
+                    padding: "calc(.5 * var(--u)) calc(.65 * var(--u))",
                     borderColor: "#f87171",
                     background: "rgba(220, 38, 38, .35)",
                   }}
@@ -245,8 +245,8 @@ export default function TournamentCreateModal({
               className="mm-field"
               style={{
                 cursor: "pointer",
-                fontSize: "1.25cqw",
-                padding: ".45cqw .7cqw",
+                fontSize: "calc(1.25 * var(--u))",
+                padding: "calc(.45 * var(--u)) calc(.7 * var(--u))",
                 textAlign: "center",
               }}
               onClick={onOpenShopAdmin}
@@ -260,8 +260,8 @@ export default function TournamentCreateModal({
               className="mm-field"
               style={{
                 cursor: "pointer",
-                fontSize: "1.25cqw",
-                padding: ".45cqw .7cqw",
+                fontSize: "calc(1.25 * var(--u))",
+                padding: "calc(.45 * var(--u)) calc(.7 * var(--u))",
                 textAlign: "center",
               }}
               onClick={onOpenAdminUsers}
@@ -281,7 +281,7 @@ export default function TournamentCreateModal({
         title="Règles"
         caption="Étape 2 / 3 · Règles du match"
       >
-        <div className="mm-center" style={{ gap: "1.6cqw" }}>
+        <div className="mm-center" style={{ gap: "calc(1.6 * var(--u))" }}>
           <div style={{ width: "78%" }}>{adminNav}</div>
           <div className="mm-list" style={{ width: "64%" }}>
             {RULES.map((r, i) => (
@@ -323,7 +323,7 @@ export default function TournamentCreateModal({
 
   return (
     <MeleeFrame open={open} onClose={onClose} title="Publier" caption="Les joueurs seront notifiés">
-      <div className="mm-center" style={{ gap: "1.4cqw" }}>
+      <div className="mm-center" style={{ gap: "calc(1.4 * var(--u))" }}>
         <div style={{ width: "78%" }}>{adminNav}</div>
         <span className="mm-kicker">Étape 3 / 3</span>
         <span className="mm-big">Publier {d.name} ?</span>
@@ -331,7 +331,7 @@ export default function TournamentCreateModal({
           {dateLabel} · {d.time.replace(":00", "h")} · {d.maxPlayers} joueurs · {fmt(d.reward)}{" "}
           Tilts au vainqueur
         </span>
-        <div className="mm-btns" style={{ marginTop: "1cqw" }}>
+        <div className="mm-btns" style={{ marginTop: "calc(1 * var(--u))" }}>
           <MeleeButton text="Modifier" mirror height={56} onClick={() => setStep(0)} />
           <MeleeButton
             text="Publier"

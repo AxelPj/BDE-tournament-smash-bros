@@ -8,7 +8,8 @@ import "../css/CharacterSelectScreen.css";
  * - On attrape la pièce, on la porte sur un personnage, on lâche → sélection.
  * - Un clic ailleurs : la main fait le pistolet et tire une boule de feu.
  */
-const W = 1280, H = 720;
+// Scène de référence : paysage 1280×720, ou portrait 720×1280 sur téléphone vertical
+const LANDSCAPE = [1280, 720], PORTRAIT = [720, 1280];
 
 /** @param {Record<string, any>} props */
 export default function CharacterSelectScreen({
@@ -22,10 +23,16 @@ export default function CharacterSelectScreen({
 }) {
   const N = characters.length;
   const [sel, setSel] = useState(0);
+  const selRef = useRef(0);
+  useLayoutEffect(() => {
+    selRef.current = sel;
+  }, [sel]);
   const [tok, setTok] = useState(null);
   const [drag, setDrag] = useState(false);
   const [gun, setGun] = useState(false);
   const [scale, setScale] = useState(1);
+  const [portrait, setPortrait] = useState(false);
+  const [W, H] = portrait ? PORTRAIT : LANDSCAPE;
   const stageRef = useRef(null),
     layerRef = useRef(null),
     handRef = useRef(null),
@@ -46,12 +53,32 @@ export default function CharacterSelectScreen({
     setSel(idx >= 0 ? idx : 0);
   }, [open, selectedId, characters]);
 
+  // Précharge les grands portraits en tâche de fond (~30 Ko chacun en WebP) :
+  // le survol d'un personnage affiche alors son portrait instantanément.
+  useEffect(() => {
+    if (!open || !characters.length) return;
+    const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 300));
+    const cancel = window.cancelIdleCallback || clearTimeout;
+    const id = idle(() => {
+      for (const ch of characters) {
+        if (!ch.portrait) continue;
+        const img = new Image();
+        img.decoding = "async";
+        img.src = ch.portrait;
+      }
+    });
+    return () => cancel(id);
+  }, [open, characters]);
+
   // mise à l'échelle 1280×720 → fenêtre (ordinateur + téléphone)
   useEffect(() => {
     const fit = () => {
       const vw = window.visualViewport?.width || window.innerWidth;
       const vh = window.visualViewport?.height || window.innerHeight;
-      setScale(Math.min((vw - 12) / W, (vh - 12) / H));
+      const isPortrait = vh > vw;
+      const [w, h] = isPortrait ? PORTRAIT : LANDSCAPE;
+      setPortrait(isPortrait);
+      setScale(Math.min((vw - 12) / w, (vh - 12) / h));
     };
     fit();
     window.addEventListener("resize", fit);
@@ -123,10 +150,11 @@ export default function CharacterSelectScreen({
   };
   useEffect(() => {
     if (open) {
-      const t = setTimeout(() => snap(sel), 50);
+      // selRef : la sélection à jour (le perso actuel est choisi juste après l'ouverture)
+      const t = setTimeout(() => snap(selRef.current), 50);
       return () => clearTimeout(t);
     }
-  }, [open, scale]); // eslint-disable-line
+  }, [open, scale, portrait]); // eslint-disable-line
 
   const hit = (cx, cy) => {
     const el = document
@@ -172,14 +200,39 @@ export default function CharacterSelectScreen({
         const k = Math.floor(Math.random() * N);
         setSel(k);
         requestAnimationFrame(() => snap(k));
-      } else if (i != null) snap(i);
+      } else if (i != null) {
+        // Relâché sur une vignette (même sans glisser) : elle devient la sélection
+        setSel(i);
+        snap(i);
+      }
     };
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", up);
   };
 
+  // Rayon de prise du jeton : 64px dans la scène, mais jamais moins de 44px réels à
+  // l'écran (la scène est réduite sur petit écran, la zone resterait minuscule).
+  const nearCoin = (e) => {
+    const g = geo();
+    if (!g || !tok) return false;
+    const x = (e.clientX - g.sr.left) / g.k, y = (e.clientY - g.sr.top) / g.k;
+    const r = Math.max(64, 44 / g.k);
+    return Math.hypot(x - (tok.x + 18), y - (tok.y + 18)) <= r;
+  };
+
   const stageDown = (e) => {
     if (st.current.drag || e.target.closest(".mbtn")) return;
+    if (nearCoin(e)) return tokDown(e);
+    // Écran tactile : un tap sur une vignette la sélectionne directement
+    if (e.pointerType !== "mouse") {
+      const i = hit(e.clientX, e.clientY);
+      if (i != null) {
+        const k = i === N ? Math.floor(Math.random() * N) : i;
+        setSel(k);
+        requestAnimationFrame(() => snap(k));
+        return;
+      }
+    }
     clearTimeout(st.current.gunT);
     st.current.gun = true;
     setGun(true);
@@ -224,8 +277,8 @@ export default function CharacterSelectScreen({
     <div className="cs-overlay">
       <div
         ref={stageRef}
-        className="cs-stage"
-        style={{ transform: `scale(${scale})` }}
+        className={`cs-stage${portrait ? " cs-stage--portrait" : ""}`}
+        style={{ transform: `translate(-50%, -50%) scale(${scale})` }}
         onPointerDown={stageDown}
         onPointerMove={placeHand}
         onPointerLeave={() => {
@@ -246,7 +299,9 @@ export default function CharacterSelectScreen({
                   : undefined
               }
             >
-              {(x.tile || x.image) && <img src={x.tile || x.image} alt="" draggable="false" />}
+              {(x.tile || x.image) && (
+                <img src={x.tile || x.image} alt="" draggable="false" width={84} height={48} decoding="async" />
+              )}
               <span className="cs-name">{x.name}</span>
             </div>
           ))}
@@ -267,7 +322,7 @@ export default function CharacterSelectScreen({
             <div className="cs-p1-circle" />
             <div className="cs-portrait">
               {c.portrait || c.image ? (
-                <img src={c.portrait || c.image} alt={c.name} />
+                <img src={c.portrait || c.image} alt={c.name} width={290} height={258} fetchPriority="high" />
               ) : (
                 <span>portrait</span>
               )}

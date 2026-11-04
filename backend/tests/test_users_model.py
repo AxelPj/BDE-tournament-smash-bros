@@ -45,3 +45,24 @@ def test_intra_id_is_unique_but_optional(db):
 def test_sqlite_pragmas_are_enabled(db):
     assert db.execute(text("PRAGMA foreign_keys")).scalar() == 1
     assert db.execute(text("PRAGMA journal_mode")).scalar() == "wal"
+
+
+def test_42_login_keeps_chosen_fighter_avatar(db):
+    """Le combattant choisi comme photo de profil n'est pas écrasé à la reconnexion 42."""
+    from app.users.service import get_or_create_42_user
+
+    user = get_or_create_42_user(db, 4242, "peach", "Peach", "https://cdn.intra.42.fr/a.jpg")
+    user.avatar_url = "/fighters/peach.png"
+    db.commit()
+
+    again = get_or_create_42_user(db, 4242, "peach", "Peach", "https://cdn.intra.42.fr/b.jpg")
+    assert again.avatar_url == "/fighters/peach.png"
+
+
+def test_42_login_refreshes_intra_photo(db):
+    """Sans combattant choisi, la photo 42 suit celle de l'intra."""
+    from app.users.service import get_or_create_42_user
+
+    get_or_create_42_user(db, 4343, "toad", "Toad", "https://cdn.intra.42.fr/a.jpg")
+    again = get_or_create_42_user(db, 4343, "toad", "Toad", "https://cdn.intra.42.fr/b.jpg")
+    assert again.avatar_url == "https://cdn.intra.42.fr/b.jpg"

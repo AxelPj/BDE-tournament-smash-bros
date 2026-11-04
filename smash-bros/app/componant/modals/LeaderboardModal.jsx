@@ -41,15 +41,15 @@ export default function LeaderboardModal({
       sideLabel="Stats"
       caption={`${realPlayers.length} joueur${realPlayers.length > 1 ? "s" : ""} classé${realPlayers.length > 1 ? "s" : ""}`}
     >
-      <div className="mm-main" style={{ gap: ".8cqw", padding: "0 1cqw 0 2cqw" }}>
+      <div className="mm-main" style={{ gap: "calc(.8 * var(--u))", padding: "0 calc(1 * var(--u)) 0 calc(2 * var(--u))" }}>
         <span className="mm-label">Classement Général BDE</span>
 
         <div
           className="mm-list"
           style={{
-            maxHeight: "30cqw",
+            maxHeight: "calc(30 * var(--u))",
             overflowY: "auto",
-            paddingRight: ".4cqw",
+            paddingRight: "calc(.4 * var(--u))",
           }}
         >
           {realPlayers.map((pl, i) => {
@@ -68,22 +68,22 @@ export default function LeaderboardModal({
                 key={pl.id ?? pl.login}
                 type="button"
                 className={`mm-match${isSel ? " mm-on" : ""}`}
-                style={{ padding: ".7cqw 1.1cqw" }}
+                style={{ padding: "calc(.7 * var(--u)) calc(1.1 * var(--u))" }}
                 onClick={() => setSelIdx(i)}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: ".9cqw", minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "calc(.9 * var(--u))", minWidth: 0 }}>
                   <span
                     style={{
                       fontWeight: 900,
                       fontStyle: "italic",
-                      fontSize: "1.65cqw",
-                      minWidth: "2.8cqw",
+                      fontSize: "calc(1.65 * var(--u))",
+                      minWidth: "calc(2.8 * var(--u))",
                       color: pl.rank <= 3 ? "#ffe58a" : "#9aa0ff",
                     }}
                   >
                     {medal}
                   </span>
-                  <span className="mm-bavatar" style={{ width: "2.8cqw", height: "2.8cqw" }}>
+                  <span className="mm-bavatar" style={{ width: "calc(2.8 * var(--u))", height: "calc(2.8 * var(--u))" }}>
                     {avatarSrc ? (
                       <img src={avatarSrc} alt={pl.display_name || pl.login} />
                     ) : (
@@ -94,7 +94,7 @@ export default function LeaderboardModal({
                     <div
                       className="mm-match-title"
                       style={{
-                        fontSize: "1.75cqw",
+                        fontSize: "calc(1.75 * var(--u))",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
@@ -103,7 +103,7 @@ export default function LeaderboardModal({
                       {pl.display_name || pl.login}
                       {isMe ? " (Toi)" : ""}
                     </div>
-                    <div className="mm-match-info" style={{ fontSize: "1.25cqw" }}>
+                    <div className="mm-match-info" style={{ fontSize: "calc(1.25 * var(--u))" }}>
                       {pl.wins}V · {pl.losses}D ({plRate}%) · {fmt(pl.balance)} Tilts
                     </div>
                   </div>
@@ -128,7 +128,7 @@ export default function LeaderboardModal({
           <span
             className="mm-pname"
             style={{
-              fontSize: "2.1cqw",
+              fontSize: "calc(2.1 * var(--u))",
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
@@ -136,9 +136,9 @@ export default function LeaderboardModal({
           >
             {p.display_name || p.login}
           </span>
-          <div className="mm-percent" style={{ margin: ".2cqw 0" }}>
-            <b style={{ fontSize: "5.2cqw" }}>{rate}</b>
-            <i style={{ fontSize: "2.5cqw" }}>%</i>
+          <div className="mm-percent" style={{ margin: "calc(.2 * var(--u)) 0" }}>
+            <b style={{ fontSize: "calc(5.2 * var(--u))" }}>{rate}</b>
+            <i style={{ fontSize: "calc(2.5 * var(--u))" }}>%</i>
           </div>
           <Sep />
           <PanelRow label="Tilts" value={fmt(p.balance ?? 0)} gold />

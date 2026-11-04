@@ -273,11 +273,11 @@ export default function TournamentSignupModal({
   if (!t) {
     return (
       <MeleeFrame open={open} onClose={onClose} title="Tournois" caption="Aucun tournoi programmé">
-        <div className="mm-center" style={{ gap: "1.8cqw" }}>
+        <div className="mm-center" style={{ gap: "calc(1.8 * var(--u))" }}>
           <span className="mm-kicker">Arène Smash BDE</span>
-          <span className="mm-big" style={{ fontSize: "4.2cqw" }}>Aucun tournoi actif</span>
+          <span className="mm-big" style={{ fontSize: "calc(4.2 * var(--u))" }}>Aucun tournoi actif</span>
           <span className="mm-sub">Reviens bientôt ou demande à un admin de lancer un tournoi !</span>
-          <div className="mm-btns" style={{ marginTop: "1.4cqw" }}>
+          <div className="mm-btns" style={{ marginTop: "calc(1.4 * var(--u))" }}>
             {isAdmin && (
               <MeleeButton text="Créer un tournoi" selected height={50} onClick={onOpenCreate} />
             )}
@@ -454,7 +454,7 @@ export default function TournamentSignupModal({
               }`
         }
       >
-        <div className="mm-main" style={{ gap: ".8cqw", paddingRight: "1cqw" }}>
+        <div className="mm-main" style={{ gap: "calc(.8 * var(--u))", paddingRight: "calc(1 * var(--u))" }}>
           {hasLosersTree ? (
             <div className="mm-seg">
               <button
@@ -517,14 +517,14 @@ export default function TournamentSignupModal({
           {activeMatch ? (
             <>
               <span className="mm-ptag">Match {activeMatch.code}</span>
-              <span className="mm-pname" style={{ fontSize: "clamp(14px, 1.45cqw, 24px)" }}>
+              <span className="mm-pname" style={{ fontSize: "clamp(14px, calc(1.45 * var(--u)), 24px)" }}>
                 {getPlayerName(activeMatch.player1_id)} vs {getPlayerName(activeMatch.player2_id)}
               </span>
               <Sep />
               {isAdmin && (activeMatch.status === "ready" || activeMatch.status === "completed") ? (
                 <>
                   <div className="mm-prow" style={{ alignItems: "center" }}>
-                    <span style={{ fontSize: "clamp(12px, 1.15cqw, 18px)" }}>
+                    <span style={{ fontSize: "clamp(12px, calc(1.15 * var(--u)), 18px)" }}>
                       {nameWithBet(activeMatch.player1_id)}
                     </span>
                     <input
@@ -533,16 +533,16 @@ export default function TournamentSignupModal({
                       max={99}
                       className="mm-field"
                       style={{
-                        width: "clamp(52px, 4.5cqw, 76px)",
-                        padding: "clamp(4px, .35cqw, 8px) clamp(6px, .5cqw, 10px)",
-                        fontSize: "clamp(13px, 1.25cqw, 20px)",
+                        width: "clamp(52px, calc(4.5 * var(--u)), 76px)",
+                        padding: "clamp(4px, calc(.35 * var(--u)), 8px) clamp(6px, calc(.5 * var(--u)), 10px)",
+                        fontSize: "clamp(13px, calc(1.25 * var(--u)), 20px)",
                       }}
                       value={score1}
                       onChange={(e) => setScore1(Number(e.target.value))}
                     />
                   </div>
                   <div className="mm-prow" style={{ alignItems: "center" }}>
-                    <span style={{ fontSize: "clamp(12px, 1.15cqw, 18px)" }}>
+                    <span style={{ fontSize: "clamp(12px, calc(1.15 * var(--u)), 18px)" }}>
                       {nameWithBet(activeMatch.player2_id)}
                     </span>
                     <input
@@ -551,9 +551,9 @@ export default function TournamentSignupModal({
                       max={99}
                       className="mm-field"
                       style={{
-                        width: "clamp(52px, 4.5cqw, 76px)",
-                        padding: "clamp(4px, .35cqw, 8px) clamp(6px, .5cqw, 10px)",
-                        fontSize: "clamp(13px, 1.25cqw, 20px)",
+                        width: "clamp(52px, calc(4.5 * var(--u)), 76px)",
+                        padding: "clamp(4px, calc(.35 * var(--u)), 8px) clamp(6px, calc(.5 * var(--u)), 10px)",
+                        fontSize: "clamp(13px, calc(1.25 * var(--u)), 20px)",
                       }}
                       value={score2}
                       onChange={(e) => setScore2(Number(e.target.value))}
@@ -624,7 +624,7 @@ export default function TournamentSignupModal({
                           style={{
                             flexDirection: "column",
                             alignItems: "stretch",
-                            gap: ".45cqw",
+                            gap: "calc(.45 * var(--u))",
                             borderColor: isDone
                               ? "rgba(74, 222, 128, .75)"
                               : isFail
@@ -632,7 +632,7 @@ export default function TournamentSignupModal({
                               : "rgba(255, 208, 0, .55)",
                           }}
                         >
-                          <div style={{ display: "flex", alignItems: "center", gap: ".6cqw" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "calc(.6 * var(--u))" }}>
                             <img
                               src={resolveGageImg(g, shopItems)}
                               alt={g.name}
@@ -645,7 +645,7 @@ export default function TournamentSignupModal({
                               <span className="mm-match-gage-desc">{g.description}</span>
                               <span
                                 style={{
-                                  fontSize: ".95cqw",
+                                  fontSize: "calc(.95 * var(--u))",
                                   fontWeight: 900,
                                   color: isDone
                                     ? "#4ade80"
@@ -664,15 +664,15 @@ export default function TournamentSignupModal({
                           </div>
 
                           {isAdmin && onValidateGage && (
-                            <div style={{ display: "flex", gap: ".4cqw" }}>
+                            <div style={{ display: "flex", gap: "calc(.4 * var(--u))" }}>
                               <button
                                 type="button"
                                 className="mm-field"
                                 style={{
                                   flex: 1,
                                   cursor: "pointer",
-                                  fontSize: "1.05cqw",
-                                  padding: ".35cqw .5cqw",
+                                  fontSize: "calc(1.05 * var(--u))",
+                                  padding: "calc(.35 * var(--u)) calc(.5 * var(--u))",
                                   textAlign: "center",
                                   borderColor: isDone ? "#4ade80" : "#ffd000",
                                   background: isDone
@@ -690,8 +690,8 @@ export default function TournamentSignupModal({
                                 style={{
                                   flex: 1,
                                   cursor: "pointer",
-                                  fontSize: "1.05cqw",
-                                  padding: ".35cqw .5cqw",
+                                  fontSize: "calc(1.05 * var(--u))",
+                                  padding: "calc(.35 * var(--u)) calc(.5 * var(--u))",
                                   textAlign: "center",
                                   borderColor: isFail ? "#f87171" : "#3a42e6",
                                   background: isFail
@@ -728,7 +728,7 @@ export default function TournamentSignupModal({
       sideLabel="Règles"
       caption={`${registeredCount} / ${maxPlayers} joueurs inscrits`}
     >
-      <div className="mm-center" style={{ gap: "1cqw" }}>
+      <div className="mm-center" style={{ gap: "calc(1 * var(--u))" }}>
         {isAdmin && (onOpenCreate || onOpenShopAdmin || onOpenAdminUsers) && (
           <div className="mm-seg" style={{ width: "86%" }}>
             {onOpenCreate && (
@@ -749,7 +749,7 @@ export default function TournamentSignupModal({
           </div>
         )}
         {tournaments.length > 1 && (
-          <div style={{ display: "flex", alignItems: "center", gap: "1.6cqw" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "calc(1.6 * var(--u))" }}>
             <button
               className="mm-tri mm-tri--l"
               aria-label="Tournoi précédent"
@@ -766,7 +766,7 @@ export default function TournamentSignupModal({
           </div>
         )}
         <span className="mm-kicker">{t.date}</span>
-        <span className="mm-big" style={{ fontSize: "4.4cqw" }}>{t.name}</span>
+        <span className="mm-big" style={{ fontSize: "calc(4.4 * var(--u))" }}>{t.name}</span>
 
         {countdown && t.status === "registration" && (
           <div className="mm-countdown">
@@ -784,7 +784,7 @@ export default function TournamentSignupModal({
             style={{
               display: "flex",
               flexWrap: "wrap",
-              gap: ".6cqw",
+              gap: "calc(.6 * var(--u))",
               justifyContent: "center",
               maxWidth: "92%",
             }}
@@ -795,12 +795,12 @@ export default function TournamentSignupModal({
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: ".4cqw",
+                  gap: "calc(.4 * var(--u))",
                   background: "rgba(20, 24, 80, .65)",
                   border: "1px solid #3a42e6",
                   borderRadius: "999px",
-                  padding: ".2cqw .7cqw .2cqw .3cqw",
-                  fontSize: "1.3cqw",
+                  padding: "calc(.2 * var(--u)) calc(.7 * var(--u)) calc(.2 * var(--u)) calc(.3 * var(--u))",
+                  fontSize: "calc(1.3 * var(--u))",
                   fontWeight: 700,
                 }}
               >
@@ -811,7 +811,7 @@ export default function TournamentSignupModal({
           </div>
         )}
 
-        <div className="mm-btns" style={{ gap: ".8cqw", marginTop: ".6cqw", justifyContent: "center" }}>
+        <div className="mm-btns" style={{ gap: "calc(.8 * var(--u))", marginTop: "calc(.6 * var(--u))", justifyContent: "center" }}>
           {t.status === "registration" && t.registration_open && (
             registered ? (
               <MeleeButton
@@ -864,7 +864,7 @@ export default function TournamentSignupModal({
       </div>
       <Panel>
         {(t.rules || []).map((r, i) => (
-          <span key={i} className="mm-ptext" style={{ fontSize: "1.95cqw" }}>
+          <span key={i} className="mm-ptext" style={{ fontSize: "calc(1.95 * var(--u))" }}>
             {r}
           </span>
         ))}

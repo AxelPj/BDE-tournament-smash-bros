@@ -60,7 +60,7 @@ export function BetTag({ market, mine, playerId }) {
     <span
       style={{
         display: "block",
-        fontSize: "clamp(10px, .9cqw, 14px)",
+        fontSize: "clamp(10px, calc(.9 * var(--u)), 14px)",
         fontWeight: 800,
         fontStyle: "normal",
         color: "#ffe58a",
@@ -116,24 +116,24 @@ export default function BetBox({ players, getPlayerName, balance, market, onPlac
   const choiceStyle = (selected) => ({
     flex: 1,
     cursor: "pointer",
-    fontSize: "clamp(11px, 1.05cqw, 16px)",
-    padding: ".35cqw .5cqw",
+    fontSize: "clamp(11px, calc(1.05 * var(--u)), 16px)",
+    padding: "calc(.35 * var(--u)) calc(.5 * var(--u))",
     textAlign: "center",
     borderColor: selected ? "#ffd000" : "#3a42e6",
     background: selected ? "rgba(255, 208, 0, .25)" : "rgba(20, 24, 80, .6)",
     color: "#fff",
     display: "flex",
     flexDirection: "column",
-    gap: ".15cqw",
+    gap: "calc(.15 * var(--u))",
   });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: ".5cqw" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: "calc(.5 * var(--u))" }}>
       <span className="mm-ptag" style={{ color: "#ffd000" }}>
         Parier · {market ? fmt(market.total_bettors) : "…"} parieur
         {market?.total_bettors > 1 ? "s" : ""}
       </span>
-      <div style={{ display: "flex", gap: ".4cqw" }}>
+      <div style={{ display: "flex", gap: "calc(.4 * var(--u))" }}>
         {players.map((uid) => {
           const o = oddsOf(uid);
           return (
@@ -147,7 +147,7 @@ export default function BetBox({ players, getPlayerName, balance, market, onPlac
               <span style={{ fontWeight: 900, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {getPlayerName(uid)}
               </span>
-              <span style={{ fontSize: "clamp(10px, .9cqw, 14px)", opacity: 0.85 }}>
+              <span style={{ fontSize: "clamp(10px, calc(.9 * var(--u)), 14px)", opacity: 0.85 }}>
                 {o?.odds
                   ? `Cote x${o.odds} · ${o.bettors} parieur${o.bettors > 1 ? "s" : ""}`
                   : "Aucun parieur"}
@@ -157,7 +157,7 @@ export default function BetBox({ players, getPlayerName, balance, market, onPlac
         })}
       </div>
       <div className="mm-prow" style={{ alignItems: "center" }}>
-        <span style={{ fontSize: "clamp(12px, 1.15cqw, 18px)" }}>
+        <span style={{ fontSize: "clamp(12px, calc(1.15 * var(--u)), 18px)" }}>
           Mise (solde {fmt(balance)})
         </span>
         <input
@@ -166,9 +166,9 @@ export default function BetBox({ players, getPlayerName, balance, market, onPlac
           max={balance ?? 0}
           className="mm-field"
           style={{
-            width: "clamp(64px, 5.5cqw, 90px)",
-            padding: "clamp(4px, .35cqw, 8px) clamp(6px, .5cqw, 10px)",
-            fontSize: "clamp(13px, 1.25cqw, 20px)",
+            width: "clamp(64px, calc(5.5 * var(--u)), 90px)",
+            padding: "clamp(4px, calc(.35 * var(--u)), 8px) clamp(6px, calc(.5 * var(--u)), 10px)",
+            fontSize: "clamp(13px, calc(1.25 * var(--u)), 20px)",
           }}
           value={amount}
           onChange={(e) => setAmount(Math.floor(Number(e.target.value)))}
@@ -177,7 +177,7 @@ export default function BetBox({ players, getPlayerName, balance, market, onPlac
       {msg && (
         <span
           style={{
-            fontSize: "clamp(11px, 1cqw, 15px)",
+            fontSize: "clamp(11px, calc(1 * var(--u)), 15px)",
             fontWeight: 800,
             color: msg.ok ? "#4ade80" : "#f87171",
           }}
@@ -185,7 +185,7 @@ export default function BetBox({ players, getPlayerName, balance, market, onPlac
           {msg.text}
         </span>
       )}
-      <div style={{ display: "flex", gap: ".4cqw" }}>
+      <div style={{ display: "flex", gap: "calc(.4 * var(--u))" }}>
         <MeleeButton
           text="Confirmer"
           selected={Boolean(pick) && validAmount}
