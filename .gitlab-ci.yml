@@ -173,6 +173,12 @@ deploy_to_vps:
   environment:
     name: production
   before_script:
+    # Retire espaces / retours à la ligne collés par erreur dans les variables GitLab
+    - |
+      for v in VPS_USER VPS_IP VPS_SSH_PORT VPS_PROJECT_PATH; do
+        eval "export $v=\"\$(printf '%s' \"\${$v}\" | tr -d '[:space:]')\""
+      done
+      echo "VPS_USER : ${#VPS_USER} caractères, port : ${VPS_SSH_PORT:-22}, chemin : $VPS_PROJECT_PATH"
     - apk add --no-cache openssh-client
     - eval $(ssh-agent -s)
     # Accepte SSH_PRIVATE_KEY de type "File" (chemin) ou "Variable" (contenu)
