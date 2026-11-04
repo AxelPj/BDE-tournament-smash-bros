@@ -3,6 +3,9 @@
     pending ─(adversaire accepte)→ accepted ─(admin valide)→ validated
             ─(admin lance)→ in_progress ─(admin saisit le score)→ completed
 
+    in_progress ─(admin dé-lock)→ validated (les paris rouvrent)
+    completed ─(admin dévalide)→ in_progress (score effacé, gains repris)
+
     pending ─(adversaire refuse)→ refused
     pending ─(demandeur annule)→ cancelled
     tout état actif ─(admin annule)→ cancelled
@@ -82,6 +85,15 @@ def create_duel(db: Session, challenger: User, opponent_id: int) -> Duel:
     )
     if already_active:
         raise DuelStateError("Un duel est déjà en cours entre ces deux joueurs")
+    own_challenge = db.scalar(
+        select(Duel.id).where(
+            Duel.challenger_id == challenger.id, Duel.status.in_(ACTIVE_STATUSES)
+        )
+    )
+    if own_challenge:
+        raise DuelStateError(
+            "Tu as déjà lancé un défi : attends qu'il soit terminé, refusé ou annulé"
+        )
 
     duel = Duel(challenger_id=challenger.id, opponent_id=opponent_id)
     db.add(duel)
@@ -134,9 +146,34 @@ def start(db: Session, duel: Duel) -> Duel:
     return duel
 
 
+def unstart(db: Session, duel: Duel) -> Duel:
+    """Annule le lancement (dé-lock) d'un duel sans résultat : les paris rouvrent."""
+    _require_status(duel, DuelStatus.IN_PROGRESS)
+    duel.status = DuelStatus.VALIDATED
+    duel.started_at = None
+    db.commit()
+    return duel
+
+
+def cancel_result(db: Session, duel: Duel) -> Duel:
+    """Annule le score d'un duel terminé (dévalidation) : il redevient « en cours »
+    (paris toujours fermés), les gains versés sont repris et les paris attendent
+    le nouveau résultat."""
+    _require_status(duel, DuelStatus.COMPLETED)
+    duel.challenger_score = duel.opponent_score = duel.winner_id = None
+    duel.completed_at = None
+    duel.status = DuelStatus.IN_PROGRESS
+    settle_bets(db, duel)
+    sync_gages(db, duel)
+    db.commit()
+    return duel
+
+
 def report_result(db: Session, duel: Duel, challenger_score: int, opponent_score: int) -> Duel:
-    """Saisit le score d'un duel en cours, ou corrige celui d'un duel terminé."""
-    _require_status(duel, DuelStatus.IN_PROGRESS, DuelStatus.COMPLETED)
+    """Saisit le score d'un duel validé ou en cours (ce qui ferme les paris), ou
+    corrige celui d'un duel terminé."""
+    _require_status(duel, DuelStatus.VALIDATED, DuelStatus.IN_PROGRESS, DuelStatus.COMPLETED)
+    duel.started_at = duel.started_at or _now()
     if challenger_score == opponent_score:
         raise ValueError("Pas de match nul : il faut un vainqueur")
     duel.challenger_score = challenger_score

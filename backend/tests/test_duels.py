@@ -4,7 +4,7 @@ from sqlalchemy.orm.exc import StaleDataError
 
 from app.duels import service
 from app.duels.models import Duel
-from app.users.service import create_user
+from app.users.service import create_user, get_user_by_username
 from tests.test_tournaments_api import PASSWORD, login
 
 
@@ -154,3 +154,43 @@ def test_concurrent_changes_are_rejected(engine, db):
         service.respond(first, d1, first.get(type(luigi), luigi.id), accept=True)
         with pytest.raises(StaleDataError):
             service.cancel(second, d2, second.get(type(mario), mario.id))
+
+
+def test_admin_can_unlock_and_unvalidate(accounts):
+    a = accounts
+    duel_id = challenge(a)
+    a["luigi"].post(f"/api/duels/{duel_id}/accept")
+    a["admin"].post(f"/api/admin/duels/{duel_id}/validate")
+    start_url = f"/api/admin/duels/{duel_id}/start"
+    result_url = f"/api/admin/duels/{duel_id}/result"
+
+    assert a["admin"].delete(start_url).status_code == 409  # pas lancé
+    a["admin"].post(start_url)
+    assert a["mario"].delete(start_url).status_code == 403
+    unlocked = a["admin"].delete(start_url).json()
+    assert (unlocked["status"], unlocked["betting_open"], unlocked["started_at"]) == ("validated", True, None)
+
+    a["admin"].post(start_url)
+    assert a["admin"].delete(result_url).status_code == 409  # pas de résultat
+    a["admin"].put(result_url, json={"challenger_score": 2, "opponent_score": 0})
+    cancelled = a["admin"].delete(result_url).json()
+    assert (cancelled["status"], cancelled["winner_id"], cancelled["challenger_score"]) == (
+        "in_progress",
+        None,
+        None,
+    )
+    assert cancelled["betting_open"] is False
+
+
+def test_only_one_challenge_at_a_time(accounts, db):
+    a = accounts
+    duel_id = challenge(a)
+    wario_id = get_user_by_username(db, "wario").id
+
+    response = a["mario"].post("/api/duels", json={"opponent_id": wario_id})
+    assert response.status_code == 409
+    # Être défié n'empêche pas de défier quelqu'un d'autre
+    assert a["luigi"].post("/api/duels", json={"opponent_id": wario_id}).status_code == 201
+
+    a["luigi"].post(f"/api/duels/{duel_id}/refuse")
+    assert a["mario"].post("/api/duels", json={"opponent_id": wario_id}).status_code == 201

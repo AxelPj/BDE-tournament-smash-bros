@@ -144,6 +144,41 @@ def test_reclaimed_payout_never_makes_balance_negative(db, duel_setup):
     assert balance(db, c) == 2000
 
 
+def test_unvalidated_duel_reclaims_payouts_until_new_result(db, duel_setup):
+    duel, _, mario, luigi, a, _, c = duel_setup
+    bets.place_duel_bet(db, a, duel, mario.id, 100)
+    bets.place_duel_bet(db, c, duel, luigi.id, 100)
+    finish(db, duel)  # Mario gagne : cote 2
+    assert balance(db, a) == 1100
+
+    duels.cancel_result(db, duel)
+    assert (balance(db, a), balance(db, c)) == (900, 900)  # gain repris, paris en attente
+
+    duels.report_result(db, duel, 0, 2)  # nouveau résultat : Luigi gagne
+    assert (balance(db, a), balance(db, c)) == (900, 1100)
+
+
+def test_unlocked_duel_reopens_bets(db, duel_setup):
+    duel, _, mario, _, a, _, _ = duel_setup
+    duels.start(db, duel)
+    with pytest.raises(bets.BettingClosedError):
+        bets.place_duel_bet(db, a, duel, mario.id, 10)
+
+    duels.unstart(db, duel)
+
+    bets.place_duel_bet(db, a, duel, mario.id, 10)
+
+
+def test_result_without_lock_closes_duel_bets(db, duel_setup):
+    duel, _, mario, _, a, _, _ = duel_setup
+    bets.place_duel_bet(db, a, duel, mario.id, 100)
+
+    duels.report_result(db, duel, 2, 0)  # validé directement, sans lock
+
+    assert (duel.status.value, duel.betting_open, duel.started_at is not None) == ("completed", False, True)
+    assert balance(db, a) == 900 + 120  # seul parieur : cote minimale
+
+
 # --- Règles de prise de pari ---
 
 

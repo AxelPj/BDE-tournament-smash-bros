@@ -145,6 +145,28 @@ def start(
         return service.start(db, duel)
 
 
+@router.delete("/api/admin/duels/{duel_id}/start", response_model=DuelRead)
+def unstart(
+    duel: Duel = Depends(_get_duel),
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    """Dé-lock : annule le lancement d'un duel en cours, les paris rouvrent."""
+    with _http_errors():
+        return service.unstart(db, duel)
+
+
+@router.delete("/api/admin/duels/{duel_id}/result", response_model=DuelRead)
+def cancel_result(
+    duel: Duel = Depends(_get_duel),
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    """Dévalide un duel terminé : score effacé, gains repris, paris en attente du nouveau résultat."""
+    with _http_errors():
+        return service.cancel_result(db, duel)
+
+
 @router.put("/api/admin/duels/{duel_id}/result", response_model=DuelRead)
 def report_result(
     body: DuelResult,
