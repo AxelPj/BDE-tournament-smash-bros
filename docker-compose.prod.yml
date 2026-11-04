@@ -1,5 +1,4 @@
 # Production : images figées (pas de volume de code), front compilé, backend sans --reload.
-# Le HTTPS est géré par le Caddy déjà installé sur le VPS, qui relaie vers nginx (127.0.0.1:5003).
 #   docker compose -f docker-compose.prod.yml up -d --build
 
 services:
@@ -64,7 +63,6 @@ services:
       frontend:
         condition: service_healthy
     restart: unless-stopped
-    # Exposé uniquement en local : le Caddy du VPS (hors Docker) gère le HTTPS
     # et relaie smash.bde42perpignan.fr vers 127.0.0.1:5003
     ports:
       - "127.0.0.1:5003:80"
