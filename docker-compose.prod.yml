@@ -1,6 +1,5 @@
 # Production : images figées (pas de volume de code), front compilé, backend sans --reload.
-# Caddy gère HTTPS (certificat Let's Encrypt) devant nginx.
-#   cp .env.example .env   # puis renseigner DOMAIN
+# Le HTTPS est géré par le Caddy déjà installé sur le VPS, qui relaie vers nginx (127.0.0.1:5003).
 #   docker compose -f docker-compose.prod.yml up -d --build
 
 services:
@@ -65,34 +64,15 @@ services:
       frontend:
         condition: service_healthy
     restart: unless-stopped
-    networks:
-      - smash_net
-
-  caddy:
-    container_name: smash-caddy
-    image: caddy:2-alpine
-    environment:
-      DOMAIN: ${DOMAIN:-localhost}
-    volumes:
-      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      nginx:
-        condition: service_healthy
-    restart: unless-stopped
+    # Exposé uniquement en local : le Caddy du VPS (hors Docker) gère le HTTPS
+    # et relaie smash.bde42perpignan.fr vers 127.0.0.1:5003
     ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
+      - "127.0.0.1:5003:80"
     networks:
       - smash_net
 
 volumes:
   sqlite_data:
-  # Certificats et clés ACME : à conserver (limites de Let's Encrypt)
-  caddy_data:
-  caddy_config:
 
 networks:
   smash_net:

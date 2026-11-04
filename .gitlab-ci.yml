@@ -10,8 +10,9 @@
 #                       sinon la clé de l'hôte est récupérée à la volée
 #
 # Sur le VPS (une seule fois) : cloner le dépôt dans VPS_PROJECT_PATH, puis créer
-#   .env          (DOMAIN=..., cf. .env.example)       -> certificat HTTPS via Caddy
 #   backend/.env  (secrets OAuth 42, cf. backend/.env.example)
+# Le HTTPS est assuré par le Caddy du VPS (hors de ce projet), qui relaie
+# smash.bde42perpignan.fr vers nginx sur 127.0.0.1:5003.
 
 stages:
   - lint
@@ -88,7 +89,6 @@ compose_config:
   image: docker:27-cli
   script:
     - cp backend/.env.example backend/.env
-    - cp .env.example .env
     - docker compose config --quiet
     - docker compose -f docker-compose.prod.yml config --quiet
 
@@ -156,7 +156,6 @@ docker_build:
         - "**/Dockerfile"
         - docker-compose.yml
         - docker-compose.prod.yml
-        - caddy/**/*
         - nginx/**/*
         - backend/pyproject.toml
         - backend/uv.lock
@@ -200,7 +199,6 @@ deploy_to_vps:
         set -eu
         cd "$PROJECT_PATH"
         # Fichiers non versionnés, à créer une fois sur le VPS
-        [ -f .env ] || { echo "ERREUR : $PROJECT_PATH/.env manquant (DOMAIN=...), voir .env.example"; exit 1; }
         [ -f backend/.env ] || { echo "ERREUR : $PROJECT_PATH/backend/.env manquant, voir backend/.env.example"; exit 1; }
         git fetch --prune origin
         git checkout -q main

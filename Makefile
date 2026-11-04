@@ -18,10 +18,6 @@ backend/.env:
 	cp backend/.env.example backend/.env
 	@echo "backend/.env créé : pense à renseigner FT_CLIENT_ID et FT_CLIENT_SECRET !"
 
-.env:
-	cp .env.example .env
-	@echo ".env créé : renseigne DOMAIN (nom de domaine du VPS) avant make prod !"
-
 up:
 	docker compose up -d
 
@@ -51,7 +47,7 @@ admin:
 	$(DC) exec backend python -m app.cli create-admin "$(LOGIN)" $(if $(NAME),--display-name "$(NAME)")
 
 # --- Production (VPS) ---
-prod: backend/.env .env
+prod: backend/.env
 	$(DC_PROD) up -d --build --remove-orphans --wait
 
 prod-down:
