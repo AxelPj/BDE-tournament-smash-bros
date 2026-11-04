@@ -8,7 +8,7 @@ import { fmt } from "./ShopModal";
  * Le taux de victoire est calculé et affiché façon « pourcentage de dégâts ».
  */
 /** @param {Record<string, any>} props */
-export default function ProfileModal({ player: p, onAvatarClick, onOpenInventory, onClose, open }) {
+export default function ProfileModal({ player: p, onAvatarClick, onOpenInventory, onLogout, onClose, open }) {
   if (!p) return null;
   const total = (p.wins || 0) + (p.losses || 0);
   const rate = total ? Math.round((p.wins / total) * 100) : 0;
@@ -79,6 +79,7 @@ export default function ProfileModal({ player: p, onAvatarClick, onOpenInventory
             <MeleeButton text="Inventaire" selected height={42} onClick={onOpenInventory} />
           )}
           <MeleeButton text="Retour" height={42} onClick={onClose} />
+          {onLogout && <MeleeButton text="Déconnexion" height={42} onClick={onLogout} />}
         </div>
       </div>
       <Panel>

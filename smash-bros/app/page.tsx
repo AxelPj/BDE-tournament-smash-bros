@@ -574,6 +574,13 @@ export default function Home() {
     return result ?? { ok: false, error: "Action déjà en cours" };
   };
 
+  // Supprime la session côté serveur (base + cookie) puis recharge la page :
+  // tout l'état est remis à zéro.
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
+    window.location.href = "/";
+  };
+
   // --- Duels ---
 
   // Appel API qui renvoie le message d'erreur du backend (pour l'afficher)
@@ -983,6 +990,14 @@ export default function Home() {
       />
 
       <ConfirmModal
+        open={modal === "confirm-logout"}
+        question="Se déconnecter ?"
+        caption="Tu pourras te reconnecter avec ton compte 42"
+        onYes={handleLogout}
+        onNo={() => setModal("profile")}
+      />
+
+      <ConfirmModal
         open={modal === "confirm-duel-action"}
         question={
           pendingDuelAction?.type === "cancel-result"
@@ -1009,6 +1024,7 @@ export default function Home() {
           loadShopAndInventory(user);
           setModal("inv");
         }}
+        onLogout={() => setModal("confirm-logout")}
         player={{
           login: user?.username ?? "player",
           campus: user?.display_name ?? "42",
