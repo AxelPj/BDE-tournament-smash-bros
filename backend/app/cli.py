@@ -8,6 +8,7 @@ de sa première connexion OAuth), ou promeut administrateur un compte existant.
 
 import argparse
 
+import app.models  # noqa: F401
 from app.core.db import SessionLocal
 from app.shop.service import create_gage, list_gages
 from app.users.service import create_user, get_user_by_username

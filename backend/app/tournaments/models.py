@@ -5,6 +5,7 @@ from sqlalchemy import JSON, DateTime, ForeignKey, String, UniqueConstraint, fun
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db import Base, enum_column
+from app.gages.models import GageUse
 from app.tournaments.bracket import MatchStatus, Side
 from app.users.models import User
 

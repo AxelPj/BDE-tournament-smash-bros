@@ -143,6 +143,18 @@ def update_tournament(
     return TournamentDetail.from_model(tournament)
 
 
+@router.delete("/{tournament_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_tournament(
+    tournament: Tournament = Depends(_get_tournament),
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    """Supprime définitivement un tournoi (admin)."""
+    with _http_errors():
+        service.delete_tournament(db, tournament)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 @router.post("/{tournament_id}/participants", response_model=TournamentDetail)
 def add_participant(
     body: ParticipantAdd,

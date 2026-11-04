@@ -181,7 +181,10 @@ export default function TournamentSignupModal({
   onGenerateBracket,
   onReportScore,
   onValidateGage,
+  onDeleteTournament,
   onOpenCreate,
+  onOpenShopAdmin,
+  onOpenAdminUsers,
   onClose,
   open,
 }) {
@@ -469,6 +472,13 @@ export default function TournamentSignupModal({
 
           <div className="mm-btns">
             <MeleeButton text="Infos" height={38} onClick={() => setView("info")} />
+            {isAdmin && onDeleteTournament && (
+              <MeleeButton
+                text="Supprimer"
+                height={38}
+                onClick={() => onDeleteTournament(t)}
+              />
+            )}
             <MeleeButton text="Retour" height={38} onClick={onClose} />
           </div>
         </div>
@@ -667,6 +677,25 @@ export default function TournamentSignupModal({
       caption={`${registeredCount} / ${maxPlayers} joueurs inscrits`}
     >
       <div className="mm-center" style={{ gap: "1cqw" }}>
+        {isAdmin && (onOpenCreate || onOpenShopAdmin || onOpenAdminUsers) && (
+          <div className="mm-seg" style={{ width: "86%" }}>
+            {onOpenCreate && (
+              <button type="button" onClick={onOpenCreate}>
+                Nouveau Tournoi
+              </button>
+            )}
+            {onOpenShopAdmin && (
+              <button type="button" onClick={onOpenShopAdmin}>
+                Gérer le Shop
+              </button>
+            )}
+            {onOpenAdminUsers && (
+              <button type="button" onClick={onOpenAdminUsers}>
+                Joueurs & Tilts
+              </button>
+            )}
+          </div>
+        )}
         {tournaments.length > 1 && (
           <div style={{ display: "flex", alignItems: "center", gap: "1.6cqw" }}>
             <button
@@ -769,6 +798,13 @@ export default function TournamentSignupModal({
               selected={registered}
               height={40}
               onClick={() => onGenerateBracket?.(t)}
+            />
+          )}
+          {isAdmin && onDeleteTournament && (
+            <MeleeButton
+              text="Supprimer"
+              height={40}
+              onClick={() => onDeleteTournament(t)}
             />
           )}
           <MeleeButton text="Retour" height={40} onClick={onClose} />

@@ -22,3 +22,12 @@ class AdminAdjustment(BaseModel):
         ge=-100_000, le=100_000, description="Positif pour donner, négatif pour retirer"
     )
     reason: str = Field(min_length=1, max_length=200)
+
+
+class AdminBulkAdjustment(BaseModel):
+    user_ids: list[int] = Field(min_length=1, max_length=500)
+    amount: int = Field(
+        ge=-100_000, le=100_000, description="Positif pour donner, négatif pour retirer"
+    )
+    reason: str = Field(min_length=1, max_length=200)
+

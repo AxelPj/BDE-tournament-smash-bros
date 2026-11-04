@@ -5,7 +5,7 @@ from app.auth.dependencies import get_current_user, require_admin
 from app.core.db import get_db
 from app.economy import service
 from app.economy.models import TransactionKind
-from app.economy.schemas import AdminAdjustment, TransactionRead
+from app.economy.schemas import AdminAdjustment, AdminBulkAdjustment, TransactionRead
 from app.users.models import User
 
 router = APIRouter(tags=["tilt"])
@@ -32,6 +32,43 @@ def user_transactions(
     _admin: User = Depends(require_admin),
 ):
     return service.list_transactions(db, user_id, limit, offset)
+
+
+@router.post(
+    "/api/admin/users/tilt-bulk",
+    response_model=list[TransactionRead],
+    status_code=status.HTTP_201_CREATED,
+)
+def adjust_balance_bulk(
+    body: AdminBulkAdjustment,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    """Donne ou retire des Tilt à plusieurs joueurs d'un coup (ex. tous les inscrits d'un tournoi)."""
+    if body.amount == 0:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Le montant ne peut pas être nul")
+    clean_reason = body.reason.strip()
+    transactions = []
+    for uid in dict.fromkeys(body.user_ids):
+        target = db.get(User, uid)
+        if target is None:
+            continue
+        effective_amount = body.amount
+        if effective_amount < 0:
+            effective_amount = max(effective_amount, -target.balance)
+            if effective_amount == 0:
+                continue
+        tx = service.record_transaction(
+            db,
+            uid,
+            effective_amount,
+            TransactionKind.ADMIN_ADJUSTMENT,
+            clean_reason,
+            created_by_id=admin.id,
+        )
+        transactions.append(tx)
+    db.commit()
+    return transactions
 
 
 @router.post(

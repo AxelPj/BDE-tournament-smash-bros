@@ -57,6 +57,7 @@ export default function Home() {
   const [playableMatches, setPlayableMatches] = useState<any[]>([]);
   const [usingItem, setUsingItem] = useState<any | null>(null);
   const [pendingUnregister, setPendingUnregister] = useState<any | null>(null);
+  const [pendingDeleteTournament, setPendingDeleteTournament] = useState<any | null>(null);
   const actionBusyRef = useRef(false);
 
   const close = () => setModal(null);
@@ -440,6 +441,23 @@ export default function Home() {
       }
     });
 
+  const handleDeleteTournament = (t: any) =>
+    withActionLock(async () => {
+      if (!user?.is_admin || !t) return;
+      const ok = await apiJson(`/api/tournaments/${t.id}`, {
+        method: "DELETE",
+      });
+      if (ok) {
+        setPendingDeleteTournament(null);
+        await Promise.all([
+          loadTournamentsAndMatches(user),
+          loadShopAndInventory(user),
+          loadStats(),
+        ]);
+        setModal("signup");
+      }
+    });
+
   const handleGenerateBracket = (t: any) =>
     withActionLock(async () => {
       if (!user || !t) return;
@@ -506,6 +524,18 @@ export default function Home() {
       }
     });
 
+  const handleBulkAdjustTilt = (targetUserIds: number[], amount: number, reason: string) =>
+    withActionLock(async () => {
+      if (!user?.is_admin || !targetUserIds?.length) return;
+      const ok = await apiJson("/api/admin/users/tilt-bulk", {
+        method: "POST",
+        body: JSON.stringify({ user_ids: targetUserIds, amount, reason }),
+      });
+      if (ok) {
+        await loadStats();
+      }
+    });
+
   const fighterColorByImage = useMemo(
     () => new Map(fighters.map((f) => [f.image, f.color])),
     [fighters]
@@ -534,7 +564,13 @@ export default function Home() {
 
       {authChecked && user?.is_admin && (
         <div className="smash-intro__actions">
-          <MeleeButton text="Setting Admin" onClick={() => setModal("create")} />
+          <MeleeButton
+            text="Setting Admin"
+            onClick={() => {
+              loadTournamentsAndMatches(user);
+              setModal("create");
+            }}
+          />
         </div>
       )}
 
@@ -604,6 +640,7 @@ export default function Home() {
         onOpenTournamentCreate={() => setModal("create")}
         onOpenAdminUsers={() => {
           loadLeaderboard();
+          loadTournamentsAndMatches(user);
           setModal("admin-users");
         }}
         onClose={close}
@@ -644,19 +681,42 @@ export default function Home() {
         onGenerateBracket={handleGenerateBracket}
         onReportScore={handleReportScore}
         onValidateGage={handleValidateGage}
+        onDeleteTournament={(t: any) => {
+          setPendingDeleteTournament(t);
+          setModal("confirm-delete-tournament");
+        }}
         onOpenCreate={() => setModal("create")}
-        onClose={close}
-      />
-
-      <TournamentCreateModal
-        open={modal === "create"}
-        onClose={close}
         onOpenShopAdmin={() => {
           loadShopAndInventory(user);
           setModal("shop-admin");
         }}
         onOpenAdminUsers={() => {
           loadLeaderboard();
+          loadTournamentsAndMatches(user);
+          setModal("admin-users");
+        }}
+        onClose={close}
+      />
+
+      <TournamentCreateModal
+        open={modal === "create"}
+        tournaments={tournaments}
+        onClose={close}
+        onDeleteTournament={(t: any) => {
+          setPendingDeleteTournament(t);
+          setModal("confirm-delete-tournament");
+        }}
+        onOpenTournamentSignup={() => {
+          loadTournamentsAndMatches(user);
+          setModal("signup");
+        }}
+        onOpenShopAdmin={() => {
+          loadShopAndInventory(user);
+          setModal("shop-admin");
+        }}
+        onOpenAdminUsers={() => {
+          loadLeaderboard();
+          loadTournamentsAndMatches(user);
           setModal("admin-users");
         }}
         onPublish={handlePublishTournament}
@@ -669,6 +729,7 @@ export default function Home() {
         isAdmin={!!user?.is_admin}
         onOpenAdminUsers={() => {
           loadLeaderboard();
+          loadTournamentsAndMatches(user);
           setModal("admin-users");
         }}
         onClose={close}
@@ -677,7 +738,9 @@ export default function Home() {
       <AdminUsersModal
         open={modal === "admin-users"}
         players={leaderboard}
+        tournaments={tournaments}
         onAdjustTilt={handleAdjustTilt}
+        onBulkAdjustTilt={handleBulkAdjustTilt}
         onOpenTournamentCreate={() => setModal("create")}
         onOpenShopAdmin={() => {
           loadShopAndInventory(user);
@@ -691,6 +754,14 @@ export default function Home() {
         question="Quitter le tournoi ?"
         caption="Tu pourras te réinscrire tant que l'arbre n'est pas lancé"
         onYes={() => handleUnregisterTournament(pendingUnregister)}
+        onNo={() => setModal("signup")}
+      />
+
+      <ConfirmModal
+        open={modal === "confirm-delete-tournament"}
+        question={`Supprimer ${pendingDeleteTournament?.name || "ce tournoi"} ?`}
+        caption="Action irréversible : le tournoi et son arbre seront supprimés"
+        onYes={() => handleDeleteTournament(pendingDeleteTournament)}
         onNo={() => setModal("signup")}
       />
 

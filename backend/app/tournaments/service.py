@@ -7,10 +7,11 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
+from app.bets.models import Bet
 from app.bets.service import settle_tournament as settle_bets
-from app.gages.models import GageUse
+from app.gages.models import GageUse, GageUseStatus
 from app.gages.service import sync_tournament as sync_gages
-from app.shop.models import InventoryItem
+from app.shop.models import InventoryItem, InventoryStatus
 from app.tournaments.bracket import DoubleEliminationBracket, MatchStatus
 from app.tournaments.models import (
     Participant,
@@ -110,6 +111,18 @@ def update_tournament(
         reconcile_rewards(db, tournament)
     db.commit()
     return tournament
+
+
+def delete_tournament(db: Session, tournament: Tournament) -> None:
+    """Supprime un tournoi, ses matchs, ses participants, et restitue les objets engagés non consommés."""
+    for use in list(tournament.gage_uses):
+        if use.status == GageUseStatus.ENGAGED and use.item is not None:
+            use.item.status = InventoryStatus.OWNED
+            use.item.used_at = None
+    for bet in db.scalars(select(Bet).where(Bet.tournament_id == tournament.id)):
+        db.delete(bet)
+    db.delete(tournament)
+    db.commit()
 
 
 def _require_registration_phase(tournament: Tournament) -> None:
