@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
 import MeleeButton from "../ui/MeleeButton";
 import "../css/CharacterSelectScreen.css";
 
@@ -10,6 +10,34 @@ import "../css/CharacterSelectScreen.css";
  */
 // Scène de référence : paysage 1280×720, ou portrait 720×1280 sur téléphone vertical
 const LANDSCAPE = [1280, 720], PORTRAIT = [720, 1280];
+
+const CharacterTile = memo(function CharacterTile({ character, index, selected }) {
+  return (
+    <div
+      data-char={index}
+      className={`cs-tile${selected ? " on" : ""}`}
+      style={
+        character.color
+          ? {
+              background: `radial-gradient(circle at 50% 40%, ${character.color}, color-mix(in srgb, ${character.color} 45%, #12143a))`,
+            }
+          : undefined
+      }
+    >
+      {(character.tile || character.image) && (
+        <img
+          src={character.tile || character.image}
+          alt=""
+          draggable="false"
+          width={84}
+          height={48}
+          decoding="async"
+        />
+      )}
+      <span className="cs-name">{character.name}</span>
+    </div>
+  );
+});
 
 /** @param {Record<string, any>} props */
 export default function CharacterSelectScreen({
@@ -36,9 +64,10 @@ export default function CharacterSelectScreen({
   const stageRef = useRef(null),
     layerRef = useRef(null),
     handRef = useRef(null),
+    coinRef = useRef(null),
     nameRef = useRef(null),
     loginRef = useRef(null);
-  const st = useRef({ drag: false, gun: false, ptr: null, gunT: null });
+  const st = useRef({ drag: false, gun: false, ptr: null, gunT: null, moveRaf: 0, pendingMove: null });
   useLayoutEffect(() => {
     st.current.drag = drag;
     st.current.gun = gun;
@@ -156,6 +185,14 @@ export default function CharacterSelectScreen({
     }
   }, [open, scale, portrait]); // eslint-disable-line
 
+  useEffect(
+    () => () => {
+      if (st.current.moveRaf) cancelAnimationFrame(st.current.moveRaf);
+      clearTimeout(st.current.gunT);
+    },
+    []
+  );
+
   const hit = (cx, cy) => {
     const el = document
       .elementsFromPoint(cx, cy)
@@ -179,20 +216,35 @@ export default function CharacterSelectScreen({
     const g = geo();
     if (!g) return;
     const off = 18;
-    setTok({ x: (e.clientX - g.sr.left) / g.k - off, y: (e.clientY - g.sr.top) / g.k - off });
+    const initial = { x: (e.clientX - g.sr.left) / g.k - off, y: (e.clientY - g.sr.top) / g.k - off };
+    setTok(initial);
     st.current.drag = true;
     setDrag(true);
     placeHand(e);
     const move = (ev) => {
-      const x = Math.max(-10, Math.min(W - 30, (ev.clientX - g.sr.left) / g.k - off));
-      const y = Math.max(-10, Math.min(H - 30, (ev.clientY - g.sr.top) / g.k - off));
-      setTok({ x, y });
-      const i = hit(ev.clientX, ev.clientY);
-      if (i != null && i < N) setSel(i);
+      st.current.pendingMove = ev;
+      if (st.current.moveRaf) return;
+      st.current.moveRaf = requestAnimationFrame(() => {
+        st.current.moveRaf = 0;
+        const current = st.current.pendingMove;
+        if (!current) return;
+        const x = Math.max(-10, Math.min(W - 30, (current.clientX - g.sr.left) / g.k - off));
+        const y = Math.max(-10, Math.min(H - 30, (current.clientY - g.sr.top) / g.k - off));
+        if (coinRef.current) {
+          coinRef.current.style.left = `${x}px`;
+          coinRef.current.style.top = `${y}px`;
+        }
+        const i = hit(current.clientX, current.clientY);
+        if (i != null && i < N && i !== selRef.current) setSel(i);
+      });
     };
     const up = (ev) => {
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
+      if (st.current.moveRaf) {
+        cancelAnimationFrame(st.current.moveRaf);
+        st.current.moveRaf = 0;
+      }
       const i = hit(ev.clientX, ev.clientY);
       st.current.drag = false;
       setDrag(false);
@@ -205,6 +257,14 @@ export default function CharacterSelectScreen({
         setSel(i);
         snap(i);
       }
+      const current = st.current.pendingMove;
+      if (current) {
+        setTok({
+          x: Math.max(-10, Math.min(W - 30, (current.clientX - g.sr.left) / g.k - off)),
+          y: Math.max(-10, Math.min(H - 30, (current.clientY - g.sr.top) / g.k - off)),
+        });
+      }
+      st.current.pendingMove = null;
     };
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", up);
@@ -287,23 +347,7 @@ export default function CharacterSelectScreen({
       >
         <div className="cs-grid">
           {characters.map((x, i) => (
-            <div
-              key={x.id ?? i}
-              data-char={i}
-              className={`cs-tile${i === sel ? " on" : ""}`}
-              style={
-                x.color
-                  ? {
-                      background: `radial-gradient(circle at 50% 40%, ${x.color}, color-mix(in srgb, ${x.color} 45%, #12143a))`,
-                    }
-                  : undefined
-              }
-            >
-              {(x.tile || x.image) && (
-                <img src={x.tile || x.image} alt="" draggable="false" width={84} height={48} decoding="async" />
-              )}
-              <span className="cs-name">{x.name}</span>
-            </div>
+            <CharacterTile key={x.id ?? i} character={x} index={i} selected={i === sel} />
           ))}
           <div data-char={N} className="cs-tile">
             <span className="cs-q">?</span>
@@ -356,6 +400,7 @@ export default function CharacterSelectScreen({
         <div ref={layerRef} className="cs-layer">
           {tok && (
             <div
+              ref={coinRef}
               className={`cs-coin${drag ? " drag" : ""}`}
               style={{ left: tok.x, top: tok.y }}
               onPointerDown={tokDown}

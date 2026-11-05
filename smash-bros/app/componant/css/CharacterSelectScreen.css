@@ -19,6 +19,7 @@
 .cs-grid { padding: 20px 24px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
 .cs-tile {
   position: relative; width: 84px; height: 48px; flex: none; box-sizing: border-box; overflow: hidden;
+  contain: layout paint style;
   border: 3px solid #3a3f78;
   background: repeating-linear-gradient(45deg, rgba(154, 160, 255, .1) 0 5px, transparent 5px 10px), linear-gradient(180deg, #2a2f78, #12143a);
 }
@@ -100,16 +101,16 @@
 
 /* Pièce + main + tir */
 .cs-layer { position: absolute; inset: 0; pointer-events: none; z-index: 5; }
-.cs-coin { position: absolute; width: 36px; height: 36px; pointer-events: auto; touch-action: none; transition: transform .14s; filter: drop-shadow(0 3px 3px rgba(0, 0, 0, .6)); }
+.cs-coin { position: absolute; width: 36px; height: 36px; pointer-events: auto; touch-action: none; transition: transform .14s; will-change: left, top, transform; filter: drop-shadow(0 3px 3px rgba(0, 0, 0, .6)); }
 .cs-coin.drag { pointer-events: none; transform: scale(1.22); filter: drop-shadow(0 12px 10px rgba(0, 0, 0, .6)); }
 .cs-coin-hit { position: absolute; inset: -28px; border-radius: 50%; }
 .cs-coin img { position: absolute; inset: 0; width: 36px; height: 36px; border-radius: 50%; pointer-events: none; }
-.cs-hand { position: absolute; left: 0; top: 0; width: 70px; height: 60px; pointer-events: none; opacity: 0; will-change: transform; filter: drop-shadow(0 4px 3px rgba(0, 0, 0, .55)); }
+.cs-hand { position: absolute; left: 0; top: 0; width: 70px; height: 60px; pointer-events: none; opacity: 0; will-change: transform; contain: layout paint; filter: drop-shadow(0 4px 3px rgba(0, 0, 0, .55)); }
 .cs-hand img { position: absolute; left: 0; top: 0; image-rendering: pixelated; }
 .cs-h-idle { width: 62px; height: 40px; transform: scaleX(-1); }
 .cs-h-grab { width: 53px; height: 50px; }
 .cs-h-gun { width: 70px; height: 55px; }
-.cs-shot { position: absolute; width: 45px; height: 30px; image-rendering: pixelated; pointer-events: none; }
+.cs-shot { position: absolute; width: 45px; height: 30px; image-rendering: pixelated; pointer-events: none; will-change: transform; }
 
 /* ---------- Téléphone vertical : scène 720×1280 ----------
    Grille en haut (7 vignettes par ligne), carte du joueur puis aperçu + boutons dessous. */
