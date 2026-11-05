@@ -138,14 +138,15 @@ export default function SmashIntro({
       <video
         ref={videoRef}
         className="smash-intro__video"
-        autoPlay muted loop playsInline preload="auto"
+        autoPlay muted loop playsInline preload="metadata"
         aria-label="Logo en flammes"
         onClick={handleOpen}
         onLoadedData={() => setError(false)}
+        onCanPlay={() => setError(false)}
         onError={() => setError(true)}
       >
         {webmSrc && <source src={webmSrc} type="video/webm" />}
-        {mp4Src && <source src={mp4Src} type="video/mp4" onError={() => setError(true)} />}
+        {mp4Src && <source src={mp4Src} type="video/mp4" />}
       </video>
       <div className="smash-intro__vignette" />
       <canvas ref={canvasRef} className="smash-intro__embers" />

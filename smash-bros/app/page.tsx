@@ -718,7 +718,7 @@ export default function Home() {
   );
 
   return (
-    <SmashIntro mp4Src="/smash-video.mp4">
+    <SmashIntro webmSrc="/smash-video.webm" mp4Src="/smash-video.mp4">
       {authChecked && !user && (
         <div className="smash-intro__actions">
           <MeleeButton text="Connexion" onClick={handleLogin42} />
