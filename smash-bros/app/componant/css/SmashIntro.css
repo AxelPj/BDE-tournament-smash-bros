@@ -173,7 +173,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: min(96vw, 1320px);
+  width: min(96vw, 1600px);
   gap: clamp(110px, 34vw, 520px);
 }
 .smash-intro__menu-col {
