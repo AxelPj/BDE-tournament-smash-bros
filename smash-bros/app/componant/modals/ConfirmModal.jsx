@@ -7,9 +7,20 @@ import MeleeButton from "../ui/MeleeButton";
  *         defaultNo (true : « Non » en surbrillance), onYes, onNo, open
  */
 /** @param {Record<string, any>} props */
-export default function ConfirmModal({ title = "Attention", question, caption, yesLabel = "Oui", noLabel = "Non", defaultNo = true, onYes, onNo, open }) {
+export default function ConfirmModal({
+  title = "Attention",
+  question,
+  caption,
+  yesLabel = "Oui",
+  noLabel = "Non",
+  defaultNo = true,
+  onYes,
+  onNo,
+  open,
+  variant = "",
+}) {
   return (
-    <MeleeFrame open={open} onClose={onNo} title={title} caption={caption}>
+    <MeleeFrame open={open} onClose={onNo} title={title} caption={caption} className={variant}>
       <div className="mm-center" style={{ gap: "calc(3 * var(--u))" }}>
         <span className="mm-big">{question}</span>
         <div className="mm-btns">

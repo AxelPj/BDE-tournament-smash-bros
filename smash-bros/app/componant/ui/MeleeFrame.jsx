@@ -17,7 +17,16 @@ export const SHEET_QUERY = "(max-width: 760px), (max-height: 520px)";
  *  - onClose    appelé sur Échap ou clic sur le fond
  *  - children   contenu. Avec sideLabel : 1er enfant = colonne gauche, 2e = panneau turquoise
  */
-export default function MeleeFrame({ title, sideLabel, caption, open = true, fullScreen = false, onClose, children }) {
+export default function MeleeFrame({
+  title,
+  sideLabel,
+  caption,
+  open = true,
+  fullScreen = false,
+  onClose,
+  className = "",
+  children,
+}) {
   const uid = "mf" + useId().replace(/[^a-zA-Z0-9]/g, "");
   const side = !!sideLabel;
   const frameRef = useRef(null);
@@ -85,7 +94,7 @@ export default function MeleeFrame({ title, sideLabel, caption, open = true, ful
     >
       <div
         ref={frameRef}
-        className={`mm${fullScreen ? " mm--fs" : ""}`}
+        className={`mm${fullScreen ? " mm--fs" : ""}${className ? ` ${className}` : ""}`}
         role="dialog"
         aria-modal="true"
         aria-label={title}

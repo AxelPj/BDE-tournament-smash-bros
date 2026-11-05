@@ -534,6 +534,31 @@
   .mm-split { grid-template-columns: auto minmax(0, 1fr); padding-left: 0; }
 
   .mm .mm-close { display: grid; }
+
+  .mm-purchase-success .mm-body {
+    justify-content: center;
+    overflow-y: hidden;
+  }
+  .mm-purchase-success .mm-center {
+    width: 100%;
+    gap: 24px;
+    padding: 8px 4px;
+    box-sizing: border-box;
+  }
+  .mm-purchase-success .mm-big {
+    max-width: 100%;
+    font-size: clamp(26px, 8vw, 38px);
+    line-height: 1.15;
+  }
+  .mm-purchase-success .mm-btns {
+    width: min(100%, 320px);
+    flex-direction: column;
+    gap: 12px;
+  }
+  .mm-purchase-success .mm-btns .mbtn {
+    width: 100%;
+    min-height: 48px;
+  }
 }
 
 /* Bouton fermer : uniquement en mode feuille (pas de fond cliquable autour) */

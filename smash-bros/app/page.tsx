@@ -994,6 +994,7 @@ export default function Home() {
 
       <ConfirmModal
         open={modal === "purchase-success"}
+        variant="mm-purchase-success"
         title="Achat confirmé"
         question={`${purchasedItem?.name || "Objet"} ajouté à ton inventaire`}
         caption="Tu peux maintenant retrouver et utiliser cet objet depuis ton profil, dans la section Inventaire."
