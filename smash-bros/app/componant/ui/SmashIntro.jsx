@@ -51,22 +51,57 @@ export default function SmashIntro({
     const cv = canvasRef.current;
     if (!cv) return;
     const ctx = cv.getContext("2d");
-    let W = 0, H = 0, raf = 0;
+    if (!ctx) return;
+
+    const lowPower = (navigator.hardwareConcurrency || 4) <= 4;
+    const particleCount = lowPower ? 35 : 55;
+    const maxDpr = lowPower ? 1 : 1.5;
+    const frameDuration = 1000 / 30;
+    let W = 0, H = 0, raf = 0, lastFrame = 0;
+    let visible = document.visibilityState === "visible";
+
     const size = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
       W = cv.clientWidth; H = cv.clientHeight;
       cv.width = W * dpr; cv.height = H * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     size();
     window.addEventListener("resize", size);
+
+    // Une seule texture est réutilisée pour chaque braise au lieu de recréer
+    // un dégradé radial 30 fois par seconde.
+    const ember = document.createElement("canvas");
+    ember.width = ember.height = 32;
+    const emberCtx = ember.getContext("2d");
+    if (!emberCtx) return;
+    const gradient = emberCtx.createRadialGradient(16, 16, 0, 16, 16, 16);
+    gradient.addColorStop(0, "rgba(255,220,140,0.9)");
+    gradient.addColorStop(0.4, "rgba(255,120,30,0.5)");
+    gradient.addColorStop(1, "rgba(255,60,0,0)");
+    emberCtx.fillStyle = gradient;
+    emberCtx.fillRect(0, 0, 32, 32);
+
     const spawn = () => ({
       x: W * (0.25 + Math.random() * 0.5), y: H * (0.55 + Math.random() * 0.35),
       vx: (Math.random() - 0.5) * 0.4, vy: -(0.4 + Math.random() * 1.2),
       r: 0.6 + Math.random() * 2.2, life: 0, max: 120 + Math.random() * 160,
     });
-    const P = Array.from({ length: 70 }, () => { const p = spawn(); p.life = Math.random() * p.max; return p; });
-    const tick = () => {
+    const P = Array.from({ length: particleCount }, () => {
+      const p = spawn();
+      p.life = Math.random() * p.max;
+      return p;
+    });
+    const tick = (now) => {
+      if (!visible) {
+        raf = 0;
+        return;
+      }
+      if (now - lastFrame < frameDuration) {
+        raf = requestAnimationFrame(tick);
+        return;
+      }
+      lastFrame = now;
       ctx.clearRect(0, 0, W, H);
       ctx.globalCompositeOperation = "lighter";
       for (const p of P) {
@@ -75,17 +110,27 @@ export default function SmashIntro({
         p.y += p.vy;
         const k = 1 - p.life / p.max;
         if (k <= 0) { Object.assign(p, spawn()); continue; }
-        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 4);
-        g.addColorStop(0, `rgba(255,220,140,${0.9 * k})`);
-        g.addColorStop(0.4, `rgba(255,120,30,${0.5 * k})`);
-        g.addColorStop(1, "rgba(255,60,0,0)");
-        ctx.fillStyle = g;
-        ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2); ctx.fill();
+        const size = p.r * 8;
+        ctx.globalAlpha = k;
+        ctx.drawImage(ember, p.x - size / 2, p.y - size / 2, size, size);
       }
+      ctx.globalAlpha = 1;
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", size); };
+    const onVisibilityChange = () => {
+      visible = document.visibilityState === "visible";
+      if (visible && !raf) {
+        lastFrame = 0;
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", size);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
   }, []);
 
   return (
