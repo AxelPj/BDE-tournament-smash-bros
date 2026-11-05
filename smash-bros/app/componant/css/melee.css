@@ -208,11 +208,19 @@
 }
 .mm-bracket {
   display: flex; align-items: stretch; gap: calc(2.2 * var(--u)); overflow-x: auto;
-  padding: calc(.4 * var(--u)) calc(.2 * var(--u));
+  padding: calc(.7 * var(--u)) calc(.2 * var(--u)) calc(1 * var(--u));
+  min-height: calc(31 * var(--u));
 }
 .mm-round {
-  position: relative; display: flex; flex-direction: column; justify-content: space-around;
-  gap: calc(1 * var(--u)); min-width: calc(19 * var(--u));
+  position: relative; display: grid; grid-template-rows: auto minmax(0, 1fr);
+  gap: calc(1 * var(--u)); min-width: calc(19 * var(--u)); align-self: stretch;
+}
+.mm-round-matches {
+  display: grid;
+  grid-template-rows: repeat(var(--match-count), minmax(0, 1fr));
+  align-items: center;
+  gap: calc(.8 * var(--u));
+  min-height: calc(27 * var(--u));
 }
 .mm-round-title {
   font-weight: 800; font-size: calc(1.1 * var(--u)); letter-spacing: calc(.2 * var(--u)); color: #9aa0ff;
@@ -222,6 +230,7 @@
   position: relative; display: flex; flex-direction: column; gap: calc(.35 * var(--u)); padding: calc(.55 * var(--u)) calc(.75 * var(--u));
   background: rgba(15, 18, 64, .85); border: calc(.18 * var(--u)) solid #3a42e6; border-radius: calc(.6 * var(--u));
   font-size: calc(1.35 * var(--u)); color: #fff; text-align: left; font-family: inherit;
+  width: 100%; min-width: 0; box-sizing: border-box;
 }
 .mm-round:not(:last-child) .mm-bmatch::after {
   content: ""; position: absolute; right: calc(-2.2 * var(--u)); top: 50%; width: calc(2.2 * var(--u)); height: calc(.2 * var(--u));

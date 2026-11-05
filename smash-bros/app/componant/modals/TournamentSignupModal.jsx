@@ -310,7 +310,11 @@ export default function TournamentSignupModal({
   const renderTree = (rounds, isLosers = false) => (
     <div className="mm-bracket">
       {rounds.map(([roundNum, rMatches]) => (
-        <div key={roundNum} className="mm-round">
+        <div
+          key={roundNum}
+          className="mm-round"
+          style={{ "--match-count": rMatches.length }}
+        >
           <div className="mm-round-title">
             {roundNum >= 100
               ? roundNum === 100
@@ -320,7 +324,8 @@ export default function TournamentSignupModal({
               ? `Losers T${roundNum}`
               : `Tour ${roundNum}`}
           </div>
-          {rMatches.map((m) => {
+          <div className="mm-round-matches">
+            {rMatches.map((m) => {
             const p1Obj = m.player1_id ? playerObjMap[m.player1_id] : null;
             const p2Obj = m.player2_id ? playerObjMap[m.player2_id] : null;
             const p1 = getPlayerName(m.player1_id);
@@ -334,7 +339,7 @@ export default function TournamentSignupModal({
             const p1Gages = matchGages.filter((g) => g.imposer_id === m.player1_id);
             const p2Gages = matchGages.filter((g) => g.imposer_id === m.player2_id);
 
-            return (
+              return (
               <button
                 key={m.code}
                 type="button"
@@ -403,8 +408,9 @@ export default function TournamentSignupModal({
                   <span>{m.score2 ?? "-"}</span>
                 </div>
               </button>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
       ))}
     </div>
