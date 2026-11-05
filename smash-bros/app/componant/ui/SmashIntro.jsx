@@ -145,8 +145,8 @@ export default function SmashIntro({
         onCanPlay={() => setError(false)}
         onError={() => setError(true)}
       >
-        {webmSrc && <source src={webmSrc} type="video/webm" />}
         {mp4Src && <source src={mp4Src} type="video/mp4" />}
+        {webmSrc && <source src={webmSrc} type="video/webm" />}
       </video>
       <div className="smash-intro__vignette" />
       <canvas ref={canvasRef} className="smash-intro__embers" />
