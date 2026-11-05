@@ -44,7 +44,9 @@ def oauth_42_authorize(body: OAuthAuthorizeRequest, response: Response):
         max_age=settings.oauth_state_ttl_seconds,
         httponly=True,
         secure=settings.cookie_secure,
-        samesite="lax",
+        # Le retour OAuth vient d'un autre site (42). En HTTPS, None évite
+        # que les protections anti-pistage mobiles suppriment le state.
+        samesite="none" if settings.cookie_secure else "lax",
     )
     return OAuthAuthorizeResponse(authorization_url=authorization_url)
 

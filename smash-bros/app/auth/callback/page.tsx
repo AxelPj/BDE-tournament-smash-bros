@@ -26,6 +26,7 @@ function CallbackHandler() {
 
     fetch("/api/auth/oauth/42/callback", {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         code,
