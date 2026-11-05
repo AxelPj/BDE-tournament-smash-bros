@@ -76,6 +76,21 @@ def test_first_42_login_grants_welcome_bonus_once(db):
     ).count() == 1
 
 
+def test_existing_42_account_without_bonus_is_repaired_on_login(db):
+    from app.economy.models import TiltTransaction, TransactionKind
+    from app.users.service import create_user, get_or_create_42_user
+
+    user = create_user(db, "peach", "Peach", intra_id=4242)
+    assert user.balance == 0
+
+    get_or_create_42_user(db, 4242, "peach", "Peach")
+
+    assert user.balance == 100
+    assert db.query(TiltTransaction).filter_by(
+        user_id=user.id, kind=TransactionKind.WELCOME_BONUS
+    ).count() == 1
+
+
 def test_42_login_refreshes_intra_photo(db):
     """Sans combattant choisi, la photo 42 suit celle de l'intra."""
     from app.users.service import get_or_create_42_user

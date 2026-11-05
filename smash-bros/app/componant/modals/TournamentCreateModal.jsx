@@ -6,7 +6,7 @@ import { fmt } from "./ShopModal";
 /**
  * Création de tournoi (admin) en 3 étapes : Informations → Règles → Publication.
  * Props : onPublish(data), onClose, open, defaults (valeurs initiales, optionnel)
- * data = { name, date, time, maxPlayers, reward, format, lives, time_limit, items }
+ * data = { name, date, time, maxPlayers, reward, matchReward, format, lives, time_limit, items }
  */
 const RULES = [
   { key: "format", label: "Format", options: ["1 contre 1", "2 contre 2", "Chacun pour soi"] },
@@ -37,6 +37,7 @@ export default function TournamentCreateModal({
     time: "14:00",
     maxPlayers: 16,
     reward: 1000,
+    matchReward: 20,
     format: "1 contre 1",
     losers_bracket: "Oui",
     lives: 3,
@@ -86,7 +87,10 @@ export default function TournamentCreateModal({
   const isPastDate = Boolean(todayStr && d.date && d.date < todayStr);
   const rewardValue = Number(d.reward);
   const rewardValid = Number.isInteger(rewardValue) && rewardValue >= 0 && rewardValue <= 100000;
-  const infoOk = Boolean(d.name.trim() && d.date && !isPastDate && rewardValid);
+  const matchRewardValue = Number(d.matchReward);
+  const matchRewardValid =
+    Number.isInteger(matchRewardValue) && matchRewardValue >= 0 && matchRewardValue <= 100000;
+  const infoOk = Boolean(d.name.trim() && d.date && !isPastDate && rewardValid && matchRewardValid);
   const dateLabel = d.date
     ? new Date(d.date + "T00:00").toLocaleDateString("fr-FR", {
         weekday: "short",
@@ -193,6 +197,23 @@ export default function TournamentCreateModal({
               Le gain doit être un nombre entier entre 0 et 100 000.
             </span>
           )}
+          <label className="mm-fieldwrap">
+            <span className="mm-label">Gain par match gagné (Tilts)</span>
+            <input
+              className="mm-field"
+              type="number"
+              min="0"
+              max="100000"
+              step="1"
+              value={d.matchReward}
+              onChange={(e) => set("matchReward", e.target.value)}
+            />
+          </label>
+          {!matchRewardValid ? (
+            <span style={{ color: "#ff6b6b", fontWeight: 700, fontSize: "calc(1.45 * var(--u))" }}>
+              Le gain par match doit être un nombre entier entre 0 et 100 000.
+            </span>
+          ) : null}
           <div className="mm-btns">
             <MeleeButton
               text="Suivant"
@@ -213,6 +234,7 @@ export default function TournamentCreateModal({
           <PanelRow label="Joueurs" value={d.maxPlayers} />
           <PanelRow label="Vies" value={d.lives} />
           <PanelRow label="Vainqueur" value={fmt(d.reward)} gold />
+          <PanelRow label="Par victoire" value={fmt(d.matchReward)} gold />
 
           <Sep />
           <span className="mm-ptag" style={{ color: "#ffe58a" }}>
@@ -347,8 +369,8 @@ export default function TournamentCreateModal({
         <span className="mm-kicker">Étape 3 / 3</span>
         <span className="mm-big">Publier {d.name} ?</span>
         <span className="mm-sub">
-          {dateLabel} · {d.time.replace(":00", "h")} · {d.maxPlayers} joueurs · {fmt(d.reward)}{" "}
-          Tilts au vainqueur
+          {dateLabel} · {d.time.replace(":00", "h")} · {d.maxPlayers} joueurs · {fmt(d.reward)} Tilts au
+          vainqueur · {fmt(d.matchReward)} Tilts par victoire
         </span>
         <div className="mm-btns" style={{ marginTop: "calc(1 * var(--u))" }}>
           <MeleeButton text="Modifier" mirror height={56} onClick={() => setStep(0)} />

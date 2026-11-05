@@ -434,7 +434,10 @@ export default function Home() {
         method: "POST",
         body: JSON.stringify({
           name: data.name,
-          rewards: { champion: Math.min(Math.max(Number(data.reward) || 200, 0), 100000) },
+          rewards: {
+            champion: Math.min(Math.max(Number(data.reward) || 200, 0), 100000),
+            match_won: Math.min(Math.max(Number(data.matchReward) || 0, 0), 100000),
+          },
           scheduled_date: data.date || undefined,
           starts_at: startsAt,
           date_label: dateLabel,

@@ -161,6 +161,7 @@ export interface PlayableMatch {
 export interface TournamentFormData {
   name: string;
   reward?: string | number;
+  matchReward?: string | number;
   date?: string;
   time?: string;
   maxPlayers?: string | number;

@@ -88,6 +88,7 @@ def get_or_create_42_user(
             user.avatar_url = avatar_url
             db.commit()
             db.refresh(user)
+        _grant_welcome_bonus(db, user)
         return user
 
     clean_display = display_name.strip() or login.strip()
@@ -120,6 +121,7 @@ def get_or_create_42_user(
         db.rollback()
         existing_by_intra = get_user_by_intra_id(db, intra_id)
         if existing_by_intra is not None:
+            _grant_welcome_bonus(db, existing_by_intra)
             return existing_by_intra
         raise
     db.refresh(user)
