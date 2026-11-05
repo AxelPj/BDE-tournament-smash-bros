@@ -418,14 +418,18 @@ export default function TournamentSignupModal({
     );
 
     // Pari possible : connecté, match ouvert aux paris, et le joueur n'y participe pas.
+    const isMatchPlayer = Boolean(
+      currentUserId &&
+        (currentUserId === activeMatch?.player1_id || currentUserId === activeMatch?.player2_id)
+    );
+    // Les spectateurs connectés peuvent parier, même s'ils ne sont pas inscrits au tournoi.
     const canBet = Boolean(
       currentUserId &&
         onPlaceBet &&
         activeMatch?.betting_open &&
         activeMatch.player1_id &&
         activeMatch.player2_id &&
-        currentUserId !== activeMatch.player1_id &&
-        currentUserId !== activeMatch.player2_id
+        !isMatchPlayer
     );
     const betBox = canBet ? (
       <BetBox

@@ -59,6 +59,23 @@ def test_42_login_keeps_chosen_fighter_avatar(db):
     assert again.avatar_url == "/fighters/peach.png"
 
 
+def test_first_42_login_grants_welcome_bonus_once(db):
+    from app.economy.models import TiltTransaction, TransactionKind
+    from app.users.service import get_or_create_42_user
+
+    user = get_or_create_42_user(db, 4242, "peach", "Peach")
+    assert user.balance == 100
+    assert db.query(TiltTransaction).filter_by(
+        user_id=user.id, kind=TransactionKind.WELCOME_BONUS
+    ).count() == 1
+
+    again = get_or_create_42_user(db, 4242, "peach", "Peach")
+    assert again.balance == 100
+    assert db.query(TiltTransaction).filter_by(
+        user_id=user.id, kind=TransactionKind.WELCOME_BONUS
+    ).count() == 1
+
+
 def test_42_login_refreshes_intra_photo(db):
     """Sans combattant choisi, la photo 42 suit celle de l'intra."""
     from app.users.service import get_or_create_42_user

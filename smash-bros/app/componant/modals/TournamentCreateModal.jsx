@@ -84,7 +84,9 @@ export default function TournamentCreateModal({
   });
 
   const isPastDate = Boolean(todayStr && d.date && d.date < todayStr);
-  const infoOk = Boolean(d.name.trim() && d.date && !isPastDate);
+  const rewardValue = Number(d.reward);
+  const rewardValid = Number.isInteger(rewardValue) && rewardValue >= 0 && rewardValue <= 100000;
+  const infoOk = Boolean(d.name.trim() && d.date && !isPastDate && rewardValid);
   const dateLabel = d.date
     ? new Date(d.date + "T00:00").toLocaleDateString("fr-FR", {
         weekday: "short",
@@ -174,6 +176,23 @@ export default function TournamentCreateModal({
               ))}
             </div>
           </div>
+          <label className="mm-fieldwrap">
+            <span className="mm-label">Gain du vainqueur (Tilts)</span>
+            <input
+              className="mm-field"
+              type="number"
+              min="0"
+              max="100000"
+              step="1"
+              value={d.reward}
+              onChange={(e) => set("reward", e.target.value)}
+            />
+          </label>
+          {!rewardValid && (
+            <span style={{ color: "#ff6b6b", fontWeight: 700, fontSize: "calc(1.45 * var(--u))" }}>
+              Le gain doit être un nombre entier entre 0 et 100 000.
+            </span>
+          )}
           <div className="mm-btns">
             <MeleeButton
               text="Suivant"

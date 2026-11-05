@@ -9,6 +9,7 @@ from app.core.db import Base, enum_column
 
 class TransactionKind(StrEnum):
     ADMIN_ADJUSTMENT = "admin_adjustment"
+    WELCOME_BONUS = "welcome_bonus"
     TOURNAMENT_REWARD = "tournament_reward"
     SHOP_PURCHASE = "shop_purchase"
     BET_STAKE = "bet_stake"

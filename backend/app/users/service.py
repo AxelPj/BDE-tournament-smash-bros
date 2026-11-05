@@ -6,10 +6,14 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.duels.models import Duel, DuelStatus
+from app.economy.models import TransactionKind
+from app.economy.service import record_transaction
 from app.tournaments.bracket import MatchStatus
 from app.tournaments.models import Participant, TournamentMatch
 from app.users.models import User
 from app.users.schemas import UserStatsRead
+
+WELCOME_BONUS = 100
 
 
 class UsernameTakenError(Exception):
@@ -99,6 +103,7 @@ def get_or_create_42_user(
             existing.display_name = clean_display[:64]
         db.commit()
         db.refresh(existing)
+        _grant_welcome_bonus(db, existing)
         return existing
 
     username = make_unique_username(db, login)
@@ -118,7 +123,21 @@ def get_or_create_42_user(
             return existing_by_intra
         raise
     db.refresh(user)
+    _grant_welcome_bonus(db, user)
     return user
+
+
+def _grant_welcome_bonus(db: Session, user: User) -> None:
+    """Crédite une seule fois le bonus du premier compte OAuth."""
+    record_transaction(
+        db,
+        user.id,
+        WELCOME_BONUS,
+        TransactionKind.WELCOME_BONUS,
+        "Bonus de bienvenue",
+        reference=f"welcome-bonus:user:{user.id}",
+    )
+    db.commit()
 
 
 def list_leaderboard(db: Session) -> list[UserStatsRead]:
