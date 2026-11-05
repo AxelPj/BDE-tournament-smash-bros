@@ -54,6 +54,7 @@ export default function Home() {
   const [sprites, setSprites] = useState<Sprite[]>([]);
   const [fighters, setFighters] = useState<Fighter[]>([]);
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
+  const [purchasedItem, setPurchasedItem] = useState<ShopItem | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [playableMatches, setPlayableMatches] = useState<PlayableMatch[]>([]);
@@ -351,6 +352,8 @@ export default function Home() {
       });
       if (ok) {
         await Promise.all([loadStats(), loadShopAndInventory(user)]);
+        setPurchasedItem(item);
+        setModal("purchase-success");
       }
     });
 
@@ -987,6 +990,24 @@ export default function Home() {
         caption="Tu pourras te réinscrire tant que l'arbre n'est pas lancé"
         onYes={() => handleUnregisterTournament(pendingUnregister)}
         onNo={() => setModal("signup")}
+      />
+
+      <ConfirmModal
+        open={modal === "purchase-success"}
+        title="Achat confirmé"
+        question={`${purchasedItem?.name || "Objet"} ajouté à ton inventaire`}
+        caption="Tu peux maintenant retrouver et utiliser cet objet depuis ton profil, dans la section Inventaire."
+        yesLabel="Voir l'inventaire"
+        noLabel="Retour au shop"
+        defaultNo
+        onYes={() => {
+          setPurchasedItem(null);
+          setModal("inv");
+        }}
+        onNo={() => {
+          setPurchasedItem(null);
+          setModal("shop");
+        }}
       />
 
       <ConfirmModal
