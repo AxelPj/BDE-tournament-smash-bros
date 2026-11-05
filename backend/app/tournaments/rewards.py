@@ -25,6 +25,7 @@ class RewardSettings(BaseModel):
     participation: int = Field(default=100, ge=0, le=100_000)
     match_played: int = Field(default=10, ge=0, le=100_000)
     match_won: int = Field(default=20, ge=0, le=100_000)
+    match_lost: int = Field(default=0, ge=0, le=100_000)
     top8: int = Field(default=30, ge=0, le=100_000, description="5e à 8e")
     top4: int = Field(default=60, ge=0, le=100_000, description="3e et 4e")
     finalist: int = Field(default=100, ge=0, le=100_000)
@@ -119,6 +120,9 @@ def desired_rewards(db: Session, tournament: Tournament) -> dict[str, tuple[int,
         for user_id in (match.player1_id, match.player2_id):
             add(f"played:{match.code}", user_id, settings.match_played, f"Match joué ({match.code})")
         add(f"won:{match.code}", match.winner_id, settings.match_won, f"Match gagné ({match.code})")
+        loser = _loser(match)
+        if loser is not None:
+            add(f"lost:{match.code}", loser, settings.match_lost, f"Match perdu ({match.code})")
     for user_id, tier in placement_tiers(tournament).items():
         add("placement", user_id, getattr(settings, tier), PLACEMENT_LABELS[tier])
 

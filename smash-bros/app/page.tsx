@@ -431,6 +431,7 @@ export default function Home() {
             rewards: {
               champion: Math.min(Math.max(Number(data.reward) || 0, 0), 100000),
               match_won: Math.min(Math.max(Number(data.matchReward) || 0, 0), 100000),
+              match_lost: Math.min(Math.max(Number(data.lossReward) || 0, 0), 100000),
             },
           }),
         });
@@ -456,6 +457,7 @@ export default function Home() {
           rewards: {
             champion: Math.min(Math.max(Number(data.reward) || 200, 0), 100000),
             match_won: Math.min(Math.max(Number(data.matchReward) || 0, 0), 100000),
+            match_lost: Math.min(Math.max(Number(data.lossReward) || 0, 0), 100000),
           },
           scheduled_date: data.date || undefined,
           starts_at: startsAt,
@@ -932,6 +934,7 @@ export default function Home() {
                 name: editingTournament.name,
                 reward: editingTournament.rewards?.champion ?? 200,
                 matchReward: editingTournament.rewards?.match_won ?? 20,
+                lossReward: editingTournament.rewards?.match_lost ?? 0,
               }
             : {}
         }

@@ -103,6 +103,7 @@ export interface RawTournament {
   rewards?: {
     champion?: number;
     match_won?: number;
+    match_lost?: number;
   };
   created_at: string;
   date_label?: string | null;
@@ -168,6 +169,7 @@ export interface TournamentFormData {
   id?: number;
   reward?: string | number;
   matchReward?: string | number;
+  lossReward?: string | number;
   date?: string;
   time?: string;
   maxPlayers?: string | number;

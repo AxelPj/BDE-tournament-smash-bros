@@ -6,7 +6,7 @@ import { fmt } from "./ShopModal";
 /**
  * Création de tournoi (admin) en 3 étapes : Informations → Règles → Publication.
  * Props : onPublish(data), onClose, open, defaults (valeurs initiales, optionnel)
- * data = { name, date, time, maxPlayers, reward, matchReward, format, lives, time_limit, items }
+ * data = { name, date, time, maxPlayers, reward, matchReward, lossReward, format, lives, time_limit, items }
  */
 const RULES = [
   { key: "format", label: "Format", options: ["1 contre 1", "2 contre 2", "Chacun pour soi"] },
@@ -39,6 +39,7 @@ export default function TournamentCreateModal({
     maxPlayers: 16,
     reward: 1000,
     matchReward: 20,
+    lossReward: 0,
     format: "1 contre 1",
     losers_bracket: "Oui",
     lives: 3,
@@ -92,7 +93,12 @@ export default function TournamentCreateModal({
   const matchRewardValue = Number(d.matchReward);
   const matchRewardValid =
     Number.isInteger(matchRewardValue) && matchRewardValue >= 0 && matchRewardValue <= 100000;
-  const infoOk = Boolean(d.name.trim() && d.date && !isPastDate && rewardValid && matchRewardValid);
+  const lossRewardValue = Number(d.lossReward);
+  const lossRewardValid =
+    Number.isInteger(lossRewardValue) && lossRewardValue >= 0 && lossRewardValue <= 100000;
+  const infoOk = Boolean(
+    d.name.trim() && d.date && !isPastDate && rewardValid && matchRewardValid && lossRewardValid
+  );
   const dateLabel = d.date
     ? new Date(d.date + "T00:00").toLocaleDateString("fr-FR", {
         weekday: "short",
@@ -133,7 +139,7 @@ export default function TournamentCreateModal({
         caption="Étape 1 / 3 · Informations du tournoi"
       >
         <div className="mm-main" style={{ gap: "calc(1.1 * var(--u))", paddingRight: "calc(3 * var(--u))" }}>
-          {adminNav}
+          {!isEditing && adminNav}
           <label className="mm-fieldwrap">
             <span className="mm-label">Nom du tournoi</span>
             <input
@@ -217,6 +223,23 @@ export default function TournamentCreateModal({
               Le gain par match doit être un nombre entier entre 0 et 100 000.
             </span>
           ) : null}
+          <label className="mm-fieldwrap">
+            <span className="mm-label">Gain par match perdu (Tilts)</span>
+            <input
+              className="mm-field"
+              type="number"
+              min="0"
+              max="100000"
+              step="1"
+              value={d.lossReward}
+              onChange={(e) => set("lossReward", e.target.value)}
+            />
+          </label>
+          {!lossRewardValid ? (
+            <span style={{ color: "#ff6b6b", fontWeight: 700, fontSize: "calc(1.45 * var(--u))" }}>
+              Le gain par match perdu doit être un nombre entier entre 0 et 100 000.
+            </span>
+          ) : null}
           <div className="mm-btns">
             <MeleeButton
               text="Suivant"
@@ -238,6 +261,7 @@ export default function TournamentCreateModal({
           <PanelRow label="Vies" value={d.lives} />
           <PanelRow label="Vainqueur" value={fmt(d.reward)} gold />
           <PanelRow label="Par victoire" value={fmt(d.matchReward)} gold />
+          <PanelRow label="Par défaite" value={fmt(d.lossReward)} gold />
 
           <Sep />
           <span className="mm-ptag" style={{ color: "#ffe58a" }}>
@@ -343,7 +367,7 @@ export default function TournamentCreateModal({
         caption="Étape 2 / 3 · Règles du match"
       >
         <div className="mm-center" style={{ gap: "calc(1.6 * var(--u))" }}>
-          <div style={{ width: "78%" }}>{adminNav}</div>
+          {!isEditing && <div style={{ width: "78%" }}>{adminNav}</div>}
           <div className="mm-list" style={{ width: "64%" }}>
             {RULES.map((r, i) => (
               <div
@@ -390,12 +414,12 @@ export default function TournamentCreateModal({
       caption={isEditing ? "Les changements seront appliqués immédiatement" : "Les joueurs seront notifiés"}
     >
       <div className="mm-center" style={{ gap: "calc(1.4 * var(--u))" }}>
-        <div style={{ width: "78%" }}>{adminNav}</div>
+        {!isEditing && <div style={{ width: "78%" }}>{adminNav}</div>}
         <span className="mm-kicker">Étape 3 / 3</span>
         <span className="mm-big">{isEditing ? "Modifier" : "Publier"} {d.name} ?</span>
         <span className="mm-sub">
           {dateLabel} · {d.time.replace(":00", "h")} · {d.maxPlayers} joueurs · {fmt(d.reward)} Tilts au
-          vainqueur · {fmt(d.matchReward)} Tilts par victoire
+          vainqueur · {fmt(d.matchReward)} Tilts par victoire · {fmt(d.lossReward)} Tilts par défaite
         </span>
         <div className="mm-btns" style={{ marginTop: "calc(1 * var(--u))" }}>
           <MeleeButton text="Modifier" mirror height={56} onClick={() => setStep(0)} />

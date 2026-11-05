@@ -58,6 +58,17 @@ def test_match_rewards_follow_corrections(db):
     assert balances(db, [p0, p3]) == [100, 100]
 
 
+def test_match_loser_reward_is_paid(db):
+    t, (p0, p1) = setup_tournament(db, 2)
+    service.update_tournament(
+        db, t, None, None, RewardSettings(match_lost=7)
+    )
+
+    win(db, t, "W1-1")
+
+    assert balances(db, [p0, p1]) == [100 + 10 + 20, 100 + 10 + 7]
+
+
 def test_byes_are_not_rewarded(db):
     t, (p0, _, _) = setup_tournament(db, 3)  # p0 passe le 1er tour par un bye
 
