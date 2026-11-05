@@ -23,6 +23,7 @@ export default function TournamentCreateModal({
   onOpenShopAdmin,
   onOpenAdminUsers,
   onOpenTournamentSignup,
+  onEditTournament,
   onDeleteTournament,
   tournaments = [],
   onClose,
@@ -61,10 +62,11 @@ export default function TournamentCreateModal({
   }, []);
 
   useEffect(() => {
-    if (open) {
+    if (open && defaults.id !== d.id) {
       setStep(0);
+      setD((s) => ({ ...s, ...defaults }));
     }
-  }, [open]);
+  }, [open, defaults, d.id]);
 
   useEffect(() => {
     if (!open || step !== 1) return;
@@ -101,6 +103,7 @@ export default function TournamentCreateModal({
 
   const activeTournament =
     tournaments.find((t) => t.status === "registration" || t.status === "in_progress") || null;
+  const isEditing = Boolean(d.id);
 
   const adminNav = (onOpenShopAdmin || onOpenAdminUsers) && (
     <div className="mm-seg" style={{ width: "100%" }}>
@@ -125,7 +128,7 @@ export default function TournamentCreateModal({
       <MeleeFrame
         open={open}
         onClose={onClose}
-        title="Settings Admin"
+        title={isEditing ? "Modifier le tournoi" : "Settings Admin"}
         sideLabel="Récap"
         caption="Étape 1 / 3 · Informations du tournoi"
       >
@@ -278,6 +281,23 @@ export default function TournamentCreateModal({
                   🗑
                 </button>
               )}
+              {onEditTournament && activeTournament && (
+                <button
+                  type="button"
+                  className="mm-field"
+                  style={{
+                    width: "auto",
+                    cursor: "pointer",
+                    fontSize: "calc(1.2 * var(--u))",
+                    padding: "calc(.5 * var(--u)) calc(.65 * var(--u))",
+                    borderColor: "#ffe58a",
+                    background: "rgba(255, 229, 138, .18)",
+                  }}
+                  onClick={() => onEditTournament(activeTournament)}
+                >
+                  Modifier
+                </button>
+              )}
             </div>
           )}
           {onOpenShopAdmin && (
@@ -363,11 +383,16 @@ export default function TournamentCreateModal({
     );
 
   return (
-    <MeleeFrame open={open} onClose={onClose} title="Publier" caption="Les joueurs seront notifiés">
+    <MeleeFrame
+      open={open}
+      onClose={onClose}
+      title={isEditing ? "Enregistrer" : "Publier"}
+      caption={isEditing ? "Les changements seront appliqués immédiatement" : "Les joueurs seront notifiés"}
+    >
       <div className="mm-center" style={{ gap: "calc(1.4 * var(--u))" }}>
         <div style={{ width: "78%" }}>{adminNav}</div>
         <span className="mm-kicker">Étape 3 / 3</span>
-        <span className="mm-big">Publier {d.name} ?</span>
+        <span className="mm-big">{isEditing ? "Modifier" : "Publier"} {d.name} ?</span>
         <span className="mm-sub">
           {dateLabel} · {d.time.replace(":00", "h")} · {d.maxPlayers} joueurs · {fmt(d.reward)} Tilts au
           vainqueur · {fmt(d.matchReward)} Tilts par victoire
@@ -375,7 +400,7 @@ export default function TournamentCreateModal({
         <div className="mm-btns" style={{ marginTop: "calc(1 * var(--u))" }}>
           <MeleeButton text="Modifier" mirror height={56} onClick={() => setStep(0)} />
           <MeleeButton
-            text="Publier"
+            text={isEditing ? "Enregistrer" : "Publier"}
             selected
             height={56}
             onClick={async () => {

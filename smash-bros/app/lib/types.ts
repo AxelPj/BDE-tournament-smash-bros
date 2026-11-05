@@ -99,6 +99,11 @@ export type TournamentRule = string | { label: string; value: string };
 export interface RawTournament {
   id: number;
   name: string;
+  status?: string;
+  rewards?: {
+    champion?: number;
+    match_won?: number;
+  };
   created_at: string;
   date_label?: string | null;
   max_players?: number | null;
@@ -160,6 +165,7 @@ export interface PlayableMatch {
 /** Données du formulaire de création de tournoi */
 export interface TournamentFormData {
   name: string;
+  id?: number;
   reward?: string | number;
   matchReward?: string | number;
   date?: string;

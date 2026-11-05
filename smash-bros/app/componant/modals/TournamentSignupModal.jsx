@@ -167,6 +167,7 @@ export default function TournamentSignupModal({
   balance = 0,
   onValidateGage,
   onDeleteTournament,
+  onEditTournament,
   onOpenCreate,
   onOpenShopAdmin,
   onOpenAdminUsers,
@@ -511,6 +512,13 @@ export default function TournamentSignupModal({
                 text="Supprimer"
                 height={38}
                 onClick={() => onDeleteTournament(t)}
+              />
+            )}
+            {isAdmin && onEditTournament && t?.status === "registration" && (
+              <MeleeButton
+                text="Modifier"
+                height={38}
+                onClick={() => onEditTournament(t)}
               />
             )}
             <MeleeButton text="Retour" height={38} onClick={onClose} />
@@ -861,6 +869,13 @@ export default function TournamentSignupModal({
               text="Supprimer"
               height={40}
               onClick={() => onDeleteTournament(t)}
+            />
+          )}
+          {isAdmin && onEditTournament && t?.status === "registration" && (
+            <MeleeButton
+              text="Modifier"
+              height={40}
+              onClick={() => onEditTournament(t)}
             />
           )}
           <MeleeButton text="Retour" height={40} onClick={onClose} />

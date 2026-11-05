@@ -60,6 +60,7 @@ export default function Home() {
   const [usingItem, setUsingItem] = useState<InventoryItem | null>(null);
   const [pendingUnregister, setPendingUnregister] = useState<Tournament | null>(null);
   const [pendingDeleteTournament, setPendingDeleteTournament] = useState<Tournament | null>(null);
+  const [editingTournament, setEditingTournament] = useState<Tournament | null>(null);
   const [pendingCancelScore, setPendingCancelScore] = useState<{
     tournamentId: number;
     matchCode: string;
@@ -422,6 +423,24 @@ export default function Home() {
   const handlePublishTournament = (data: TournamentFormData) =>
     withActionLock(async () => {
       if (!user) return;
+      if (data.id) {
+        const updated = await apiJson(`/api/tournaments/${data.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            name: data.name,
+            rewards: {
+              champion: Math.min(Math.max(Number(data.reward) || 0, 0), 100000),
+              match_won: Math.min(Math.max(Number(data.matchReward) || 0, 0), 100000),
+            },
+          }),
+        });
+        if (updated) {
+          setEditingTournament(null);
+          await loadTournamentsAndMatches(user);
+          setModal("signup");
+        }
+        return;
+      }
       const dateLabel = data.date
         ? `${formatShortDate(data.date + "T00:00")} · ${(data.time || "14:00").replace(":00", "h")}`
         : undefined;
@@ -878,7 +897,14 @@ export default function Home() {
           setPendingDeleteTournament(t);
           setModal("confirm-delete-tournament");
         }}
-        onOpenCreate={() => setModal("create")}
+        onEditTournament={(t: Tournament) => {
+          setEditingTournament(t);
+          setModal("create");
+        }}
+        onOpenCreate={() => {
+          setEditingTournament(null);
+          setModal("create");
+        }}
         onOpenShopAdmin={() => {
           loadShopAndInventory(user);
           setModal("shop-admin");
@@ -899,6 +925,16 @@ export default function Home() {
           setPendingDeleteTournament(t);
           setModal("confirm-delete-tournament");
         }}
+        defaults={
+          editingTournament
+            ? {
+                id: editingTournament.id,
+                name: editingTournament.name,
+                reward: editingTournament.rewards?.champion ?? 200,
+                matchReward: editingTournament.rewards?.match_won ?? 20,
+              }
+            : {}
+        }
         onOpenTournamentSignup={() => {
           loadTournamentsAndMatches(user);
           setModal("signup");
