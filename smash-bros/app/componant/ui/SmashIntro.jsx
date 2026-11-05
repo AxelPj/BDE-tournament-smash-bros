@@ -156,7 +156,7 @@ export default function SmashIntro({
         <span className="smash-intro__cta-text">{ctaText}</span>
       </button>
 
-      {children}
+      {open && children}
 
       {error && (
         <p className="smash-intro__error">
