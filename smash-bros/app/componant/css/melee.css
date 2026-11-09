@@ -197,6 +197,50 @@
   max-height: calc(36 * var(--u)); overflow-y: auto; overflow-x: auto;
   padding: calc(.4 * var(--u)); scrollbar-width: thin; scrollbar-color: #ffd000 rgba(20, 24, 80, .4);
 }
+.tb-shell {
+  display: flex;
+  flex-direction: column;
+  gap: calc(.5 * var(--u));
+  min-width: 0;
+}
+.tb-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: calc(.35 * var(--u));
+  color: #c3c6d6;
+  font-size: calc(1.1 * var(--u));
+  font-weight: 800;
+}
+.tb-controls button {
+  min-width: calc(2.5 * var(--u));
+  padding: calc(.35 * var(--u)) calc(.6 * var(--u));
+  border: 1px solid rgba(154, 160, 255, .65);
+  border-radius: calc(.35 * var(--u));
+  background: rgba(20, 24, 80, .75);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+.tb-controls button:hover { border-color: #ffd000; color: #ffe58a; }
+.tb-viewport {
+  position: relative;
+  min-height: calc(28 * var(--u));
+  height: calc(43 * var(--u));
+  overflow: hidden;
+  border: 1px solid rgba(154, 160, 255, .3);
+  border-radius: calc(.6 * var(--u));
+  background: rgba(3, 5, 28, .5);
+  cursor: grab;
+  touch-action: none;
+}
+.tb-viewport:active { cursor: grabbing; }
+.tb-canvas {
+  width: 100%;
+  transform-origin: center center;
+  will-change: transform;
+  user-select: none;
+}
 .mm-tree-section {
   display: flex; flex-direction: column; gap: calc(.5 * var(--u));
   background: rgba(8, 10, 38, .55); border: 1px solid rgba(154, 160, 255, .25);
@@ -370,6 +414,10 @@
   height: 100%;
   gap: calc(1 * var(--u));
   padding: calc(.4 * var(--u));
+}
+.mm--fs .tb-viewport {
+  height: 100%;
+  min-height: 0;
 }
 .mm--fs .mm-tree-section {
   flex: 1;

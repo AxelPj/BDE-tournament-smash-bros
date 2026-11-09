@@ -25,8 +25,13 @@ export default function TournamentBracket({
   championLabel = "Vainqueur",
   onMatchClick,
 }) {
+  const viewportRef = useRef(null);
+  const canvasRef = useRef(null);
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const dragRef = useRef(null);
   const roundCount = rounds.length;
-  if (!roundCount) return null;
+  const firstRoundLength = rounds[0]?.length ?? 0;
 
   const scale = 100 / 88;
   const unit = (value) => `${+(value * scale).toFixed(3)}cqw`;
@@ -42,6 +47,58 @@ export default function TournamentBracket({
   const bracketHeight = top + slot * firstMatchCount;
   const championWidth = 10;
   const championX = 78;
+
+  useEffect(() => {
+    setZoom(1);
+    const frame = requestAnimationFrame(() => {
+      const viewport = viewportRef.current;
+      const canvas = canvasRef.current;
+      const overflow = canvas && viewport ? canvas.offsetHeight - viewport.clientHeight : 0;
+      setPan({ x: 0, y: overflow > 0 ? -overflow / 2 : 0 });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [roundCount, firstRoundLength]);
+
+  if (!roundCount) return null;
+
+  const changeZoom = (delta) => {
+    setZoom((value) => Math.min(2.5, Math.max(0.45, +(value + delta).toFixed(2))));
+  };
+
+  const recenter = () => {
+    setZoom(1);
+    const viewport = viewportRef.current;
+    const canvas = canvasRef.current;
+    const overflow = canvas && viewport ? canvas.offsetHeight - viewport.clientHeight : 0;
+    setPan({ x: 0, y: overflow > 0 ? -overflow / 2 : 0 });
+  };
+
+  const handleWheel = (event) => {
+    event.preventDefault();
+    changeZoom(event.deltaY < 0 ? 0.1 : -0.1);
+  };
+
+  const handlePointerDown = (event) => {
+    if (event.button !== 0) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    dragRef.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
+  };
+
+  const handlePointerMove = (event) => {
+    if (!dragRef.current) return;
+    const previous = dragRef.current;
+    setPan((value) => ({
+      x: value.x + event.clientX - previous.x,
+      y: value.y + event.clientY - previous.y,
+    }));
+    dragRef.current = { ...previous, x: event.clientX, y: event.clientY };
+  };
+
+  const handlePointerUp = (event) => {
+    if (!dragRef.current) return;
+    event.currentTarget.releasePointerCapture?.(event.pointerId);
+    dragRef.current = null;
+  };
 
   const centers = [rounds[0].map((_, index) => top + slot * (index + 0.5))];
   for (let round = 1; round < roundCount; round += 1) {
@@ -172,6 +229,7 @@ export default function TournamentBracket({
 
   const MatchCard = ({ match, round, index }) => {
     const winner = winnerOf(match);
+    const completed = Boolean(match.completed);
     const state = (playerIndex) =>
       winner === null ? "" : winner === playerIndex ? "winner" : "loser";
     const x = round * step;
@@ -198,6 +256,31 @@ export default function TournamentBracket({
           boxShadow: match.live ? `0 0 ${unit(1.2)} rgba(255,59,59,.45)` : "none",
         }}
       >
+        {completed && (
+          <span
+            title="Match validé par l'administrateur"
+            style={{
+              position: "absolute",
+              zIndex: 2,
+              top: unit(-1.35),
+              right: unit(-1.05),
+              width: unit(2.2),
+              height: unit(2.2),
+              display: "grid",
+              placeItems: "center",
+              border: `${unit(0.18)} solid #ffe58a`,
+              borderRadius: unit(0.35),
+              background: GOLD,
+              color: "#11132a",
+              fontSize: unit(1.25),
+              fontWeight: 900,
+              lineHeight: 1,
+              boxShadow: `0 0 ${unit(0.8)} rgba(255,208,0,.5)`,
+            }}
+          >
+            ✓
+          </span>
+        )}
         <PlayerRow name={match.players?.[0]} score={match.scores?.[0]} state={state(0)} />
         <PlayerRow name={match.players?.[1]} score={match.scores?.[1]} state={state(1)} />
       </div>
@@ -206,8 +289,34 @@ export default function TournamentBracket({
 
   const finalCenter = centers[roundCount - 1][0];
   return (
-    <div style={{ width: "100%", containerType: "inline-size", fontFamily: "'Exo 2', sans-serif" }}>
-      <div style={{ position: "relative", width: "100%", height: unit(bracketHeight) }}>
+    <div className="tb-shell">
+      <div className="tb-controls" aria-label="Contrôles de l'arbre">
+        <button type="button" onClick={() => changeZoom(-0.1)} aria-label="Dézoomer">−</button>
+        <span>{Math.round(zoom * 100)}%</span>
+        <button type="button" onClick={() => changeZoom(0.1)} aria-label="Zoomer">+</button>
+        <button type="button" onClick={recenter} aria-label="Recentrer">
+          Recentrer
+        </button>
+      </div>
+      <div
+        ref={viewportRef}
+        className="tb-viewport"
+        onWheel={handleWheel}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        title="Glissez pour déplacer l'arbre · Molette pour zoomer"
+      >
+        <div
+          className="tb-canvas"
+          ref={canvasRef}
+          style={{
+            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+          }}
+        >
+        <div style={{ width: "100%", containerType: "inline-size", fontFamily: "'Exo 2', sans-serif" }}>
+          <div style={{ position: "relative", width: "100%", height: unit(bracketHeight) }}>
         {labels.slice(0, roundCount).map((text, round) => (
           <span key={`header-${round}`}>
             {renderHeader({ x: round * step, width, text })}
@@ -256,7 +365,11 @@ export default function TournamentBracket({
         >
           {champion || "?"}
         </div>
+          </div>
+        </div>
+        </div>
       </div>
     </div>
   );
 }
+import { useEffect, useRef, useState } from "react";

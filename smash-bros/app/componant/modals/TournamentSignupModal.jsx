@@ -155,6 +155,7 @@ function toBracketRounds(rounds, getPlayerName) {
       players: [getPlayerName(match.player1_id), getPlayerName(match.player2_id)],
       scores: [match.score1, match.score2],
       live: match.status === "ready",
+      completed: match.status === "completed",
       winner:
         match.winner_id === match.player1_id
           ? 0
