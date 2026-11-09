@@ -8,7 +8,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
  */
 
 const ON = "#9aa0ff", OFF = "#2a2e66", GOLD = "#ffd000", LINE = 3;
-const CARD_W = 210, CARD_H = 64, COL_GAP = 64, SLOT = 84, HEAD = 36, CHAMP_W = 120, CHAMP_H = 96, FONT = 17;
+const CARD_W = 210, CARD_H = 64, COL_GAP = 64, SLOT = 104, MIN_SLOT = CARD_H + 24, HEAD = 36, CHAMP_W = 120, CHAMP_H = 96, FONT = 17;
 
 const DEFAULT_LABELS = {
   1: ["Finale"], 2: ["Demies", "Finale"], 3: ["Quarts", "Demies", "Finale"],
@@ -25,15 +25,21 @@ function winnerOf(m) {
 
 // centre vertical de chaque match : moyenne de ses deux matchs « parents » (2i, 2i+1) s'ils existent
 function computeCenters(rounds) {
-  const first = rounds[0].length;
+  const first = rounds[0]?.length ?? 0;
+  if (!first) return rounds.map(() => []);
   const centers = [rounds[0].map((_, i) => HEAD + SLOT * (i + 0.5))];
   for (let r = 1; r < rounds.length; r++) {
     const prev = centers[r - 1], n = rounds[r].length;
-    centers[r] = rounds[r].map((_, i) => {
+    const ideal = rounds[r].map((_, i) => {
       const feeders = [prev[2 * i], prev[2 * i + 1]].filter((v) => v != null);
       if (feeders.length) return feeders.reduce((s, v) => s + v, 0) / feeders.length;
-      return HEAD + (SLOT * first) * ((i + 0.5) / n); // fallback : réparti régulièrement
+      return HEAD + (SLOT * first) * ((i + 0.5) / n);
     });
+    const gap = Math.max(MIN_SLOT, (ideal[ideal.length - 1] - ideal[0]) / Math.max(1, n - 1));
+    const span = gap * Math.max(0, n - 1);
+    const middle = ideal.reduce((sum, value) => sum + value, 0) / n;
+    const start = middle - span / 2;
+    centers[r] = rounds[r].map((_, i) => start + gap * i);
   }
   return centers;
 }
@@ -86,7 +92,12 @@ export default function TournamentBracket({ rounds = [], champion = null, roundL
   const step = CARD_W + COL_GAP;
   const champX = R * step;
   const contentW = champX + CHAMP_W;
-  const contentH = HEAD + SLOT * Math.max(1, first);
+  const centers = computeCenters(rounds);
+  const maxCenter = Math.max(0, ...centers.flat());
+  const contentH = Math.max(
+    HEAD + SLOT * Math.max(1, first),
+    maxCenter + CARD_H / 2 + 24
+  );
 
   // ajuste l'arbre entier dans la vue et le centre
   const fit = useCallback(() => {
@@ -128,7 +139,6 @@ export default function TournamentBracket({ rounds = [], champion = null, roundL
   if (!R) return null;
 
   const labels = roundLabels || DEFAULT_LABELS[R] || rounds.map((_, i) => `Tour ${i + 1}`);
-  const centers = computeCenters(rounds);
 
   const lines = [];
   const h = (x1, x2, y, c, k) => lines.push({ c, k, s: { left: Math.min(x1, x2) - LINE / 2, top: y - LINE / 2, width: Math.abs(x2 - x1) + LINE, height: LINE } });
