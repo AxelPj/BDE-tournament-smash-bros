@@ -3,7 +3,7 @@
 # Variables à définir dans GitLab (Settings > CI/CD > Variables) :
 #   SSH_PRIVATE_KEY   (File ou Variable, masquée/protégée) : clé privée autorisée sur le VPS
 #   VPS_IP            : adresse du VPS
-#   VPS_USER          : utilisateur SSH (doit pouvoir lancer docker)
+#   VPS_USER            : utilisateur SSH
 #   VPS_PROJECT_PATH  : chemin du dépôt cloné sur le VPS, ex : /opt/smash-bros
 #   VPS_SSH_PORT      : (optionnel) port SSH, 22 par défaut
 #   SSH_KNOWN_HOSTS   : (optionnel, recommandé) sortie de `ssh-keyscan <VPS_IP>`,
@@ -191,21 +191,13 @@ deploy_to_vps:
       fi
     - chmod 644 ~/.ssh/known_hosts
   script:
-    - echo "Déploiement de $CI_COMMIT_SHORT_SHA sur $VPS_IP..."
+    - echo "Mise à jour du dépôt sur $VPS_IP..."
     - |
       ssh -p "${VPS_SSH_PORT:-22}" "$VPS_USER@$VPS_IP" \
-        "DEPLOY_SHA=$CI_COMMIT_SHA PROJECT_PATH=$VPS_PROJECT_PATH sh -s" << 'EOF'
+        "PROJECT_PATH=$VPS_PROJECT_PATH sh -s" << 'EOF'
         set -eu
         cd "$PROJECT_PATH"
-        # Fichiers non versionnés, à créer une fois sur le VPS
-        [ -f backend/.env ] || { echo "ERREUR : $PROJECT_PATH/backend/.env manquant, voir backend/.env.example"; exit 1; }
-        git fetch --prune origin
-        git checkout -q main
-        git reset --hard "$DEPLOY_SHA"
-        # Les images sont construites sur le VPS (pas de registry)
-        docker compose -f docker-compose.prod.yml up -d --build --remove-orphans --wait --wait-timeout 300
-        docker image prune -f
-        docker compose -f docker-compose.prod.yml ps
+        git pull
       EOF
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'

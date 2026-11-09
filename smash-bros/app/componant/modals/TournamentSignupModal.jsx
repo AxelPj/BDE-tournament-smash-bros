@@ -309,10 +309,14 @@ export default function TournamentSignupModal({
 
   const renderTree = (rounds, isLosers = false) => (
     <div className="mm-bracket">
-      {rounds.map(([roundNum, rMatches]) => (
+      {rounds.map(([roundNum, rMatches], roundIndex) => {
+        const nextMatchCount = rounds[roundIndex + 1]?.[1].length || 0;
+        const mergesIntoNextRound = nextMatchCount > 0 && nextMatchCount < rMatches.length;
+
+        return (
         <div
           key={roundNum}
-          className="mm-round"
+          className={`mm-round${mergesIntoNextRound ? " mm-round--merge" : ""}`}
           style={{ "--match-count": rMatches.length }}
         >
           <div className="mm-round-title">
@@ -410,9 +414,23 @@ export default function TournamentSignupModal({
               </button>
               );
             })}
+            {mergesIntoNextRound && (
+              <div className="mm-round-connectors" aria-hidden="true">
+                {Array.from({ length: Math.ceil(rMatches.length / 2) }, (_, pairIndex) => (
+                  <span
+                    key={pairIndex}
+                    style={{
+                      top: `${((pairIndex * 2 + 0.5) / rMatches.length) * 100}%`,
+                      height: `${(1 / rMatches.length) * 100}%`,
+                    }}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 
