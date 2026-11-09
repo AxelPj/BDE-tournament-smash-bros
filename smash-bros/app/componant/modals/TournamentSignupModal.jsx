@@ -3,6 +3,7 @@ import MeleeFrame, { Panel, PanelRow, Sep } from "../ui/MeleeFrame";
 import MeleeButton from "../ui/MeleeButton";
 import BetBox, { BetTag, useBetMarket } from "../ui/BetBox";
 import PlayerAvatar from "../ui/PlayerAvatar";
+import TournamentBracket from "../ui/TournamentBracket";
 
 const SMASH_ITEM_IMAGES = {
   "trophee aide": "/items/item_img01.png",
@@ -145,6 +146,23 @@ function groupByRound(matches) {
     m.side === "grand_final" ? 99 + m.round : m.round
   );
   return Array.from(grouped.entries()).sort((a, b) => a[0] - b[0]);
+}
+
+function toBracketRounds(rounds, getPlayerName) {
+  return rounds.map(([, matches]) =>
+    matches.map((match) => ({
+      source: match,
+      players: [getPlayerName(match.player1_id), getPlayerName(match.player2_id)],
+      scores: [match.score1, match.score2],
+      live: match.status === "ready",
+      winner:
+        match.winner_id === match.player1_id
+          ? 0
+          : match.winner_id === match.player2_id
+          ? 1
+          : undefined,
+    }))
+  );
 }
 
 /**
@@ -307,133 +325,6 @@ export default function TournamentSignupModal({
     setScore2(m.score2 ?? 0);
   };
 
-  const renderTree = (rounds, isLosers = false) => (
-    <div className="mm-bracket">
-      {rounds.map(([roundNum, rMatches], roundIndex) => {
-        const nextMatchCount = rounds[roundIndex + 1]?.[1].length || 0;
-        const mergesIntoNextRound = nextMatchCount > 0 && nextMatchCount < rMatches.length;
-
-        return (
-        <div
-          key={roundNum}
-          className={`mm-round${mergesIntoNextRound ? " mm-round--merge" : ""}`}
-          style={{ "--match-count": rMatches.length }}
-        >
-          <div className="mm-round-title">
-            {roundNum >= 100
-              ? roundNum === 100
-                ? "Grande Finale"
-                : "Finale Reset"
-              : isLosers
-              ? `Losers T${roundNum}`
-              : `Tour ${roundNum}`}
-          </div>
-          <div className="mm-round-matches">
-            {rMatches.map((m) => {
-            const p1Obj = m.player1_id ? playerObjMap[m.player1_id] : null;
-            const p2Obj = m.player2_id ? playerObjMap[m.player2_id] : null;
-            const p1 = getPlayerName(m.player1_id);
-            const p2 = getPlayerName(m.player2_id);
-            const isReady = m.status === "ready";
-            const activeCode =
-              selectedMatch?.code ||
-              (visibleMatches.find((x) => x.status === "ready") || visibleMatches[0])?.code;
-            const isSel = activeCode === m.code;
-            const matchGages = m.gages || [];
-            const p1Gages = matchGages.filter((g) => g.imposer_id === m.player1_id);
-            const p2Gages = matchGages.filter((g) => g.imposer_id === m.player2_id);
-
-              return (
-              <button
-                key={m.code}
-                type="button"
-                onClick={() => handleSelectMatch(m)}
-                className={`mm-bmatch${isReady ? " mm-bmatch--ready" : ""}${
-                  isSel ? " mm-bmatch--selected" : ""
-                } mm-bmatch--clickable`}
-              >
-                <div className="mm-bmatch-head">
-                  <span>{m.code}</span>
-                  {matchGages.length > 0 && (
-                    <span className="mm-bmatch-gagebadge">
-                      ★ {matchGages.length} Objet{matchGages.length > 1 ? "s" : ""}
-                    </span>
-                  )}
-                  <span>
-                    {m.status === "completed"
-                      ? "Terminé"
-                      : m.status === "ready"
-                      ? "À jouer"
-                      : "Attente"}
-                  </span>
-                </div>
-                <div
-                  className={`mm-bplayer${
-                    m.winner_id && m.winner_id === m.player1_id ? " mm-bplayer--win" : ""
-                  }${!m.player1_id ? " mm-bplayer--tbd" : ""}`}
-                >
-                  <div className="mm-bplayer-info">
-                    <PlayerAvatar player={p1Obj} />
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {p1}
-                    </span>
-                    {p1Gages.map((g) => (
-                      <img
-                        key={g.id}
-                        src={resolveGageImg(g, shopItems)}
-                        alt={g.name}
-                        title={`${p1} a utilisé ${g.name} : ${g.description}`}
-                        className="mm-bitem-icon"
-                      />
-                    ))}
-                  </div>
-                  <span>{m.score1 ?? "-"}</span>
-                </div>
-                <div
-                  className={`mm-bplayer${
-                    m.winner_id && m.winner_id === m.player2_id ? " mm-bplayer--win" : ""
-                  }${!m.player2_id ? " mm-bplayer--tbd" : ""}`}
-                >
-                  <div className="mm-bplayer-info">
-                    <PlayerAvatar player={p2Obj} />
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {p2}
-                    </span>
-                    {p2Gages.map((g) => (
-                      <img
-                        key={g.id}
-                        src={resolveGageImg(g, shopItems)}
-                        alt={g.name}
-                        title={`${p2} a utilisé ${g.name} : ${g.description}`}
-                        className="mm-bitem-icon"
-                      />
-                    ))}
-                  </div>
-                  <span>{m.score2 ?? "-"}</span>
-                </div>
-              </button>
-              );
-            })}
-            {mergesIntoNextRound && (
-              <div className="mm-round-connectors" aria-hidden="true">
-                {Array.from({ length: Math.ceil(rMatches.length / 2) }, (_, pairIndex) => (
-                  <span
-                    key={pairIndex}
-                    style={{
-                      top: `${((pairIndex * 2 + 0.5) / rMatches.length) * 100}%`,
-                      height: `${(1 / rMatches.length) * 100}%`,
-                    }}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-        );
-      })}
-    </div>
-  );
-
   if (view === "bracket" && hasBracket) {
     const nameWithBet = (uid) => (
       <span>
@@ -515,7 +406,11 @@ export default function TournamentSignupModal({
                 <div className="mm-tree-header">
                   {hasLosersTree ? "Arbre 1 · Winners Bracket & Finale" : "Arbre Principal"}
                 </div>
-                {renderTree(winnersRounds, false)}
+                <TournamentBracket
+                  rounds={toBracketRounds(winnersRounds, getPlayerName)}
+                  champion={championName}
+                  onMatchClick={(match) => handleSelectMatch(match.source)}
+                />
               </div>
             )}
 
@@ -524,7 +419,11 @@ export default function TournamentSignupModal({
                 <div className="mm-tree-header" style={{ color: "#9aa0ff" }}>
                   Arbre 2 · Losers Bracket
                 </div>
-                {renderTree(losersRounds, true)}
+                <TournamentBracket
+                  rounds={toBracketRounds(losersRounds, getPlayerName)}
+                  championLabel="Vainqueur Losers"
+                  onMatchClick={(match) => handleSelectMatch(match.source)}
+                />
               </div>
             )}
           </div>
